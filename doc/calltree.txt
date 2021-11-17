@@ -1,0 +1,136 @@
+*calltree.txt* Calltree
+*calltree.nvim*
+
+Author:   Louis DeLosSantos <louis.delos@gmail.com>
+Homepage: <https://github.com/ldelossa/calltree.nvim>
+License:  MIT license
+
+ ______   ________   __       __     _________  ______    ______   ______      
+/_____/\ /_______/\ /_/\     /_/\   /________/\/_____/\  /_____/\ /_____/\     
+\:::__\/ \::: _  \ \\:\ \    \:\ \  \__.::.__\/\:::_ \ \ \::::_\/_\::::_\/_    
+ \:\ \  __\::(_)  \ \\:\ \    \:\ \    \::\ \   \:(_) ) )_\:\/___/\\:\/___/\   
+  \:\ \/_/\\:: __  \ \\:\ \____\:\ \____\::\ \   \: __ `\ \\::___\/_\::___\/_  
+   \:\_\ \ \\:.\ \  \ \\:\/___/\\:\/___/\\::\ \   \ \ `\ \ \\:\____/\\:\____/\ 
+    \_____\/ \__\/\__\/ \_____\/ \_____\/ \__\/    \_\/ \_\/ \_____\/ \_____\/ 
+                                                                               
+====================================================================================
+CONTENTS                                                         *calltree-contents*
+
+  1. Intro........................................|calltree-intro|
+  2. Usage........................................|caltree-usage|
+  3. Commands.....................................|calltree-commands|
+  3. Config.......................................|calltree-config|
+
+====================================================================================
+INTRODUCTION                                                        *calltree-intro*
+
+Calltree is a simple plugin which adds the missing "call-hierarchy" tool
+found in IDEs such as Pycharm and VSCode. 
+
+A "call-hierarchy" tool creates a tree view of incoming (callers) or outging
+(callees) for a given symbol.
+
+From there you can drive down further, discovering "callers-of-callers" or
+"callees-of-callees", and producing a tree view.
+
+====================================================================================
+Usage                                                               *calltree-usage*
+
+Calltree's entry point is the "calltree.lsp.handlers.ch_lsp_handler" function. 
+
+This function returns a handler suitable for usage in neovim's LSP handler
+dicationary.
+
+While the setup function will hijack the handlers dict for you, you can also do this 
+manually like so:
+
+    vim.lsp.handlers['callHierarchy/incomingCalls'] = vim.lsp.with(
+                require('calltree.lsp.handlers').ch_lsp_handler("from"), {}
+    )
+    vim.lsp.handlers['callHierarchy/outgoingCalls'] = vim.lsp.with(
+                require('calltree.lsp.handlers').ch_lsp_handler("to"), {}
+    )
+
+This is what the "callsigns.setup()" function does.
+
+Once the calltree handlers are in place issuing the normal "vim.lsp.buf.incoming_calls" 
+and "vim.lsp.buf.outgoing_calls" will open the calltree window.
+
+From there check out *calltree-commands* to manipulate the calltree UI.
+
+====================================================================================
+COMMANDS                                                         *calltree-commands*
+
+Calltree exports several commands for manipulating the calltree UI. 
+
+                                                                           *:CTOpen*
+:CTOpen                                         
+    Open the calltree window with the most recent call tree present. 
+
+                                                                          *:CTClose*       
+:CTClose       
+    Closes the calltree window
+        
+
+                                                                         *:CTExpand*
+:CTExpand      
+    Expands a calltree symbol resolving any callers/callees of the symbol under 
+    the cursor.
+
+                                                                       *:CTCollapse*    
+:CTCollapse    
+    Collapses a calltree symbol and its subtree.
+
+                                                                       *:CTFocus*    
+:CTFocus    
+    Create a new calltree with the symbol under the cursor as root.
+
+                                                                           *:CTJump*    
+:CTJump        
+    Jump to the symbol's definition. 
+    How this jump is done is controlled via config.
+                                                                          
+                                                                          *:CTHover* 
+:CTHover       
+    Show hover info for the symbol
+
+                                                                       *:CTDumpTree* 
+:CTDumpTree       
+    Echos the current calltree in lua dictonary syntax. 
+    Useful for debugging.
+
+====================================================================================
+CONFIG                                                             *calltree-config*
+
+To configure calltree you can pass the a config table to "require('calltree').setup(config)".
+You only need to specify the fields you wish to override.
+
+The config table is described below:
+
+    M.config = {
+        -- where the calltree ui will spawn
+        -- "left" (default) - Spawn calltree as the left most vertical window.
+        -- "right"          - Spawn calltree as the left most vertical window.
+        layout = "left",
+        -- the initial size of the calltree ui
+        -- int              - An integer used in the initial "resize" command for
+        --                    the ui. 
+        layout_size = 30,
+        -- the method used when jumping to a symbol in the calltree 
+        -- "invoking"       - Jumping to a symbol will use the window which the calltree
+        --                    was initially invoked from.
+        --                    If the invoking window has been removed a new botright split
+        --                    will be created and take on the invoking window identity from there.
+        -- "neighbor"       - Jumping to a symbol will use the neighbor on the opposite side of
+        --                    the call tree. 
+        --                    If no neighbor exists a split will be created for the jump. 
+        jump_mode = "invoking",
+        -- the icon to represent the symbol type
+        -- "none"           - No icons for symbol types will just use text
+        -- "nerd"           - Use Nerd font icon set for symbol types (requires patched font)
+        -- "codicon"        - Use VSCode codicon icon set for symbol types (requires patched font)
+        icons = "none"
+    }
+
+
+
