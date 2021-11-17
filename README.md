@@ -21,7 +21,7 @@ Subsequently, you can drill down the tree futher to discover the "callers-of-cal
 the "callees-of-callee". 
 
 This relationship forms a tree and this is exactly how Calltree works, keeping an in
-memory representation of the call tree and writing the tree out in outline form when
+memory representation of the call tree and writing the tree out to an outline form when
 requested.
 
 # Usage
@@ -101,4 +101,4 @@ You'll need a patched font for them to work correctly. see (h: calltree-config)
 
 ## Demo
 
-[![Calltree Demonstration]()](https://user-images.githubusercontent.com/5642902/142290929-15082e72-3848-4af9-8bbf-8c7b2424b299.mp4)
+[![Calltree Demonstration]()](https://user-images.githubusercontent.com/5642902/142293639-aa0d97a1-e3b0-4fc4-942e-108bfaa18793.mp4)

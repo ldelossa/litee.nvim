@@ -319,7 +319,7 @@ M.jump = function()
     }
 
     -- handle jump configuration
-    if config.jump_mode == "invoking" then
+    if ct.config.jump_mode == "invoking" then
         if not vim.api.nvim_win_is_valid(M.invoking_win_handle) then
             -- invoking window is gone, split yourself and use
             -- that to jump as a fallback
@@ -332,7 +332,7 @@ M.jump = function()
         goto jump
     end
 
-    if config.jump_mode == "neighbor" then
+    if ct.config.jump_mode == "neighbor" then
         local cur_win = vim.api.nvim_get_current_win()
         if config.layout == "left" then
             vim.cmd('wincmd l')
