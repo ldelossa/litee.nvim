@@ -21,7 +21,7 @@ M.Node.mt = {
 --
 -- kind : string - the kind of symbol this node represents.
 --
--- references : array of LSP ranges
+-- references : array of references of the given symbol
 function M.Node.new(name, depth, call_hierarchy_obj, kind, references)
     local node = {
         name=name,
@@ -76,6 +76,29 @@ M.depth_table = nil
 -- the root of the current call tree.
 M.root_node = nil
 
+-- recursive_dpt_compute traverses the tree
+-- and flattens it into out depth_table
+--
+-- node : Node - calltree's root node.
+local function _recursive_dpt_compute(node)
+    local depth = node.depth
+    if M.depth_table[depth] == nil then
+        M.depth_table[depth] = {}
+    end
+    table.insert(M.depth_table[depth], node)
+    -- recurse
+    for _, child in ipairs(node.children) do
+        _recursive_dpt_compute(child)
+    end
+end
+
+-- _refresh_dpt dumps the current depth_table
+-- and writes a new one.
+local function _refresh_dpt()
+    M.depth_table = {}
+    _recursive_dpt_compute(M.root_node)
+end
+
 -- add_node adds the provided root and
 -- its children to the tree.
 --
@@ -117,41 +140,12 @@ function M.add_node(parent,  children)
     -- ditch the old child array, we are refreshing the children
     pNode.children = {}
 
-    -- add children to parent node and update
-    -- depth_table.
-    if M.depth_table[parent.depth+1] == nil then
-        M.depth_table[parent.depth+1] = {}
-    end
-
     local child_depth = parent.depth + 1
     for _, child  in ipairs(children) do
         child.depth = child_depth
         table.insert(pNode.children, child)
-        table.insert(M.depth_table[child.depth], child)
     end
-end
-
--- recursive_dpt_compute traverses the tree
--- and flattens it into out depth_table
---
--- node : Node - calltree's root node.
-local function _recursive_dpt_compute(node)
-    local depth = node.depth
-    if M.depth_table[depth] == nil then
-        M.depth_table[depth] = {}
-    end
-    table.insert(M.depth_table[depth], node)
-    -- recurse
-    for _, child in ipairs(node.children) do
-        _recursive_dpt_compute(child)
-    end
-end
-
--- _refresh_dpt dumps the current depth_table
--- and writes a new one.
-local function _refresh_dpt()
-    M.depth_table = {}
-    _recursive_dpt_compute(M.root_node)
+    _refresh_dpt()
 end
 
 -- remove_node will remove all nodes associated
