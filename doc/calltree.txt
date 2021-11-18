@@ -71,7 +71,6 @@ Calltree exports several commands for manipulating the calltree UI.
                                                                           *:CTClose*       
 :CTClose       
     Closes the calltree window
-        
 
                                                                          *:CTExpand*
 :CTExpand      
@@ -82,7 +81,7 @@ Calltree exports several commands for manipulating the calltree UI.
 :CTCollapse    
     Collapses a calltree symbol and its subtree.
 
-                                                                       *:CTFocus*    
+                                                                          *:CTFocus*    
 :CTFocus    
     Create a new calltree with the symbol under the cursor as root.
 
@@ -90,12 +89,32 @@ Calltree exports several commands for manipulating the calltree UI.
 :CTJump        
     Jump to the symbol's definition. 
     How this jump is done is controlled via config.
+
+                                                                         *:CTSwitch*    
+:CTSwitch        
+    Focus the symbol under the cursor and switch the calltree's
+    direction.
+
+    For example, if your currently viewing incoming calls for symbol
+    Func1 and perform a CTSwtch, Func1 will become root and the calltree
+    will show outgoing calls for this symbol.
+
+    The typical use case is calling CTSwitch on the root symbol, turning
+    the current outgoing calltree to an incoming call tree (or vice versa).
                                                                           
                                                                           *:CTHover* 
 :CTHover       
     Show hover info for the symbol
 
+                                                                        *:CTClearHL* 
+:CTClearHL       
+    Clears any highlights after jumping to location.
+
+    Highlights are also clearned when the current Calltree window
+    is closed.
+
                                                                        *:CTDumpTree* 
+                                                                    
 :CTDumpTree       
     Echos the current calltree in lua dictonary syntax. 
     Useful for debugging.
@@ -148,4 +167,9 @@ The config table is described below:
         -- "nerd"           - Use Nerd font icon set for symbol types (requires patched font)
         -- "codicon"        - Use VSCode codicon icon set for symbol types (requires patched font)
         icons = "none"
+        -- the highlight group used for highlighting the symbol being jumped too.
+        symbol_hl = "Search",
+        -- the highlight group used for highlighting the references to the symbol
+        -- being jumped to.
+        symbol_refs_hl = "Search"
     }
