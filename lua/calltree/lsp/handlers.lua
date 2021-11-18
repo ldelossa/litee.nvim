@@ -42,7 +42,8 @@ M.ch_lsp_handler = function(direction)
              call_hierarchy_call[direction].name,
              0, -- tree.add_node will set the depth correctly.
              call_hierarchy_call[direction],
-             call_hierarchy_call[direction].kind
+             call_hierarchy_call[direction].kind,
+             call_hierarchy_call.fromRanges
           )
           table.insert(children, child)
         end
