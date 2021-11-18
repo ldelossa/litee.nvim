@@ -1,5 +1,6 @@
 local tree = require('calltree.tree')
 local ct = require('calltree')
+local lsp_util = require('calltree.lsp.util')
 
 local M = {}
 
@@ -65,13 +66,6 @@ local function _setup_buffer()
     vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "i", ":CTHover<CR>", opts)
     vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "s", ":CTSwitch<CR>", opts)
     vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "?", ":lua require('calltree.ui').help(true)<CR>", opts)
-
-    -- attach lsp's
-    if M.active_lsp_clients ~= nil then
-        for id, _ in ipairs(M.active_lsp_clients) do
-            vim.lsp.buf_attach_client(M.buffer_handle, id)
-        end
-    end
 end
 
 -- idempotent creation of the help buffer.
@@ -193,7 +187,7 @@ M.encode_node_to_line = function(node)
         glyph = M.glyphs["collapsed"]
     end
 
-    kind = vim.lsp.protocol.SymbolKind[node.kind]
+    local kind = vim.lsp.protocol.SymbolKind[node.kind]
 
     -- add spacing up to node's depth
     for _=1, node.depth do
@@ -303,11 +297,12 @@ M.expand = function()
         node.expanded = true
     end
 
-    vim.lsp.buf_request(
-        M.buffer_handle,
+    lsp_util.multi_client_request(
+        M.active_lsp_clients,
         direction_map[M.direction].method,
         {item = node.call_hierarchy_obj},
-        M.ch_expand_handler(node, linenr, M.direction)
+        M.ch_expand_handler(node, linenr, M.direction),
+        M.buffer_handle
     )
 end
 
@@ -335,19 +330,18 @@ M.switch_direction = function()
         return
     end
 
-    local name = vim.api.nvim_buf_get_name(M.buffer_handle)
-
     if M.direction == "from" then
         M.direction = "to"
     else
         M.direction = "from"
     end
 
-    vim.lsp.buf_request(
-        M.buffer_handle,
+    lsp_util.multi_client_request(
+        M.active_lsp_clients,
         direction_map[M.direction].method,
         {item = node.call_hierarchy_obj},
-        M.ch_switch_handler(M.direction)
+        M.ch_switch_handler(M.direction),
+        M.buffer_handle
     )
 end
 
@@ -415,13 +409,13 @@ M.jump = function()
 
     if ct.config.jump_mode == "neighbor" then
         local cur_win = vim.api.nvim_get_current_win()
-        if config.layout == "left" then
+        if ct.config.layout == "left" then
             vim.cmd('wincmd l')
         else
             vim.cmd('wincmd h')
         end
         if cur_win == vim.api.nvim_get_current_win() then
-            if config.layout == "left" then
+            if ct.config.layout == "left" then
                 vim.cmd("botright vsplit")
             else
                 vim.cmd("topleft vsplit")
