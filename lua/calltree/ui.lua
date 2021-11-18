@@ -30,6 +30,9 @@ M.direction = nil
 M.invoking_win_handle = nil
 -- the buffer switched to when the user asks for help
 M.help_buffer_handle = nil
+-- the current sighlight source, reset on jumps
+M.jump_higlight_ns = vim.api.nvim_create_namespace("calltree-jump")
+M.last_highlighted_buffer = nil
 
 -- idempotent creation and configuration of call tree's ui buffer
 local function _setup_buffer()
@@ -56,6 +59,9 @@ local function _setup_buffer()
     vim.api.nvim_buf_set_option(M.buffer_handle, 'buftype', 'nofile')
     vim.api.nvim_buf_set_option(M.buffer_handle, 'modifiable', false)
     vim.api.nvim_buf_set_option(M.buffer_handle, 'swapfile', false)
+
+    -- au to clear highlights on window close
+    vim.cmd("au BufWinLeave <buffer=" .. M.buffer_handle .. "> lua require('calltree.ui').clear_jump_hl()")
 
     -- set buffer local keymaps
     local opts = {silent=true}
@@ -366,7 +372,8 @@ M.ch_switch_handler = function(direction)
              call_hierarchy_call[direction].name,
              0, -- tree.add_node will set the depth correctly.
              call_hierarchy_call[direction],
-             call_hierarchy_call[direction].kind
+             call_hierarchy_call[direction].kind,
+             call_hierarchy_call.fromRanges
           )
           table.insert(children, child)
         end
@@ -379,10 +386,38 @@ M.ch_switch_handler = function(direction)
     end
 end
 
+local function set_jump_hl(node)
+    M.last_highlighted_buffer = vim.api.nvim_get_current_buf()
+    -- set highlght for function itself
+    local range = node.call_hierarchy_obj.range
+    vim.api.nvim_buf_add_highlight(
+        M.last_highlighted_buffer,
+        M.jump_higlight_ns,
+        ct.config.symbol_hl,
+        range["start"].line,
+        range["start"].character,
+        range["end"].character
+    )
+    -- apply it to all the references
+    if node.references ~= nil then
+        for _, ref in ipairs(node.references) do
+            vim.api.nvim_buf_add_highlight(
+                M.last_highlighted_buffer,
+                M.jump_higlight_ns,
+                ct.config.symbol_refs_hl,
+                ref["start"].line,
+                ref["start"].character,
+                ref["end"].character
+            )
+        end
+    end
+end
 
 -- jump will jump to the source code location of the
 -- symbol under the cursor.
 M.jump = function()
+    M.clear_jump_hl()
+
     local line = vim.api.nvim_get_current_line()
     local node = M.decode_line_to_node(line)
     if node == nil then
@@ -425,6 +460,18 @@ M.jump = function()
 
     ::jump::
     vim.lsp.util.jump_to_location(location)
+    set_jump_hl(node)
+end
+
+M.clear_jump_hl = function()
+    if M.last_highlighted_buffer ~= nil then
+        vim.api.nvim_buf_clear_namespace(
+            M.last_highlighted_buffer,
+            M.jump_higlight_ns,
+            0,
+            -1
+        )
+    end
 end
 
 -- hover will show LSP hover information for the symbol
@@ -469,7 +516,8 @@ M.ch_expand_handler = function(node, linenr, direction)
                 call_hierarchy_call[direction].name,
                 0, -- tree.add_node will compute depth for us
                 call_hierarchy_call[direction],
-                call_hierarchy_call[direction].kind
+                call_hierarchy_call[direction].kind,
+                call_hierarchy_call.fromRanges
             )
             table.insert(children, child)
         end

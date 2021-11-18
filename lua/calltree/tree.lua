@@ -20,14 +20,17 @@ M.Node.mt = {
 -- call hierarchy object per the LSP spec.
 --
 -- kind : string - the kind of symbol this node represents.
-function M.Node.new(name, depth, call_hierarchy_obj, kind)
+--
+-- references : array of LSP ranges
+function M.Node.new(name, depth, call_hierarchy_obj, kind, references)
     local node = {
         name=name,
         depth=depth,
         children={},
         expanded=false,
         call_hierarchy_obj=call_hierarchy_obj,
-        kind=kind
+        kind=kind,
+        references=references
     }
     setmetatable(node, M.Node.mt)
     return node

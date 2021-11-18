@@ -63,7 +63,9 @@ M.config = {
     layout = "left",
     layout_size = 30,
     jump_mode = "invoking",
-    icons = "none"
+    icons = "none",
+    symbol_hl = "Search",
+    symbol_refs_hl = "Search"
 }
 
 -- the configured icon set after setup() is ran.
@@ -115,6 +117,7 @@ function M.setup(user_config)
    vim.cmd("command! CTFocus       lua require('calltree.ui').focus()")
    vim.cmd("command! CTJump        lua require('calltree.ui').jump()")
    vim.cmd("command! CTHover       lua require('calltree.ui').hover()")
+   vim.cmd("command! CTClearHL     lua require('calltree.ui').clear_jump_hl()")
    vim.cmd("command! CTDumpTree    lua require('calltree.tree').dump_tree()")
 end
 
