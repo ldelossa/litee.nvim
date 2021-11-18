@@ -48,10 +48,8 @@ M.ch_lsp_handler = function(direction)
           table.insert(children, child)
         end
 
-        -- add the new root, its children, and rewrite the
-        -- tree (will open the calltree ui if necessary).
         tree.add_node(root, children)
-        ui.write_tree({}, tree.root_node)
+        ui.write_tree()
     end
 end
 
