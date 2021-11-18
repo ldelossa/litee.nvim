@@ -130,6 +130,8 @@ end
 
 -- recursive_dpt_compute traverses the tree
 -- and flattens it into out depth_table
+--
+-- node : Node - calltree's root node.
 local function _recursive_dpt_compute(node)
     local depth = node.depth
     if M.depth_table[depth] == nil then
@@ -179,6 +181,11 @@ end
 
 -- remove subtree will remove the subtree of the
 -- provided node, leaving the root node present.
+--
+-- node : Node - the parent node who's subtree
+--               is to be removed
+-- root : bool - should be "true", indicator that
+--               recursion is at the root node.
 function M.remove_subtree(node, root)
     -- recurse to leafs
     for _, child in ipairs(node.children) do
@@ -205,6 +212,10 @@ end
 -- creating a new calltree rooted at node.
 --
 -- the subtree from node down is preserved.
+--
+-- depth : int  - indicator of the incoming node's depth
+--                useful for understanding when recursion is done.
+-- node  : Node - the Node object being reparented.
 function M.reparent_node(depth, node)
     -- we are the new root, dump the current root_node and
     -- set yourself
@@ -215,9 +226,9 @@ function M.reparent_node(depth, node)
     -- recurse to leafs
     for _, child in ipairs(node.children) do
         M.reparent_node(depth+1, child)
+        -- recursion done, update your depth
         child.depth = depth+1
     end
-    -- recursion done, update your depth
     if depth == 0 then
         -- we are the root node, refresh depth_table with
         -- new tree.

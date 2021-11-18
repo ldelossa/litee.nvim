@@ -19,7 +19,8 @@ CONTENTS                                                         *calltree-conte
   1. Intro........................................|calltree-intro|
   2. Usage........................................|caltree-usage|
   3. Commands.....................................|calltree-commands|
-  3. Config.......................................|calltree-config|
+  4. Mappings.....................................|calltree-mappings|
+  5. Config.......................................|calltree-config|
 
 ====================================================================================
 INTRODUCTION                                                        *calltree-intro*
@@ -100,6 +101,23 @@ Calltree exports several commands for manipulating the calltree UI.
     Useful for debugging.
 
 ====================================================================================
+MAPPINGS                                                         *calltree-mappings*
+
+Since all of calltree's usage happens within it's own buffer, its pretty safe to assign this buffer a default keymap. 
+
+This does not stop you from mapping *calltree-commands* to your own liking.
+
+The default buffer mapping is set via lua and should feel familiar if you use vim folds.
+
+    local opts = {silent=true}
+    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "zo", ":CTExpand<CR>", opts)
+    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "zc", ":CTCollapse<CR>", opts)
+    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "<CR>", ":CTJump<CR>", opts)
+    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "f", ":CTFocus<CR>", opts)
+    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "i", ":CTHover<CR>", opts)
+    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "s", ":CTSwitch<CR>", opts)
+
+====================================================================================
 CONFIG                                                             *calltree-config*
 
 To configure calltree you can pass the a config table to "require('calltree').setup(config)".
@@ -131,6 +149,3 @@ The config table is described below:
         -- "codicon"        - Use VSCode codicon icon set for symbol types (requires patched font)
         icons = "none"
     }
-
-
-

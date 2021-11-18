@@ -1,13 +1,13 @@
 ```
-/_____/\ /_______/\ /_/\     /_/\   /________/\/_____/\  /_____/\ /_____/\     
-\:::__\/ \::: _  \ \\:\ \    \:\ \  \__.::.__\/\:::_ \ \ \::::_\/_\::::_\/_    
- \:\ \  __\::(_)  \ \\:\ \    \:\ \    \::\ \   \:(_) ) )_\:\/___/\\:\/___/\   
-  \:\ \/_/\\:: __  \ \\:\ \____\:\ \____\::\ \   \: __ `\ \\::___\/_\::___\/_  
-   \:\_\ \ \\:.\ \  \ \\:\/___/\\:\/___/\\::\ \   \ \ `\ \ \\:\____/\\:\____/\ 
-    \_____\/ \__\/\__\/ \_____\/ \_____\/ \__\/    \_\/ \_\/ \_____\/ \_____\/ 
-                                                                               
-====================================================================================
-                      Neovim's missing call-hierarchy UI
+    /_____/\ /_______/\ /_/\     /_/\   /________/\/_____/\  /_____/\ /_____/\     
+    \:::__\/ \::: _  \ \\:\ \    \:\ \  \__.::.__\/\:::_ \ \ \::::_\/_\::::_\/_    
+     \:\ \  __\::(_)  \ \\:\ \    \:\ \    \::\ \   \:(_) ) )_\:\/___/\\:\/___/\   
+      \:\ \/_/\\:: __  \ \\:\ \____\:\ \____\::\ \   \: __ `\ \\::___\/_\::___\/_  
+       \:\_\ \ \\:.\ \  \ \\:\/___/\\:\/___/\\::\ \   \ \ `\ \ \\:\____/\\:\____/\ 
+        \_____\/ \__\/\__\/ \_____\/ \_____\/ \__\/    \_\/ \_\/ \_____\/ \_____\/ 
+                                                                                   
+    ==============================================================================
+                          Neovim's missing call-hierarchy UI
 ```
 
 # Calltree
@@ -26,16 +26,14 @@ requested.
 
 # Usage
 
-Usage is similar to any other lua plugin. 
-
-# Get it
+## Get it
 
 Plug:
 ```
  Plug 'ldelossa/calltree.nvim'
 ```
 
-# Set it
+## Set it
 
 Call the setup function from anywhere you configure your plugins from.
 
@@ -44,7 +42,7 @@ Configuration dictionary is explained in ./doc/calltree.txt (:h calltree-config)
 require('calltree').setup({})
 ```
 
-# Use it
+## Use it
 
 The setup function hooks directly into the "textDocument/incomingCalls" and "textDocument/outgoingCalls" 
 LSP handlers. 
@@ -63,7 +61,7 @@ hierarchy in an intuitative way.
 
 Use ":CTExpand" and ":CTCollapse" to achieve this.
 
-See (:h calltree-commands) for a list of commands.
+Check out (:h calltree) for all the details.
 
 # Features
 
@@ -73,11 +71,11 @@ There are a few features which add a bit more to the basic calltree usage.
 
 ## Switching Directions
 
-The ":CTSwitch" command will focus and inverse the call tree for the symbol under the curosor. 
+The ":CTSwitch" command will focus and inverse the call tree (move from outgoing to incoming for example) for the symbol under the curosor. 
 
 ## Focusing
 
-The ":CTFocus" command will reparent the symbol under the cursor, making it root. 
+The ":CTFocus" command will re-parent the symbol under the cursor, making it root. 
 
 From there you can continue down the call tree.
 

@@ -17,14 +17,13 @@ local direction_map = {
 M.buffer_handle = nil
 -- the global calltree window
 M.win_handle = nil
--- the last tabpage our outline ui was
--- on
+-- the last tabpage our outline ui was on
 M.win_tabpage = nil
 -- the active lsp clients attached to the
 -- buffer invoking the call tree.
 M.active_lsp_clients = nil
--- defines whether the call window shows
--- incoming (from) calls or outgoing (to)
+-- determines the direction (incoming or outgoing) of calls
+-- the calltree is showing.
 M.direction = nil
 -- the window in which the calltree was invoked.
 M.invoking_win_handle = nil
@@ -115,6 +114,9 @@ M.close = function()
 end
 
 -- encodes a tree node into a ui line
+-- node : Node - the node to enode into a buffer
+--               line.
+-- returns string
 M.encode_node_to_line = function(node)
     local str = ""
     local glyph
@@ -141,6 +143,8 @@ M.encode_node_to_line = function(node)
 end
 
 -- decodes a ui line into a tree node.
+-- line : string - the line to encode into a tree.Node
+-- returns tree.Node
 M.decode_line_to_node = function(line)
     -- number of characters up to the expand symbol encode
     -- the node's tree depth.
@@ -169,6 +173,11 @@ end
 --
 -- preorder traveral will print the outline as a
 -- user would expect.
+--
+-- lines : string[] - recursive accumlator of buffer lines to write
+--                  - call this function with an empty table {}
+-- node : tree.Node - the node to write to the tree. call this function
+--                    with tree.root_node typically.
 M.write_tree = function(lines, node)
     -- this is the root - ensure the outline buffer
     -- is setup.
@@ -235,6 +244,9 @@ M.expand = function()
     )
 end
 
+-- focus will reparent the calltree to the symbol under
+-- the cursor, creating a calltree with the symbol
+-- as root.
 M.focus = function()
     local line   = vim.api.nvim_get_current_line()
     local node = M.decode_line_to_node(line)
@@ -247,6 +259,8 @@ M.focus = function()
     M.write_tree({}, tree.root_node)
 end
 
+-- switch_direction will focus the symbol under the
+-- cursor and then invert the call hierarchy direction.
 M.switch_direction = function()
     local line = vim.api.nvim_get_current_line()
     local node = M.decode_line_to_node(line)
@@ -352,6 +366,8 @@ M.jump = function()
     vim.lsp.util.jump_to_location(location)
 end
 
+-- hover will show LSP hover information for the symbol
+-- under the cursor.
 M.hover = function()
     local line = vim.api.nvim_get_current_line()
     local node = M.decode_line_to_node(line)
