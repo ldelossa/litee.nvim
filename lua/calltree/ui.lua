@@ -27,6 +27,8 @@ M.active_lsp_clients = nil
 M.direction = nil
 -- the window in which the calltree was invoked.
 M.invoking_win_handle = nil
+-- the buffer switched to when the user asks for help
+M.help_buffer_handle = nil
 
 -- idempotent creation and configuration of call tree's ui buffer
 local function _setup_buffer()
@@ -48,11 +50,21 @@ local function _setup_buffer()
 
     -- set buf options
     vim.api.nvim_buf_set_name(M.buffer_handle, buf_name)
-    vim.api.nvim_buf_set_option(M.buffer_handle, 'bufhidden', 'delete')
+    vim.api.nvim_buf_set_option(M.buffer_handle, 'bufhidden', 'hide')
     vim.api.nvim_buf_set_option(M.buffer_handle, 'filetype', 'Calltree')
     vim.api.nvim_buf_set_option(M.buffer_handle, 'buftype', 'nofile')
     vim.api.nvim_buf_set_option(M.buffer_handle, 'modifiable', false)
     vim.api.nvim_buf_set_option(M.buffer_handle, 'swapfile', false)
+
+    -- set buffer local keymaps
+    local opts = {silent=true}
+    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "zo", ":CTExpand<CR>", opts)
+    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "zc", ":CTCollapse<CR>", opts)
+    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "<CR>", ":CTJump<CR>", opts)
+    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "f", ":CTFocus<CR>", opts)
+    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "i", ":CTHover<CR>", opts)
+    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "s", ":CTSwitch<CR>", opts)
+    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "?", ":lua require('calltree.ui').help(true)<CR>", opts)
 
     -- attach lsp's
     if M.active_lsp_clients ~= nil then
@@ -60,6 +72,61 @@ local function _setup_buffer()
             vim.lsp.buf_attach_client(M.buffer_handle, id)
         end
     end
+end
+
+-- idempotent creation of the help buffer.
+local function _setup_help_buffer()
+    if M.help_buffer_handle == nil or not vim.api.nvim_buf_is_valid(M.help_buffer_handle) then
+        local buf = vim.api.nvim_create_buf(false, false)
+        if buf == 0 then
+            vim.api.nvim_err_writeln("ui.help failed: buffer create failed")
+            return
+        end
+        M.help_buffer_handle = buf
+        local lines = {
+            "CALLTREE HELP:",
+            "press 'c' to close",
+            "",
+            "KEYMAP:",
+            "zo      - expand a symbol",
+            "zc      - collapse a symbol",
+            "return  - jump to symbol",
+            "f       - focus the tree on this symbol",
+            "s       - switch the symbol from",
+            "          incoming/outgoing calls"
+        }
+        vim.api.nvim_buf_set_lines(M.help_buffer_handle, 0, #lines, false, lines)
+    end
+    -- set buf options
+    vim.api.nvim_buf_set_name(M.help_buffer_handle, "Calltree Help")
+    vim.api.nvim_buf_set_option(M.help_buffer_handle, 'bufhidden', 'hide')
+    vim.api.nvim_buf_set_option(M.help_buffer_handle, 'filetype', 'Calltree')
+    vim.api.nvim_buf_set_option(M.help_buffer_handle, 'buftype', 'nofile')
+    vim.api.nvim_buf_set_option(M.help_buffer_handle, 'modifiable', false)
+    vim.api.nvim_buf_set_option(M.help_buffer_handle, 'swapfile', false)
+
+    -- set buffer local keymaps
+    local opts = {silent=true}
+    vim.api.nvim_buf_set_keymap(M.help_buffer_handle, "n", "c", ":lua require('calltree.ui').help(false)<CR>", opts)
+end
+
+-- help opens the help buffer in the current calltree window
+-- if it exists.
+M.help = function(open)
+    if
+        not vim.api.nvim_win_is_valid(M.win_handle) or
+        M.win_handle == nil or
+        not vim.api.nvim_buf_is_valid(M.buffer_handle) or
+        M.buffer_handle == nil
+    then
+        return
+    end
+    if not open then
+        vim.api.nvim_win_set_buf(M.win_handle, M.buffer_handle)
+        return
+    end
+    _setup_help_buffer()
+    vim.api.nvim_win_set_buf(M.win_handle, M.help_buffer_handle)
 end
 
 -- idempotent creation and configuration of call tree's ui window.
