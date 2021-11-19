@@ -1,11 +1,13 @@
 local tree = require('calltree.tree')
 local ct = require('calltree')
+local lsp_util = require('calltree.lsp.util')
 
 local M = {}
 
 M.glyphs = {
     expanded= "▼",
-    collapsed= "▶"
+    collapsed= "▶",
+    separator = "•"
 }
 
 -- marshal_node takes a node and marshals
@@ -32,12 +34,26 @@ function M.marshal_node(node)
         str = str .. " "
     end
 
-    str = str .. glyph .. " " .. node.name .. " "
+    -- ▶ Func1
+    str = str .. glyph .. " " .. node.name
     if ct.config.icons ~= "none" then
-        str = str .. ct.active_icon_set[kind]
+        -- ▶ Func1[]
+        str = str .. "[" .. ct.active_icon_set[kind] .. "]" .. " "
     else
-        str = str .. "•" .. " " .. kind
+        -- ▶ Func1 • [Function]
+        str = str .. M.glyphs.separator .. " " .. "[" .. kind .. "]" .. " "
     end
+
+    if ct.config.layout == "bottom" or 
+        ct.config.layout == "top" then
+        -- now we got all the room in the world, add detail
+        path = lsp_util.relative_path_from_uri(node.call_hierarchy_obj.uri)
+        -- ▶ Func1[] • relative/path/to/file
+        -- or
+        -- ▶ Func1 • [Function] • relative/path/to/file
+        str = str .. M.glyphs.separator .. " " .. path
+    end
+
     return str
 end
 
@@ -61,7 +77,7 @@ function M.marshal_line(line)
     -- just your normal string parsing to carve out the symbol portion
     -- of the line.
     local symbol_and_type = vim.fn.strcharpart(line, depth+2)
-    local symbol_end_idx = vim.fn.stridx(symbol_and_type, " ")
+    local symbol_end_idx = vim.fn.stridx(symbol_and_type, "[")
     local symbol = vim.fn.strpart(symbol_and_type, 0, symbol_end_idx)
 
     for _, node in ipairs(tree.depth_table[depth]) do

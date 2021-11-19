@@ -51,7 +51,7 @@ function M._setup_buffer(direction, buffer_handle)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zc", ":CTCollapse<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<CR>", ":CTJump<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "f", ":CTFocus<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "h", ":CTHover<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "i", ":CTHover<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":CTSwitch<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "?", ":lua require('calltree.ui').help(true)<CR>", opts)
 

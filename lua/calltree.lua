@@ -88,7 +88,11 @@ function M.setup(user_config)
     end
 
     -- sanatize the config
-    if (M.config.layout ~= "left") and (M.config.layout ~= "left") then
+    if (M.config.layout ~= "left") 
+        and (M.config.layout ~= "right") 
+        and (M.config.layout ~= "top")
+        and (M.config.layout ~= "bottom") 
+    then
         M.config.layout = "left"
     end
     if M.config.layout_size < 10 then
