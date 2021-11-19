@@ -30,7 +30,8 @@ function M._setup_help_buffer(help_buf_handle)
             "f       - focus the tree on this symbol",
             "s       - switch the symbol from",
             "          incoming/outgoing calls",
-            "h       - show hover info for symbol"
+            "h       - show hover info for symbol",
+            "d       - show symbol details"
         }
         vim.api.nvim_buf_set_lines(help_buf_handle, 0, #lines, false, lines)
     end

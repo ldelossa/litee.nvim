@@ -6,6 +6,7 @@ local ui_win = require('calltree.ui.window')
 local help_buf = require('calltree.ui.help_buffer')
 local marshal = require('calltree.ui.marshal')
 local jumps = require('calltree.ui.jumps')
+local deets = require('calltree.ui.details')
 
 local M = {}
 
@@ -288,6 +289,17 @@ M.hover = function()
         }
     }
     lsp_util.multi_client_request(M.active_lsp_clients, "textDocument/hover", params, nil, M.buffer_handle)
+end
+
+-- details opens a popup window for the given symbol
+-- showing more information.
+M.details = function()
+    local line = vim.api.nvim_get_current_line()
+    local node = marshal.marshal_line(line)
+    if node == nil then
+        return
+    end
+    deets.details_popup(node, M.direction)
 end
 
 return M
