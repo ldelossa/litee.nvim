@@ -39,8 +39,7 @@ function M.details_popup(node, direction, calltree_buffer)
     vim.api.nvim_buf_set_option(buf, 'syntax', 'yaml')
 
     local lines = {}
-    table.insert(lines, "Symbol Details")
-    table.insert(lines, "==============")
+    table.insert(lines, "==Symbol Details==")
     table.insert(lines, "Name: " .. node.name)
     table.insert(lines, "Kind: " .. vim.lsp.protocol.SymbolKind[node.kind])
 
@@ -51,8 +50,16 @@ function M.details_popup(node, direction, calltree_buffer)
     if node.references ~= nil then
         table.insert(lines, "References: " .. #node.references)
     end
+
     table.insert(lines, "File: " .. lsp_util.relative_path_from_uri(node.call_hierarchy_obj.uri))
-    table.insert(lines, "Details: " .. node.call_hierarchy_obj.detail)
+
+    if node.call_hierarchy_obj.detail ~= nil then
+        table.insert(lines, "Details: " .. node.call_hierarchy_obj.detail)
+    end
+
+    if node.call_hierarchy_obj.data ~= nil then
+        table.insert(lines, "Data: " .. node.call_hierarchy_obj.data)
+    end
 
     local width = 20
     for _, line in ipairs(lines) do

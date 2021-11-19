@@ -10,6 +10,7 @@ local M = {}
 -- a calltree.
 M.ch_lsp_handler = function(direction)
     return function(err, result, ctx, _)
+        print(vim.inspect(result))
         if err ~= nil then
             return
         end
