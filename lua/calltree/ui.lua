@@ -93,8 +93,7 @@ end
 -- position
 M.collapse = function()
     local linenr = vim.api.nvim_win_get_cursor(M.win_handle)
-    local line   = vim.api.nvim_get_current_line()
-    local node   = marshal.marshal_line(line)
+    local node   = marshal.marshal_line(linenr)
     if node == nil then
         return
     end
@@ -154,8 +153,7 @@ end
 -- expand will expand a symbol at the current cursor position
 M.expand = function()
     local linenr = vim.api.nvim_win_get_cursor(M.win_handle)
-    local line   = vim.api.nvim_get_current_line()
-    local node = marshal.marshal_line(line)
+    local node = marshal.marshal_line(linenr)
     if node == nil then
         return
     end
@@ -177,8 +175,8 @@ end
 -- the cursor, creating a calltree with the symbol
 -- as root.
 M.focus = function()
-    local line = vim.api.nvim_get_current_line()
-    local node = marshal.marshal_line(line)
+    local linenr = vim.api.nvim_win_get_cursor(M.win_handle)
+    local node = marshal.marshal_line(linenr)
     if node == nil then
         return
     end
@@ -229,8 +227,8 @@ end
 -- switch_direction will focus the symbol under the
 -- cursor and then invert the call hierarchy direction.
 M.switch_direction = function()
-    local line = vim.api.nvim_get_current_line()
-    local node = marshal.marshal_line(line)
+    local linenr = vim.api.nvim_win_get_cursor(M.win_handle)
+    local node = marshal.marshal_line(linenr)
     if node == nil then
         return
     end
@@ -253,8 +251,8 @@ end
 -- jump will jump to the source code location of the
 -- symbol under the cursor.
 M.jump = function()
-    local line = vim.api.nvim_get_current_line()
-    local node = marshal.marshal_line(line)
+    local linenr = vim.api.nvim_win_get_cursor(M.win_handle)
+    local node = marshal.marshal_line(linenr)
     if node == nil then
         return
     end
@@ -276,8 +274,8 @@ end
 -- under the cursor.
 M.hover = function()
     ui_buf.close_all_popups()
-    local line = vim.api.nvim_get_current_line()
-    local node = marshal.marshal_line(line)
+    local linenr = vim.api.nvim_win_get_cursor(M.win_handle)
+    local node = marshal.marshal_line(linenr)
     if node == nil then
         return
     end
@@ -297,8 +295,8 @@ end
 -- showing more information.
 M.details = function()
     ui_buf.close_all_popups()
-    local line = vim.api.nvim_get_current_line()
-    local node = marshal.marshal_line(line)
+    local linenr = vim.api.nvim_win_get_cursor(M.win_handle)
+    local node = marshal.marshal_line(linenr)
     if node == nil then
         return
     end

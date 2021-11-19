@@ -10,6 +10,10 @@ M.glyphs = {
     separator = "•"
 }
 
+-- buf_line_map keeps a mapping between marshaled
+-- buffer lines and the node objects
+M.buf_line_map = {}
+
 -- marshal_node takes a node and marshals
 -- it into a UI buffer line.
 --
@@ -60,32 +64,14 @@ end
 -- marshal_line takes a UI buffer line and
 -- marshals it into a tree.Node.
 --
--- line : string - the UI buffer line representing
--- the node to marshal.
+-- linenr : {row,col} - the UI buffer line typically returned by
+-- vim.api.nvim_win_get_cursor(calltree_win_handle)
 --
 -- returns:
 --   tree.Node - the marshaled tree.Node table.
-function M.marshal_line(line)
-    -- number of characters up to the expand symbol encode
-    -- the node's tree depth.
-    local depth  = vim.fn.match(line, "[▼▶]")
-    if depth == -1 then
-        vim.api.nvim_err_writeln("failed to find matching character: " .. depth)
-        return
-    end
-
-    -- just your normal string parsing to carve out the symbol portion
-    -- of the line.
-    local symbol_and_type = vim.fn.strcharpart(line, depth+2)
-    local symbol_end_idx = vim.fn.stridx(symbol_and_type, "[")
-    local symbol = vim.fn.strpart(symbol_and_type, 0, symbol_end_idx)
-
-    for _, node in ipairs(tree.depth_table[depth]) do
-        if node.name == symbol then
-            return node
-        end
-    end
-    return nil
+function M.marshal_line(linenr)
+    local node = M.buf_line_map[linenr[1]]
+    return node
 end
 
 -- marshal_tree recursively marshals all nodes from the provided root
@@ -100,7 +86,12 @@ end
 -- node : tree.Node - the root node of the tree where marshaling will 
 -- begin.
 function M.marshal_tree(buf_handle, lines, node)
+    if node.depth == 0 then
+        -- create a new line mapping
+        buf_line_map = {}
+    end
     table.insert(lines, M.marshal_node(node))
+    M.buf_line_map[#lines] = node
 
     -- if we are an expanded node or we are the root (always expand)
     -- recurse
