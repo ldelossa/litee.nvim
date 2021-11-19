@@ -31,7 +31,17 @@ function M.marshal_node(node)
         glyph = M.glyphs["collapsed"]
     end
 
-    local kind = vim.lsp.protocol.SymbolKind[node.kind]
+    -- prefer using workspace symbol details if available.
+    -- fallback to callhierarchy object details.
+    local name = ""
+    local kind = ""
+    if node.symbol ~= nil then
+        name = node.symbol.name
+        kind = vim.lsp.protocol.SymbolKind[node.symbol.kind]
+    else
+        name = node.name
+        kind = vim.lsp.protocol.SymbolKind[node.kind]
+    end
 
     -- add spacing up to node's depth
     for _=1, node.depth do
@@ -39,10 +49,10 @@ function M.marshal_node(node)
     end
 
     -- ▶ Func1
-    str = str .. glyph .. " " .. node.name
+    str = str .. glyph .. " " .. name
     if ct.config.icons ~= "none" then
-        -- ▶ Func1[]
-        str = str .. "[" .. ct.active_icon_set[kind] .. "]" .. " "
+        -- ▶ Func1 []
+        str = str .. " " .. "[" .. ct.active_icon_set[kind] .. "]" .. " "
     else
         -- ▶ Func1 • [Function]
         str = str .. M.glyphs.separator .. " " .. "[" .. kind .. "]" .. " "
@@ -52,7 +62,7 @@ function M.marshal_node(node)
         ct.config.layout == "top" then
         -- now we got all the room in the world, add detail
         path = lsp_util.relative_path_from_uri(node.call_hierarchy_obj.uri)
-        -- ▶ Func1[] • relative/path/to/file
+        -- ▶ Func1 [] • relative/path/to/file
         -- or
         -- ▶ Func1 • [Function] • relative/path/to/file
         str = str .. M.glyphs.separator .. " " .. path
