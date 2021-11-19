@@ -32,8 +32,23 @@ function M.Node.new(name, depth, call_hierarchy_obj, kind, references)
         kind=kind,
         references=references
     }
+    node.key = M.Node.keyify(node)
     setmetatable(node, M.Node.mt)
     return node
+end
+
+-- keyify creates a key for a node
+--
+-- node : tree.Node - the node a key is being created
+-- for
+--
+-- returns:
+--  string - the key
+function M.Node.keyify(node)
+    local key = node.name .. ":"
+        .. node.call_hierarchy_obj.uri .. ":"
+        .. node.call_hierarchy_obj.range.start.line
+    return key
 end
 
 -- eq perfoms a recursive comparison
@@ -128,7 +143,7 @@ function M.add_node(parent,  children)
     -- lookup parent node in depth tree (faster then tree diving.)
     local pNode = nil
     for _, node in pairs(M.depth_table[parent.depth]) do
-        if node.name == parent.name then
+        if node.key == parent.key then
             pNode = node
             break
         end
@@ -193,7 +208,7 @@ function M.remove_subtree(node, root)
         local dt = M.depth_table[node.depth]
         local nw_dt = {}
         for _, dt_node in ipairs(dt) do
-            if dt_node.name ~= node.name then
+            if dt_node.key ~= node.key then
                 table.insert(nw_dt, dt_node)
             end
         end
