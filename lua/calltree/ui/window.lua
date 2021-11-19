@@ -35,12 +35,26 @@ function M._setup_window(buf_handle, win_handle, win_tabpage, config)
 
         if config.layout == "left" then
             vim.cmd("topleft vsplit")
-        else
+            vim.cmd("vertical resize " ..
+                        config.layout_size)
+        elseif config.layout == "right" then
             vim.cmd("botright vsplit")
+            vim.cmd("vertical resize " ..
+                        config.layout_size)
+        elseif config.layout == "top" then
+            vim.cmd("topleft split")
+            vim.cmd("resize " ..
+                        config.layout_size)
+        elseif config.layout == "bottom" then
+            vim.cmd("botright split")
+            vim.cmd("resize " ..
+                        config.layout_size)
+        else
+            -- we should never get here but what ever.
+            vim.cmd("topleft vsplit")
+            vim.cmd("vertical resize " ..
+                        config.layout_size)
         end
-
-        vim.cmd("vertical resize " ..
-                    config.layout_size)
 
         win_handle = vim.api.nvim_get_current_win()
         win_tabpage = vim.api.nvim_win_get_tabpage(win_handle)

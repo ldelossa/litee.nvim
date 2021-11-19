@@ -23,14 +23,22 @@ function M.jump_neighbor(location, layout, node)
     local cur_win = vim.api.nvim_get_current_win()
     if layout == "left" then
         vim.cmd('wincmd l')
-    else
+    elseif layout == "right" then
         vim.cmd('wincmd h')
+    elseif layout == "top" then
+        vim.cmd('wincmd j')
+    elseif layout == "bottom" then
+        vim.cmd('wincmd k')
     end
     if cur_win == vim.api.nvim_get_current_win() then
         if layout == "left" then
             vim.cmd("botright vsplit")
-        else
+        elseif layout == "right" then
             vim.cmd("topleft vsplit")
+        elseif layout == "top" then
+            vim.cmd("botleft split")
+        elseif layout == "bottom" then
+            vim.cmd("botleft split")
         end
     end
     vim.lsp.util.jump_to_location(location)

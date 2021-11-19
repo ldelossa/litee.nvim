@@ -128,13 +128,13 @@ This does not stop you from mapping *calltree-commands* to your own liking.
 
 The default buffer mapping is set via lua and should feel familiar if you use vim folds.
 
-    local opts = {silent=true}
-    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "zo", ":CTExpand<CR>", opts)
-    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "zc", ":CTCollapse<CR>", opts)
-    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "<CR>", ":CTJump<CR>", opts)
-    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "f", ":CTFocus<CR>", opts)
-    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "i", ":CTHover<CR>", opts)
-    vim.api.nvim_buf_set_keymap(M.buffer_handle, "n", "s", ":CTSwitch<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zo", ":CTExpand<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zc", ":CTCollapse<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<CR>", ":CTJump<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "f", ":CTFocus<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "i", ":CTHover<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":CTSwitch<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "?", ":lua require('calltree.ui').help(true)<CR>", opts)
 
 ====================================================================================
 CONFIG                                                             *calltree-config*
@@ -148,6 +148,12 @@ The config table is described below:
         -- where the calltree ui will spawn
         -- "left" (default) - Spawn calltree as the left most vertical window.
         -- "right"          - Spawn calltree as the left most vertical window.
+        -- "top"            - Spawn calltree as the bottom most horizontal window
+        --                    more details about the symbol will be shown with this
+        --                    layout.
+        -- "bottom"         - Spawn calltree as the top most horizontal window
+        --                    more details about the symbol will be shown with this
+        --                    layout.
         layout = "left",
         -- the initial size of the calltree ui
         -- int              - An integer used in the initial "resize" command for
