@@ -5,6 +5,11 @@ local direction_map = {
     to   = {method="callHierarchy/outgoingCalls", buf_name="outgoingCalls"}
 }
 
+function M.close_all_popups()
+    require('calltree.ui.hover').close_hover_popup()
+    require('calltree.ui.details').close_details_popup()
+end
+
 -- _setup_buffer performs an idempotent creation
 -- of the calltree buffer
 --
@@ -45,7 +50,7 @@ function M._setup_buffer(direction, buffer_handle)
     -- au to clear highlights on window close
     vim.cmd("au BufWinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.jumps').set_jump_hl(false)")
     -- au to close popup with cursor moves or buffer is closed.
-    vim.cmd("au CursorMoved,BufWinLeave,WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.details').close_details_popup()")
+    vim.cmd("au CursorMoved,BufWinLeave,WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.buffer').close_all_popups()")
 
     -- set buffer local keymaps
     local opts = {silent=true}

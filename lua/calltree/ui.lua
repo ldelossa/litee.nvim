@@ -7,6 +7,7 @@ local help_buf = require('calltree.ui.help_buffer')
 local marshal = require('calltree.ui.marshal')
 local jumps = require('calltree.ui.jumps')
 local deets = require('calltree.ui.details')
+local hover = require('calltree.ui.hover')
 
 local M = {}
 
@@ -274,6 +275,7 @@ end
 -- hover will show LSP hover information for the symbol
 -- under the cursor.
 M.hover = function()
+    ui_buf.close_all_popups()
     local line = vim.api.nvim_get_current_line()
     local node = marshal.marshal_line(line)
     if node == nil then
@@ -288,12 +290,13 @@ M.hover = function()
             character = node.call_hierarchy_obj.range.start.character
         }
     }
-    lsp_util.multi_client_request(M.active_lsp_clients, "textDocument/hover", params, nil, M.buffer_handle)
+    lsp_util.multi_client_request(M.active_lsp_clients, "textDocument/hover", params, hover.hover_handler, M.buffer_handle)
 end
 
 -- details opens a popup window for the given symbol
 -- showing more information.
 M.details = function()
+    ui_buf.close_all_popups()
     local line = vim.api.nvim_get_current_line()
     local node = marshal.marshal_line(line)
     if node == nil then
