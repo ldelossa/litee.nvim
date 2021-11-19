@@ -106,6 +106,10 @@ Calltree exports several commands for manipulating the calltree UI.
 :CTHover       
     Show hover info for the symbol
 
+                                                                         *CTDetails* 
+:CTDetails      
+    Show symbol detail information in a popup.
+
                                                                         *:CTClearHL* 
 :CTClearHL       
     Clears any highlights after jumping to location.
@@ -114,7 +118,6 @@ Calltree exports several commands for manipulating the calltree UI.
     is closed.
 
                                                                        *:CTDumpTree* 
-                                                                    
 :CTDumpTree       
     Echos the current calltree in lua dictonary syntax. 
     Useful for debugging.
@@ -133,6 +136,7 @@ The default buffer mapping is set via lua and should feel familiar if you use vi
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<CR>", ":CTJump<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "f", ":CTFocus<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "i", ":CTHover<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":CTDetails<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":CTSwitch<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "?", ":lua require('calltree.ui').help(true)<CR>", opts)
 
