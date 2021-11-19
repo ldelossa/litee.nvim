@@ -139,6 +139,8 @@ local function ch_expand_handler(node, linenr, direction)
                 call_hierarchy_call[direction].kind,
                 call_hierarchy_call.fromRanges
             )
+            -- try to resolve the workspace symbol for child
+            child.symbol = lsp_util.symbol_from_node(M.active_lsp_clients, child, M.buffer_handle)
             table.insert(children, child)
         end
 
@@ -201,6 +203,8 @@ local function ch_switch_handler(direction)
         0,
         ctx.params.item,
         ctx.params.item.kind)
+        -- try to resolve the workspace symbol for root
+        root.symbol = lsp_util.symbol_from_node(M.active_lsp_clients, child, M.buffer_handle)
 
         -- create the root's children nodes via the response array.
         local children = {}
@@ -212,6 +216,8 @@ local function ch_switch_handler(direction)
              call_hierarchy_call[direction].kind,
              call_hierarchy_call.fromRanges
           )
+          -- try to resolve the workspace symbol for child
+          child.symbol = lsp_util.symbol_from_node(M.active_lsp_clients, child, M.buffer_handle)
           table.insert(children, child)
         end
 
