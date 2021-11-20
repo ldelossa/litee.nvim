@@ -49,13 +49,13 @@ function M.marshal_node(node)
     end
 
     -- ▶ Func1
-    str = str .. glyph .. " " .. name
+    str = str .. glyph
     if ct.config.icons ~= "none" then
         -- ▶ Func1 []
-        str = str .. " " .. "[" .. ct.active_icon_set[kind] .. "]" .. " "
+        str = str .. " " .. "[" .. ct.active_icon_set[kind] .. "]" .. " " .. name .. " "
     else
         -- ▶ Func1 • [Function]
-        str = str .. M.glyphs.separator .. " " .. "[" .. kind .. "]" .. " "
+        str = str .. " " .. "[" .. kind .. "]" .. " " .. M.glyphs.separator .. " " .. name .. " "
     end
 
     if ct.config.layout == "bottom" or 
