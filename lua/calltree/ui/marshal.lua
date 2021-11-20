@@ -1,4 +1,3 @@
-local tree = require('calltree.tree')
 local ct = require('calltree')
 local lsp_util = require('calltree.lsp.util')
 
@@ -61,7 +60,7 @@ function M.marshal_node(node)
     if ct.config.layout == "bottom" or 
         ct.config.layout == "top" then
         -- now we got all the room in the world, add detail
-        path = lsp_util.relative_path_from_uri(node.call_hierarchy_obj.uri)
+        path = lsp_util.relative_path_from_uri(node.call_hierarchy_item.uri)
         -- ▶ Func1 [] • relative/path/to/file
         -- or
         -- ▶ Func1 • [Function] • relative/path/to/file

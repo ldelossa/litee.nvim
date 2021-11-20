@@ -98,7 +98,7 @@ function M.set_jump_hl(set, node)
 
     M.last_highlighted_buffer = vim.api.nvim_get_current_buf()
     -- set highlght for function itself
-    local range = node.call_hierarchy_obj.range
+    local range = node.call_hierarchy_item.range
     vim.api.nvim_buf_add_highlight(
         M.last_highlighted_buffer,
         M.jump_higlight_ns,
