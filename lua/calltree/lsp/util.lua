@@ -56,7 +56,7 @@ function M.symbol_from_node(clients, node, bufnr)
             if
                 res.uri == node.uri and
                 res.location.range.start.line ==
-                node.call_hierarchy_obj.range.start.line
+                node.call_hierarchy_item.range.start.line
             then
                 return res
             end

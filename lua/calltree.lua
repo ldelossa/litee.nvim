@@ -123,7 +123,7 @@ function M.setup(user_config)
    vim.cmd("command! CTHover       lua require('calltree.ui').hover()")
    vim.cmd("command! CTDetails     lua require('calltree.ui').details()")
    vim.cmd("command! CTClearHL     lua require('calltree.ui.jumps').set_jump_hl(false)")
-   vim.cmd("command! CTDumpTree    lua require('calltree.tree').dump_tree()")
+   vim.cmd("command! CTDumpTree    lua require('calltree.ui').dump_tree()")
 end
 
 return M

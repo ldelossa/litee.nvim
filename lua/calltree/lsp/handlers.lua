@@ -1,4 +1,5 @@
-local tree = require('calltree.tree')
+local tree_node = require('calltree.tree.node')
+local tree = require('calltree.tree.tree')
 local ui = require('calltree.ui')
 local lsp_util = require('calltree.lsp.util')
 
@@ -23,18 +24,21 @@ M.ch_lsp_handler = function(direction)
 
         -- tell the ui what direction the call tree is being invoked
         -- with.
-        ui.direction = direction
+        ui.calltree_dir = direction
 
-        -- store the window invoking the call tree, jumps will 
+        -- store the window invoking the call tree, jumps will
         -- occur here.
-        ui.invoking_win_handle = vim.api.nvim_get_current_win()
+        ui.invoking_win = vim.api.nvim_get_current_win()
+
+        -- create a new tree
+        ui.calltree_handle = tree.new_tree("calltree")
 
         -- create the root of our call tree, the request which
         -- signaled this response is in ctx.params
-        local root = tree.Node.new(ctx.params.item.name,
+        local root = tree_node.new(ctx.params.item.name,
         0,
         ctx.params.item,
-        ctx.params.item.kind)
+        nil)
 
         -- try to resolve the workspace symbol for root.
         root.symbol = lsp_util.symbol_from_node(ui.active_lsp_clients, root, ui.invoking_win_handle)
@@ -42,11 +46,10 @@ M.ch_lsp_handler = function(direction)
         -- create the root's children nodes via the response array.
         local children = {}
         for _, call_hierarchy_call in pairs(result) do
-          local child = tree.Node.new(
+          local child = tree_node.new(
              call_hierarchy_call[direction].name,
              0, -- tree.add_node will set the depth correctly.
              call_hierarchy_call[direction],
-             call_hierarchy_call[direction].kind,
              call_hierarchy_call.fromRanges
           )
           -- try to resolve the workspace symbol for child
@@ -54,7 +57,7 @@ M.ch_lsp_handler = function(direction)
           table.insert(children, child)
         end
 
-        tree.add_node(root, children)
+        tree.add_node(ui.calltree_handle, root, children)
         ui.write_tree()
     end
 end

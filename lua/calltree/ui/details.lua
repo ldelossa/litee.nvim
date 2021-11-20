@@ -41,7 +41,7 @@ function M.details_popup(node, direction, calltree_buffer)
     local lines = {}
     table.insert(lines, "==Symbol Details==")
     table.insert(lines, "Name: " .. node.name)
-    table.insert(lines, "Kind: " .. vim.lsp.protocol.SymbolKind[node.kind])
+    table.insert(lines, "Kind: " .. vim.lsp.protocol.SymbolKind[node.call_hierarchy_item.kind])
 
     if node.expanded then
         table.insert(lines, direction_map[direction] .. #node.children)
@@ -51,14 +51,14 @@ function M.details_popup(node, direction, calltree_buffer)
         table.insert(lines, "References: " .. #node.references)
     end
 
-    table.insert(lines, "File: " .. lsp_util.relative_path_from_uri(node.call_hierarchy_obj.uri))
+    table.insert(lines, "File: " .. lsp_util.relative_path_from_uri(node.call_hierarchy_item.uri))
 
-    if node.call_hierarchy_obj.detail ~= nil then
-        table.insert(lines, "Details: " .. node.call_hierarchy_obj.detail)
+    if node.call_hierarchy_item.detail ~= nil then
+        table.insert(lines, "Details: " .. node.call_hierarchy_item.detail)
     end
 
-    if node.call_hierarchy_obj.data ~= nil then
-        table.insert(lines, "Data: " .. node.call_hierarchy_obj.data)
+    if node.call_hierarchy_item.data ~= nil then
+        table.insert(lines, "Data: " .. node.call_hierarchy_item.data)
     end
 
     local width = 20
