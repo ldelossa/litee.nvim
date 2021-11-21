@@ -1,3 +1,5 @@
+local marshal = require('calltree.ui.marshal')
+
 local M = {}
 
 -- reg is a registry holding references to root
@@ -87,6 +89,11 @@ function M.add_node(tree, parent, children)
         table.insert(pNode.children, child)
     end
     _refresh_dpt(tree)
+end
+
+M.write_tree = function(tree, buf)
+    marshal.marshal_tree(buf, {}, reg[tree].root)
+    return buf
 end
 
 -- remove subtree will remove the subtree of the

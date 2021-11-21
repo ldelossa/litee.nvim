@@ -1,71 +1,152 @@
+local config = require("calltree").config
 local M = {}
 
--- _setup_buffer performs an idempotent creation
--- of the calltree window
+-- window.lua offers a declartive way to open new windows
+-- in a static layout.
+
+-- static_layout defines the order of calltree windows in
+-- the ui.
+local static_layout = {calltree=1, symboltree=2}
+
+-- type_to_ui_state_win is a helper map which maps the
+-- window type being opened to the win field on the ui_state.
+local type_to_ui_state_win = {
+    calltree = "calltree_win",
+    symboltree = "symboltree_win"
+}
+
+-- realize_current_and_desired will determine the current and desired state
+-- for a requested window type.
 --
--- buf_handle : a valid calltree buffer handle
+-- check_win_type is the window type being checked to realize the current_layout.
 --
--- win_handle : win_handle - previous calltree window
--- or nil
---
--- win_tabpage : tab_handle - prevous tab the previous
--- calltree window belong too.
---
--- config : table - the calltree configuration table.
+-- desired_win_type is the window type attempting to be opened.
 --
 -- returns:
---   "win_handle"  -- handle to a valid calltree window
---   "win_tabpage" -- the tabpage the valid calltree window exists
---    on
-function M._setup_window(buf_handle, win_handle, win_tabpage, config)
+--   continue : bool - whether to continue evaluating the open window request.
+--                     false if we determine the window is already open on the current tab.
+local function realize_current_and_desired(check_win_type, desired_win_type, current_layout, desired_layout, ui_state)
     local current_tabpage = vim.api.nvim_win_get_tabpage(
         vim.api.nvim_get_current_win()
     )
-    if
-        win_handle == nil
-        or (current_tabpage ~= win_tabpage)
-        or not vim.api.nvim_win_is_valid(win_handle)
-    then
-        if
-            win_handle ~= nil
-            and vim.api.nvim_win_is_valid(win_handle)
-        then
-            vim.api.nvim_win_close(win_handle, true)
-        end
+    local win = ui_state[type_to_ui_state_win[check_win_type]]
 
-        if config.layout == "left" then
-            vim.cmd("topleft vsplit")
-            vim.cmd("vertical resize " ..
-                        config.layout_size)
-        elseif config.layout == "right" then
-            vim.cmd("botright vsplit")
-            vim.cmd("vertical resize " ..
-                        config.layout_size)
-        elseif config.layout == "top" then
-            vim.cmd("topleft split")
-            vim.cmd("resize " ..
-                        config.layout_size)
-        elseif config.layout == "bottom" then
-            vim.cmd("botright split")
-            vim.cmd("resize " ..
-                        config.layout_size)
-        else
-            -- we should never get here but what ever.
-            vim.cmd("topleft vsplit")
-            vim.cmd("vertical resize " ..
-                        config.layout_size)
+    -- check if the desired window exists.
+    if win == nil or (not vim.api.nvim_win_is_valid(win)) then
+        if check_win_type == desired_win_type then
+            -- checked window is invalid, its also the desired window to open
+            -- add it to desired layout.
+            table.insert(desired_layout, desired_win_type)
         end
-
-        win_handle = vim.api.nvim_get_current_win()
-        win_tabpage = vim.api.nvim_win_get_tabpage(win_handle)
-        vim.api.nvim_win_set_buf(win_handle, buf_handle)
+        return true
     end
-    vim.api.nvim_win_set_option(win_handle, 'number', false)
-    vim.api.nvim_win_set_option(win_handle, 'cursorline', true)
-    vim.api.nvim_buf_set_option(buf_handle, 'textwidth', 0)
-    vim.api.nvim_buf_set_option(buf_handle, 'wrapmargin', 0)
-    vim.api.nvim_win_set_option(win_handle, 'wrap', false)
-    return win_handle, win_tabpage
+
+    local win_tabpage = vim.api.nvim_win_get_tabpage(win)
+    -- desired window type is already open on current tabpage, go to it and noop
+    if check_win_type == desired_win_type and current_tabpage == win_tabpage then
+        return false
+    end
+    -- the checked window type is open and on the current tab, unconditionally add it to
+    -- desired_layout to preserve it existence.
+    if current_tabpage == win_tabpage then
+        table.insert(current_layout, win)
+        table.insert(desired_layout, check_win_type)
+    -- the window type we are checking is also the desired window type, but its
+    -- opened in another tab, close it and add desired window type to desired layout.
+    -- it will be opened on the current tab.
+    elseif check_win_type == desired_win_type then
+        vim.api.nvim_win_close(win, true)
+        table.insert(desired_layout, desired_win_type)
+    end
+    return true
+end
+
+-- open_window will first compute the current UI layout
+-- then compute the desired layout and finally call
+-- _setup_window with both.
+function M._open_window(kind, ui_state)
+    -- holds open window handles we'll reuse
+    local current_layout = {}
+    -- holds the window types to ensure present in the ui
+    local desired_layout = {}
+
+    for win_type, _ in pairs(static_layout) do
+        if not realize_current_and_desired(win_type, kind, current_layout, desired_layout, ui_state) then
+            return
+        end
+    end
+
+    M._setup_window(current_layout, desired_layout, ui_state)
+end
+
+-- setup_window evaluates the current layout and the desired layout
+-- and opens the necessary windows to obtain the desired layout.
+function M._setup_window(current_layout, desired_layout, ui_state)
+    for i, kind in ipairs(desired_layout) do
+        local buffer_to_set = nil
+        local win_handle_to_set = nil
+
+        if kind == "calltree" then
+            buffer_to_set = ui_state.calltree_buf
+            win_handle_to_set = "calltree_win"
+        end
+        if kind == "symboltree" then
+            buffer_to_set = ui_state.symboltree_buf
+            win_handle_to_set = "symboltree_win"
+        end
+
+        -- we can reuse the current layout windows
+        if i <= #current_layout then
+            vim.api.nvim_win_set_buf(current_layout[i], buffer_to_set)
+            ui_state[win_handle_to_set] = current_layout[i]
+            vim.api.nvim_set_current_win(ui_state[win_handle_to_set])
+            goto continue
+        end
+
+        -- we are out of open windows, so we need to create some
+
+        if #current_layout == 0 then
+            -- there is no current layout, so just do a botright or equivalent
+            if config.layout == "left" then
+                vim.cmd("topleft vsplit")
+                vim.cmd("vertical resize " ..
+                            config.layout_size)
+            elseif config.layout == "right" then
+                vim.cmd("botright vsplit")
+                vim.cmd("vertical resize " ..
+                            config.layout_size)
+            elseif config.layout == "top" then
+                vim.cmd("topleft split")
+                vim.cmd("resize " ..
+                            config.layout_size)
+            elseif config.layout == "bottom" then
+                vim.cmd("botright split")
+                vim.cmd("resize " ..
+                            config.layout_size)
+            end
+            goto set
+        end
+
+        -- cursor currently in a reused window, split according to layout config
+        if config.layout == "left" then
+            vim.cmd("below split")
+        elseif config.layout == "right" then
+            vim.cmd("below split")
+        elseif config.layout == "top" then
+            vim.cmd("vsplit")
+        elseif config.layout == "bottom" then
+            vim.cmd("vsplit")
+        end
+
+        ::set::
+        ui_state[win_handle_to_set] = vim.api.nvim_get_current_win()
+        vim.api.nvim_win_set_buf(ui_state[win_handle_to_set], buffer_to_set)
+        vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'number', false)
+        vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'cursorline', true)
+        vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'wrap', false)
+
+        ::continue::
+    end
 end
 
 return M

@@ -14,7 +14,8 @@ local M = {}
 
 local direction_map = {
     from = {method ="callHierarchy/incomingCalls", buf_name="incomingCalls"},
-    to   = {method="callHierarchy/outgoingCalls", buf_name="outgoingCalls"}
+    to   = {method="callHierarchy/outgoingCalls", buf_name="outgoingCalls"},
+    empty = {method="callHierarchy/outgoingCalls", buf_name="calltree: empty"}
 }
 
 -- the global calltree buffer
@@ -26,10 +27,21 @@ M.calltree_handle = nil
 M.calltree_win = nil
 -- the last tabpage our calltree ui was on
 M.calltree_tab = nil
+-- direction of calltree (incoming(from)/outgoing(to))
+M.calltree_dir = "empty"
+
+-- the global symboltree buffer
+M.symboltree_buf = nil
+-- handle to our symboltree tree
+-- see calltree.tree.tree
+M.symboltree_handle = nil
+-- the global symboltree window
+M.symboltree_win = nil
+-- the last tabpage our symboltree ui was on
+M.symboltree_tab = nil
+
 -- the active lsp clients which invoked the calltree
 M.active_lsp_clients = nil
--- direction of calltree (incoming(from)/outgoing(to))
-M.calltree_dir = nil
 -- the window in which the calltree was invoked.
 M.invoking_win = nil
 -- the buffer switched to when the user asks for help
@@ -59,19 +71,18 @@ M.help = function(open)
     vim.api.nvim_win_set_buf(M.calltree_win, M.help_buf)
 end
 
--- open will open the call tree ui
+-- open_calltree will open the call tree ui
 M.open_calltree = function()
     M.calltree_buf =
-        ui_buf._setup_buffer(M.calltree_dir, M.calltree_buf)
+        ui_buf._setup_buffer(direction_map[M.calltree_dir].buf_name, M.calltree_buf)
     if M.calltree_handle ~= nil then
-        M.write_tree()
+        tree.write_tree(M.calltree_handle, M.calltree_buf)
     end
-    M.calltree_win, M.calltree_tab =
-        ui_win._setup_window(M.calltree_buf, M.calltree_win, M.calltree_tab, ct.config)
+    ui_win._open_window("calltree", M)
 end
 
 -- close will close the call tree ui
-M.close = function()
+M.close_calltree = function()
     if M.calltree_win ~= nil then
         if vim.api.nvim_win_is_valid(M.calltree_win) then
             vim.api.nvim_win_close(M.calltree_win, true)
@@ -80,21 +91,23 @@ M.close = function()
     M.calltree_win = nil
 end
 
--- write_tree will write the current calltree to a
--- valid calltree buffer, opening the calltree ui if
--- necessary.
-M.write_tree = function()
-    M.calltree_buf =
-        ui_buf._setup_buffer(M.calltree_dir, M.calltree_buf)
-
-    if M.calltree_handle == nil then
-        M.calltree_handle = tree.new_tree("calltree")
+-- open_symboltree will open the symboltree ui
+M.open_symboltree = function()
+    M.symboltree_buf =
+        ui_buf._setup_buffer("documentSymbols", M.symboltree_buf)
+    if M.symboltree_handle ~= nil then
+        tree.write_tree(M.symboltree_handle, M.symboltree_buf)
     end
+    ui_win._open_window("symboltree", M)
+end
 
-    marshal.marshal_tree(M.calltree_buf, {}, tree.get_tree(M.calltree_handle))
-
-    M.calltree_win, M.calltree_tab =
-        ui_win._setup_window(M.calltree_buf, M.calltree_win, M.calltree_tab, ct.config)
+M.close_symboltree = function()
+    if M.symboltree_win ~= nil then
+        if vim.api.nvim_win_is_valid(M.symboltree_win) then
+            vim.api.nvim_win_close(M.symoltree_win, true)
+        end
+    end
+    M.symboltree_win = nil
 end
 
 -- collapse will collapse a symbol at the current cursor
@@ -109,7 +122,7 @@ M.collapse = function()
     node.expanded = false
     tree.remove_subtree(M.calltree_handle, node, true)
 
-    M.write_tree()
+    tree.write_tree(M.calltree_handle, M.calltree_buf)
 
     vim.api.nvim_win_set_cursor(M.calltree_win, linenr)
 end
@@ -133,7 +146,7 @@ local function ch_expand_handler(node, linenr, direction)
         if result == nil then
             -- rewrite the tree still to expand node giving ui
             -- feedback that no further callers/callees exist
-            M.write_tree()
+            tree.write_tree(M.calltree_handle, M.calltree_buf)
             vim.api.nvim_win_set_cursor(M.calltree_win, linenr)
             return
         end
@@ -153,7 +166,7 @@ local function ch_expand_handler(node, linenr, direction)
 
         tree.add_node(M.calltree_handle, node, children)
 
-        M.write_tree()
+        tree.write_tree(M.calltree_handle, M.calltree_buf)
 
         vim.api.nvim_win_set_cursor(M.calltree_win, linenr)
     end
@@ -191,7 +204,7 @@ M.focus = function()
     end
 
     tree.reparent_node(M.calltree_handle, 0, node)
-    M.write_tree()
+    tree.write_tree(M.calltree_handle, M.calltree_buf)
 end
 
 -- switch handler is the call_hierarchy handler
@@ -231,7 +244,7 @@ local function ch_switch_handler(direction)
         -- tree (will open the calltree ui if necessary).
         tree.add_node(M.calltree_handle, root, children)
 
-        M.write_tree()
+        tree.write_tree(M.calltree_handle, M.calltree_buf)
         vim.api.nvim_buf_set_name(M.calltree_buf, direction_map[direction].buf_name)
     end
 end

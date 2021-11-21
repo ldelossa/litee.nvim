@@ -113,7 +113,8 @@ function M.setup(user_config)
     end
 
    -- setup commands
-   vim.cmd("command! CTOpen        lua require('calltree.ui').open()")
+   vim.cmd("command! CTOpen        lua require('calltree.ui').open_calltree()")
+   vim.cmd("command! STOpen        lua require('calltree.ui').open_symboltree()")
    vim.cmd("command! CTClose       lua require('calltree.ui').close()")
    vim.cmd("command! CTExpand      lua require('calltree.ui').expand()")
    vim.cmd("command! CTCollapse    lua require('calltree.ui').collapse()")
