@@ -58,7 +58,7 @@ M.ch_lsp_handler = function(direction)
         end
 
         tree.add_node(ui.calltree_handle, root, children)
-        ui.write_tree()
+        ui.open_calltree()
     end
 end
 
