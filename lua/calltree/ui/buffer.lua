@@ -34,6 +34,8 @@ function M._setup_buffer(name, buffer_handle)
     vim.api.nvim_buf_set_option(buffer_handle, 'buftype', 'nofile')
     vim.api.nvim_buf_set_option(buffer_handle, 'modifiable', false)
     vim.api.nvim_buf_set_option(buffer_handle, 'swapfile', false)
+    vim.api.nvim_buf_set_option(buffer_handle, 'textwidth', 0)
+    vim.api.nvim_buf_set_option(buffer_handle, 'wrapmargin', 0)
 
     -- au to clear highlights on window close
     vim.cmd("au BufWinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.jumps').set_jump_hl(false)")

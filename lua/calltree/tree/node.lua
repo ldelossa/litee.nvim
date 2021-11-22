@@ -8,10 +8,25 @@ local M = {}
 -- returns:
 --  string - the key
 function M.keyify(node)
-    local key = node.name .. ":"
-        .. node.call_hierarchy_item.uri .. ":"
-        .. node.call_hierarchy_item.range.start.line
-    return key
+    local key = ""
+    if node.document_symbol ~= nil then
+        key = node.document_symbol.name .. ":" ..
+                node.document_symbol.kind .. ":" ..
+                    node.document_symbol.range.start.line
+        return key
+    end
+    if node.symbol ~= nil then
+        key = node.symbol.name .. ":" ..
+                node.symbol.location.uri .. ":" ..
+                    node.symbol.location.range.start.line
+        return key
+    end
+    if node.call_hierarchy_item ~= nil then
+        key = node.call_hierarchy_item.name .. ":" ..
+                node.call_hierarchy_item.uri .. ":" ..
+                    node.call_hierarchy_item.range.start.line
+        return key
+    end
 end
 
 -- new construct a new Node.
@@ -28,7 +43,7 @@ end
 -- kind : string - the kind of symbol this node represents.
 --
 -- references : array of references of the given symbol
-function M.new(name, depth, call_hierarchy_item, references)
+function M.new(name, depth, call_hierarchy_item, references, document_symbol)
     local node = {
         name=name,
         depth=depth,
@@ -36,7 +51,11 @@ function M.new(name, depth, call_hierarchy_item, references)
         references=references,
         children={},
         expanded=false,
-        symbol=nil
+        symbol=nil,
+        document_symbol=document_symbol,
+        -- if the node is a document_symbol this field will be present
+        -- containing the document uri the symbol belongs to.
+        uri=""
     }
     node.key = M.keyify(node)
     return node

@@ -4,7 +4,8 @@ local M = {}
 
 local direction_map = {
     from = "Incoming Calls: ",
-    to   = "Outgoing Calls: "
+    to   = "Outgoing Calls: ",
+    symboltree   = nil
 }
 
 local float_win = nil
@@ -27,10 +28,8 @@ end
 -- direction : string - the current direction of the call tree
 -- must be "to" or "from"
 --
--- calltree_buffer : buffer_handle - the buffer_handle for the
--- current calltree.
-function M.details_popup(node, direction, calltree_buffer)
-    local buf = vim.api.nvim_create_buf(false, false)
+function M.details_popup(node, direction)
+    local buf = vim.api.nvim_create_buf(false, true)
     if buf == 0 then
         vim.api.nvim_err_writeln("details_popup: could not create details buffer")
         return
@@ -38,27 +37,31 @@ function M.details_popup(node, direction, calltree_buffer)
     vim.api.nvim_buf_set_option(buf, 'bufhidden', 'delete')
     vim.api.nvim_buf_set_option(buf, 'syntax', 'yaml')
 
+    local name = node.name
+    local kind = lsp_util.resolve_symbol_kind(node)
+    local calltree_children = nil; calltree_children = (function() if direction_map[direction] ~= nil then return #node.children end end)()
+    local references = nil; references = (function() if node.references ~= nil then return #node.references end end)()
+    local file = lsp_util.resolve_file_path(node)
+    local detail = lsp_util.resolve_detail(node)
+
+
     local lines = {}
     table.insert(lines, "==Symbol Details==")
     table.insert(lines, "Name: " .. node.name)
-    table.insert(lines, "Kind: " .. vim.lsp.protocol.SymbolKind[node.call_hierarchy_item.kind])
-
-    if node.expanded then
-        table.insert(lines, direction_map[direction] .. #node.children)
+    if kind ~= nil then
+        table.insert(lines, "Kind: " .. kind)
     end
-
+    if node.expanded and calltree_children ~= nil then
+        table.insert(lines, direction_map[direction] .. calltree_children)
+    end
     if node.references ~= nil then
-        table.insert(lines, "References: " .. #node.references)
+        table.insert(lines, "References: " .. references)
     end
-
-    table.insert(lines, "File: " .. lsp_util.relative_path_from_uri(node.call_hierarchy_item.uri))
-
-    if node.call_hierarchy_item.detail ~= nil then
-        table.insert(lines, "Details: " .. node.call_hierarchy_item.detail)
+    if file ~= nil then
+        table.insert(lines, "File: " .. file)
     end
-
-    if node.call_hierarchy_item.data ~= nil then
-        table.insert(lines, "Data: " .. node.call_hierarchy_item.data)
+    if detail ~= nil then
+        table.insert(lines, "Details: " .. detail)
     end
 
     local width = 20
@@ -82,7 +85,6 @@ function M.details_popup(node, direction, calltree_buffer)
             }
     )
     float_win = vim.api.nvim_open_win(buf, false, popup_conf)
-    vim.api.nvim_win_set_option(float_win, 'winhighlight', 'NormalFloat:Normal')
 end
 
 return M
