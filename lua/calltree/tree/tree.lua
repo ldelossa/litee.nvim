@@ -25,7 +25,7 @@ function M.new_tree(kind)
 end
 
 function M.get_tree(handle)
-    return reg[handle].root
+    return reg[handle]
 end
 
 -- recursive_dpt_compute traverses the tree
@@ -51,7 +51,16 @@ local function _refresh_dpt(tree)
     _recursive_dpt_compute(tree, reg[tree].root)
 end
 
-function M.add_node(tree, parent, children)
+function M.add_node(tree, parent, children, external)
+    -- external nodes are roots of trees built externally
+    -- if this is true set the tree's root to the incoming parent
+    -- and immediately return
+    if external then
+        reg[tree].root = parent
+        _refresh_dpt(tree)
+        return
+    end
+
     -- if depth is 0 we are creating a new call tree.
     if parent.depth == 0 then
         reg[tree].root = parent
@@ -92,7 +101,7 @@ function M.add_node(tree, parent, children)
 end
 
 M.write_tree = function(tree, buf)
-    marshal.marshal_tree(buf, {}, reg[tree].root)
+    marshal.marshal_tree(buf, {}, reg[tree].root, tree)
     return buf
 end
 
