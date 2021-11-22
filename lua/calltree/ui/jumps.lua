@@ -1,4 +1,5 @@
 local ct = require('calltree')
+local lsp_util = require('calltree.lsp.util')
 
 local M = {}
 
@@ -36,9 +37,9 @@ function M.jump_neighbor(location, layout, node)
         elseif layout == "right" then
             vim.cmd("topleft vsplit")
         elseif layout == "top" then
-            vim.cmd("botleft split")
+            vim.cmd("topleft split")
         elseif layout == "bottom" then
-            vim.cmd("botleft split")
+            vim.cmd("topleft split")
         end
     end
     vim.lsp.util.jump_to_location(location)
@@ -64,10 +65,16 @@ end
 function M.jump_invoking(location, win_handle, node)
     M.set_jump_hl(false, nil)
     if not vim.api.nvim_win_is_valid(win_handle) then
-        -- invoking window is gone, split yourself and use
-        -- that to jump as a fallback
-        vim.cmd('botright vsplit')
-        vim.cmd('wincmd l')
+        if layout == "left" then
+            vim.cmd("botright vsplit")
+        elseif layout == "right" then
+            vim.cmd("topleft vsplit")
+        elseif layout == "top" then
+            vim.cmd("topleft split")
+        elseif layout == "bottom" then
+            print("doint a split")
+            vim.cmd("topleft split")
+        end
         win_handle = vim.api.nvim_get_current_win()
     end
     vim.api.nvim_set_current_win(win_handle)
@@ -97,8 +104,14 @@ function M.set_jump_hl(set, node)
     end
 
     M.last_highlighted_buffer = vim.api.nvim_get_current_buf()
+
     -- set highlght for function itself
-    local range = node.call_hierarchy_item.range
+    location = lsp_util.resolve_location(node)
+    if location == nil then
+        return
+    end
+    range = location.range
+
     vim.api.nvim_buf_add_highlight(
         M.last_highlighted_buffer,
         M.jump_higlight_ns,

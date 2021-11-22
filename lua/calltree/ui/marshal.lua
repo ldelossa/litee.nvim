@@ -34,12 +34,25 @@ function M.marshal_node(node)
     -- fallback to callhierarchy object details.
     local name = ""
     local kind = ""
+    local detail = ""
     if node.symbol ~= nil then
         name = node.symbol.name
         kind = vim.lsp.protocol.SymbolKind[node.symbol.kind]
-    else
+        detail = lsp_util.relative_path_from_uri(node.symbol.location.uri)
+    elseif node.document_symbol ~= nil then
+        name = node.document_symbol.name
+        kind = vim.lsp.protocol.SymbolKind[node.document_symbol.kind]
+        if node.document_symbol.detail ~= nil then
+            detail = node.document_symbol.detail
+        end
+    elseif node.call_hierarchy_item then
         name = node.name
-        kind = vim.lsp.protocol.SymbolKind[node.kind]
+        kind = vim.lsp.protocol.SymbolKind[node.call_hierarchy_item.kind]
+        detail = lsp_util.relative_path_from_uri(node.call_hierarchy_item.uri)
+    end
+    local icon = ""
+    if kind ~= "" then
+        icon = ct.active_icon_set[kind]
     end
 
     -- add spacing up to node's depth
@@ -50,22 +63,14 @@ function M.marshal_node(node)
     -- ▶ Func1
     str = str .. glyph
     if ct.config.icons ~= "none" then
-        -- ▶ Func1 []
-        str = str .. " " .. "[" .. ct.active_icon_set[kind] .. "]" .. " " .. name .. " "
+        -- ▶   Func1 
+        str = str .. " " .. icon .. "  " .. name .. " "
     else
         -- ▶ Func1 • [Function]
         str = str .. " " .. "[" .. kind .. "]" .. " " .. M.glyphs.separator .. " " .. name .. " "
     end
 
-    if ct.config.layout == "bottom" or 
-        ct.config.layout == "top" then
-        -- now we got all the room in the world, add detail
-        path = lsp_util.relative_path_from_uri(node.call_hierarchy_item.uri)
-        -- ▶ Func1 [] • relative/path/to/file
-        -- or
-        -- ▶ Func1 • [Function] • relative/path/to/file
-        str = str .. M.glyphs.separator .. " " .. path
-    end
+    str = str .. detail
 
     return str
 end
@@ -78,8 +83,8 @@ end
 --
 -- returns:
 --   tree.Node - the marshaled tree.Node table.
-function M.marshal_line(linenr)
-    local node = M.buf_line_map[linenr[1]]
+function M.marshal_line(linenr, tree)
+    local node = M.buf_line_map[tree][linenr[1]]
     return node
 end
 
@@ -92,21 +97,21 @@ end
 -- lines : array of strings - recursive accumlator of marshaled lines.
 -- call this function with an empty array.
 --
--- node : tree.Node - the root node of the tree where marshaling will 
+-- node : tree.Node - the root node of the tree where marshaling will
 -- begin.
-function M.marshal_tree(buf_handle, lines, node)
+function M.marshal_tree(buf_handle, lines, node, tree)
     if node.depth == 0 then
         -- create a new line mapping
-        buf_line_map = {}
+        M.buf_line_map[tree] = {}
     end
     table.insert(lines, M.marshal_node(node))
-    M.buf_line_map[#lines] = node
+    M.buf_line_map[tree][#lines] = node
 
     -- if we are an expanded node or we are the root (always expand)
     -- recurse
     if node.expanded  or node.depth == 0 then
         for _, child in ipairs(node.children) do
-            M.marshal_tree(buf_handle, lines, child)
+            M.marshal_tree(buf_handle, lines, child, tree)
         end
     end
 

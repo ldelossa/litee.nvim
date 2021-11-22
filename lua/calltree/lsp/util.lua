@@ -1,3 +1,5 @@
+
+local tree_node = require('calltree.tree.node')
 local M = {}
 
 M.multi_client_request = function(clients, method, params, handler, bufnr)
@@ -20,6 +22,96 @@ function M.relative_path_from_uri(uri)
         return uri_path, false
     end
     return vim.fn.substitute(uri_path, cwd .. "/", "", ""), true
+end
+
+function M.resolve_file_path(node) 
+    if node.symbol ~= nil then
+        uri = node.symbol.location.uri
+        return M.relative_path_from_uri(uri)
+    elseif node.call_hierarchy_item ~= nil then
+        uri = node.call_hierarchy_item.uri
+        return M.relative_path_from_uri(uri)
+    elseif node.document_symbol ~= nil then
+        uri = node.uri
+        return M.relative_path_from_uri(uri)
+    else
+        return nil
+    end
+
+end
+
+function M.resolve_location(node)
+    local location = nil
+    if node.symbol ~= nil then
+        location = node.symbol.location
+    elseif node.call_hierarchy_item ~= nil then
+        location = {
+            uri = node.call_hierarchy_item.uri,
+            range = node.call_hierarchy_item.range
+        }
+    elseif node.document_symbol ~= nil then
+        location = {
+            uri = node.uri,
+            range = node.document_symbol.selectionRange
+        }
+    end
+    return location
+end
+
+function M.resolve_hover_params(node)
+    local params = {}
+    if node.symbol ~= nil then
+        params.textDocument = {
+            uri = node.symbol.location.uri
+        }
+        params.position = {
+            line = node.symbol.location.range.start.line,
+            character = node.symbol.location.range.start.character
+        }
+    elseif node.call_hierarchy_item ~= nil then
+        params.textDocument = {
+            uri = node.call_hierarchy_item.uri
+        }
+        params.position = {
+            line = node.call_hierarchy_item.range.start.line,
+            character = node.call_hierarchy_item.range.start.character
+        }
+    elseif node.document_symbol ~= nil then
+        params.textDocument = {
+            uri = node.uri
+        }
+        params.position = {
+            line = node.document_symbol.selectionRange.start.line,
+            character = node.document_symbol.selectionRange.start.character
+        }
+    else
+        return nil
+    end
+    return params
+end
+
+function M.resolve_symbol_kind(node)
+    if node.symbol ~= nil then
+        return vim.lsp.protocol.SymbolKind[node.symbol.kind]
+    elseif node.call_hierarchy_item ~= nil then
+        return vim.lsp.protocol.SymbolKind[node.call_hierarchy_item.kind]
+    elseif node.document_symbol ~= nil then
+        return vim.lsp.protocol.SymbolKind[node.document_symbol.kind]
+    else
+        return nil
+    end
+end
+
+function M.resolve_detail(node)
+    if node.symbol ~= nil then
+        return node.symbol.detail
+    elseif node.call_hierarchy_item ~= nil then
+        return node.call_hierarchy_item.detail
+    elseif node.document_symbol ~= nil then
+        return node.document_symbol.detail
+    else
+        return nil
+    end
 end
 
 -- symbol_from_node attempts to extract the workspace
@@ -64,6 +156,41 @@ function M.symbol_from_node(clients, node, bufnr)
         ::continue::
     end
     return nil
+end
+
+function M.build_recursive_symbol_tree(depth, document_symbol, parent, prev_depth_table)
+        local node = tree_node.new(
+            document_symbol.name,
+            depth,
+            nil,
+            nil,
+            document_symbol
+        )
+        if parent == nil then
+            -- if no parent the document_symbol is our synthetic one and carries the uri
+            -- which will be recursively added to all children nodes in the document symboltree.
+            node.uri = document_symbol.uri
+        end
+        -- if we have a previous depth table search it for an old reference of self
+        -- and set expanded state correctly.
+        if prev_depth_table ~= nil and prev_depth_table[depth] ~= nil then
+            for _, child in ipairs(prev_depth_table[depth]) do
+                if child.key == node.key then
+                    node.expanded = child.expanded
+                end
+            end
+        end
+        if parent ~= nil then
+            -- the parent will be carrying the uri for the document symbol tree we are building.
+            node.uri = parent.uri
+            table.insert(parent.children, node)
+        end
+        if document_symbol.children ~= nil then
+            for _, child_document_symbol in ipairs(document_symbol.children) do
+            M.build_recursive_symbol_tree(depth+1, child_document_symbol, node, prev_depth_table)
+            end
+        end
+        return node
 end
 
 return M

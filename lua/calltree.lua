@@ -12,6 +12,8 @@ M.nerd = {
     Class = "ﴯ",
     Interface = "",
     Module = "",
+    Namespace = "",
+    Object = "",
     Property = "ﰠ",
     Unit = "塞",
     Value = "",
@@ -33,13 +35,15 @@ M.nerd = {
 M.codicons = {
     Text = "",
     Method = "",
-    Function = "",
+    Function = "",
     Constructor = "",
     Field = "",
     Variable = "",
     Class = "",
     Interface = "",
     Module = "",
+    Namespace = "",
+    Object = "",
     Property = "",
     Unit = "",
     Value = "",
@@ -79,6 +83,12 @@ function M.setup(user_config)
     vim.lsp.handlers['callHierarchy/outgoingCalls'] = vim.lsp.with(
                 require('calltree.lsp.handlers').ch_lsp_handler("to"), {}
     )
+    vim.lsp.handlers['textDocument/documentSymbol'] = vim.lsp.with(
+                require('calltree.lsp.handlers').ws_lsp_handler(), {}
+    )
+
+    -- autocommand for updating outline view
+    -- vim.cmd([[au TextChanged,BufEnter,BufWritePost * lua require('calltree.ui').refresh_symbol_tree()]])
 
     -- merge config
     if user_config ~= nil then
@@ -115,7 +125,8 @@ function M.setup(user_config)
    -- setup commands
    vim.cmd("command! CTOpen        lua require('calltree.ui').open_calltree()")
    vim.cmd("command! STOpen        lua require('calltree.ui').open_symboltree()")
-   vim.cmd("command! CTClose       lua require('calltree.ui').close()")
+   vim.cmd("command! CTClose       lua require('calltree.ui').close_calltree()")
+   vim.cmd("command! STClose       lua require('calltree.ui').close_symboltree()")
    vim.cmd("command! CTExpand      lua require('calltree.ui').expand()")
    vim.cmd("command! CTCollapse    lua require('calltree.ui').collapse()")
    vim.cmd("command! CTSwitch      lua require('calltree.ui').switch_direction()")
