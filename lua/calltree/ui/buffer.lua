@@ -1,5 +1,9 @@
 local M = {}
 
+-- close_all_popups is a convenience function to close any
+-- popup windows associated with calltree buffers.
+--
+-- used as an autocommand on cursor move.
 function M.close_all_popups()
     require('calltree.ui.hover').close_hover_popup()
     require('calltree.ui.details').close_details_popup()
@@ -14,9 +18,12 @@ end
 -- buffer_handle : int - previous calltree buffer
 -- or nil
 --
+-- tab : tabpage_handle - a handle to the tab the provided
+-- buffer exists on. used to break buffer name conflicts betwee
+-- tabs.
+--
 -- returns:
---  buffer_handle : int - handle to a valid calltree
---  buffer.
+--  buffer_handle : int - handle to a valid buffer.
 function M._setup_buffer(name, buffer_handle, tab)
     if buffer_handle == nil or not vim.api.nvim_buf_is_valid(buffer_handle) then
         local buf = vim.api.nvim_create_buf(false, false)

@@ -66,6 +66,7 @@ M.codicons = {
 M.config = {
     layout = "left",
     layout_size = 30,
+    auto_open = false,
     jump_mode = "invoking",
     icons = "none",
     symbol_hl = "Search",
@@ -87,9 +88,6 @@ function M.setup(user_config)
                 require('calltree.lsp.handlers').ws_lsp_handler(), {}
     )
 
-    -- autocommand for updating outline view
-    vim.cmd([[au TextChanged,BufEnter,BufWritePost * lua require('calltree.ui').refresh_symbol_tree()]])
-
     -- merge config
     if user_config ~= nil then
         for k, v in pairs(user_config) do
@@ -98,10 +96,10 @@ function M.setup(user_config)
     end
 
     -- sanatize the config
-    if (M.config.layout ~= "left") 
-        and (M.config.layout ~= "right") 
+    if (M.config.layout ~= "left")
+        and (M.config.layout ~= "right")
         and (M.config.layout ~= "top")
-        and (M.config.layout ~= "bottom") 
+        and (M.config.layout ~= "bottom")
     then
         M.config.layout = "left"
     end
@@ -121,6 +119,15 @@ function M.setup(user_config)
             M.active_icon_set = M.nerd
         end
     end
+
+    -- automatically open the ui elements on buf enters.
+    if M.config.auto_open then
+        vim.cmd([[au BufEnter * lua require('calltree.ui').open_calltree()]])
+        vim.cmd([[au BufEnter * lua require('calltree.ui').open_symboltree()]])
+    end
+
+    -- will keep the outline view up to date when moving around buffers.
+    vim.cmd([[au TextChanged,BufEnter,BufWritePost * lua require('calltree.ui').refresh_symbol_tree()]])
 
    -- setup commands
    vim.cmd("command! CTOpen        lua require('calltree.ui').open_calltree()")

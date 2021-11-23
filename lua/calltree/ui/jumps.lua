@@ -1,4 +1,4 @@
-local ct = require('calltree')
+local config = require('calltree').config
 local lsp_util = require('calltree.lsp.util')
 
 local M = {}
@@ -55,7 +55,7 @@ end
 -- location : table - an LSP location object usable by
 -- lsp.jump_to_location
 --
--- win_handle : window_handle - the previous invoking window 
+-- win_handle : window_handle - the previous invoking window
 -- handle.
 --
 -- node : tree.Node - the node being highlighted
@@ -65,13 +65,13 @@ end
 function M.jump_invoking(location, win_handle, node)
     M.set_jump_hl(false, nil)
     if not vim.api.nvim_win_is_valid(win_handle) then
-        if layout == "left" then
+        if config.layout == "left" then
             vim.cmd("botright vsplit")
-        elseif layout == "right" then
+        elseif config.layout == "right" then
             vim.cmd("topleft vsplit")
-        elseif layout == "top" then
+        elseif config.layout == "top" then
             vim.cmd("topleft split")
-        elseif layout == "bottom" then
+        elseif config.layout == "bottom" then
             vim.cmd("topleft split")
         end
         win_handle = vim.api.nvim_get_current_win()
@@ -82,10 +82,10 @@ function M.jump_invoking(location, win_handle, node)
     return win_handle
 end
 
--- set_jump_hl will highlight the symbol and 
+-- set_jump_hl will highlight the symbol and
 -- any references to the symbol if set == true.
 --
--- set : bool - if false highlights any previously created 
+-- set : bool - if false highlights any previously created
 -- jump highlights will be removed.
 --
 -- node : tree.Node - the node being highlighted
@@ -105,16 +105,16 @@ function M.set_jump_hl(set, node)
     M.last_highlighted_buffer = vim.api.nvim_get_current_buf()
 
     -- set highlght for function itself
-    location = lsp_util.resolve_location(node)
+    local location = lsp_util.resolve_location(node)
     if location == nil then
         return
     end
-    range = location.range
+    local range = location.range
 
     vim.api.nvim_buf_add_highlight(
         M.last_highlighted_buffer,
         M.jump_higlight_ns,
-        ct.config.symbol_hl,
+        config.symbol_hl,
         range["start"].line,
         range["start"].character,
         range["end"].character
@@ -125,7 +125,7 @@ function M.set_jump_hl(set, node)
             vim.api.nvim_buf_add_highlight(
                 M.last_highlighted_buffer,
                 M.jump_higlight_ns,
-                ct.config.symbol_refs_hl,
+                config.symbol_refs_hl,
                 ref["start"].line,
                 ref["start"].character,
                 ref["end"].character

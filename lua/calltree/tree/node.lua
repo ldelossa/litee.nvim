@@ -37,12 +37,14 @@ end
 -- depth : int - the depth at which this node will exist
 -- in the tree.
 --
--- call_hierarchy_obj : table - the incoming or outgoing
--- call hierarchy object per the LSP spec.
+-- call_hierarchy_item : table - the incoming or outgoing
+-- call hierarchy object per the LSP spec. this is the "item" field of a
+-- textDocument/[incoming|outgoing]Calls  response.
 --
--- kind : string - the kind of symbol this node represents.
+-- references : array - references of the given symbol. this field is the fromRanges
+-- field of a call_hierarchy response datastructure hoisted up to the top level of he node.
 --
--- references : array of references of the given symbol
+-- document_symbol : table 
 function M.new(name, depth, call_hierarchy_item, references, document_symbol)
     local node = {
         name=name,
@@ -55,6 +57,8 @@ function M.new(name, depth, call_hierarchy_item, references, document_symbol)
         document_symbol=document_symbol,
         -- if the node is a document_symbol this field will be present
         -- containing the document uri the symbol belongs to.
+        --
+        -- not set until the documentSymbol handler is invoked in calltree.lsp.handlers
         uri=""
     }
     node.key = M.keyify(node)

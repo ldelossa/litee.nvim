@@ -12,6 +12,9 @@ function M.close_hover_popup()
     end
 end
 
+-- hover_handle shows hover information for a symbol in a calltree
+-- ui window.
+--
 -- modified from neovim runtime/lua/vim/lsp/handlers.lua
 -- function conforms to client LSP handler signature.
 function M.hover_handler(_, result, ctx, config)
