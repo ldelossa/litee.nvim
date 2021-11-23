@@ -18,20 +18,31 @@ M.ch_lsp_handler = function(direction)
         if result == nil then
             return
         end
+
+        cur_win = vim.api.nvim_get_current_win()
+
+        cur_tabpage = vim.api.nvim_win_get_tabpage(cur_win)
+
+        ui_state = ui.ui_state_registry[cur_tabpage] 
+        if ui_state == nil then
+            ui_state = {}
+            ui.ui_state_registry[cur_tabpage] = ui_state
+        end
+
         -- snag the lsp clients from the buffer issuing the
         -- call hierarchy request
-        ui.active_lsp_clients = vim.lsp.get_active_clients()
+        ui_state.active_lsp_clients = vim.lsp.get_active_clients()
 
         -- tell the ui what direction the call tree is being invoked
         -- with.
-        ui.calltree_dir = direction
+        ui_state.calltree_dir = direction
 
         -- store the window invoking the call tree, jumps will
         -- occur here.
-        ui.invoking_calltree_win = vim.api.nvim_get_current_win()
+        ui_state.invoking_calltree_win = vim.api.nvim_get_current_win()
 
         -- create a new tree
-        ui.calltree_handle = tree.new_tree("calltree")
+        ui_state.calltree_handle = tree.new_tree("calltree")
 
         -- create the root of our call tree, the request which
         -- signaled this response is in ctx.params
@@ -41,7 +52,7 @@ M.ch_lsp_handler = function(direction)
         nil)
 
         -- try to resolve the workspace symbol for root.
-        root.symbol = lsp_util.symbol_from_node(ui.active_lsp_clients, root, ui.invoking_calltree_win)
+        root.symbol = lsp_util.symbol_from_node(ui_state.active_lsp_clients, root, ui_state.invoking_calltree_win)
 
         -- create the root's children nodes via the response array.
         local children = {}
@@ -53,11 +64,11 @@ M.ch_lsp_handler = function(direction)
              call_hierarchy_call.fromRanges
           )
           -- try to resolve the workspace symbol for child
-          child.symbol = lsp_util.symbol_from_node(ui.active_lsp_clients, child, ui.invoking_calltree_win)
+          child.symbol = lsp_util.symbol_from_node(ui_state.active_lsp_clients, child, ui_state.invoking_calltree_win)
           table.insert(children, child)
         end
 
-        tree.add_node(ui.calltree_handle, root, children)
+        tree.add_node(ui_state.calltree_handle, root, children)
         ui.open_calltree()
     end
 end
@@ -70,22 +81,32 @@ M.ws_lsp_handler = function()
         if result == nil then
             return
         end
+
+        cur_win = vim.api.nvim_get_current_win()
+
+        cur_tabpage = vim.api.nvim_win_get_tabpage(cur_win)
+
+        ui_state = ui.ui_state_registry[cur_tabpage] 
+        if ui_state == nil then
+            ui_state = {}
+            ui.ui_state_registry[cur_tabpage] = ui_state
+        end
+
         -- snag the lsp clients from the buffer issuing the
         -- call hierarchy request
-        ui.active_lsp_clients = vim.lsp.get_active_clients()
+        ui_state.active_lsp_clients = vim.lsp.get_active_clients()
 
-        local prev_depth_table = nil
         -- grab the previous depth table if it exists
-        local prev_tree = tree.get_tree(ui.symboltree_handle)
+        local prev_depth_table = nil
+        local prev_tree = tree.get_tree(ui_state.symboltree_handle)
         if prev_tree ~= nil then
             prev_depth_table = prev_tree.depth_table
         end
 
-        ui.invoking_symboltree_win = vim.api.nvim_get_current_win()
-        print(ui.invoking_symboltree_win)
+        ui_state.invoking_symboltree_win = vim.api.nvim_get_current_win()
 
         -- create a new tree
-        ui.symboltree_handle = tree.new_tree("symboltree")
+        ui_state.symboltree_handle = tree.new_tree("symboltree")
 
         -- create a synthetic document symbol to act as a root
         local synthetic_root_ds = {
@@ -96,8 +117,11 @@ M.ws_lsp_handler = function()
             children = result,
             uri = ctx.params.textDocument.uri
         }
+
         local root = lsp_util.build_recursive_symbol_tree(0, synthetic_root_ds, nil, prev_depth_table)
-        tree.add_node(ui.symboltree_handle, root, nil, true)
+
+        tree.add_node(ui_state.symboltree_handle, root, nil, true)
+
         ui.open_symboltree()
     end
 end

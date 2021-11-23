@@ -88,7 +88,7 @@ function M.setup(user_config)
     )
 
     -- autocommand for updating outline view
-    -- vim.cmd([[au TextChanged,BufEnter,BufWritePost * lua require('calltree.ui').refresh_symbol_tree()]])
+    vim.cmd([[au TextChanged,BufEnter,BufWritePost * lua require('calltree.ui').refresh_symbol_tree()]])
 
     -- merge config
     if user_config ~= nil then
