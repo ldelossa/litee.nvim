@@ -8,7 +8,7 @@ local jumps = require('calltree.ui.jumps')
 local deets = require('calltree.ui.details')
 local hover = require('calltree.ui.hover')
 local tree  = require('calltree.tree.tree')
-local tree_node  = require('calltree.tree.node')
+local handlers = require('calltree.handlers')
 
 local M = {}
 
@@ -42,40 +42,15 @@ local direction_map = {
 -- }
 M.ui_state_registry = {}
 
--- the global calltree buffer
-M.calltree_buf = nil
--- handle to our calltree tree
--- see calltree.tree.tree
-M.calltree_handle = nil
--- the global calltree window
-M.calltree_win = nil
--- the last tabpage our calltree ui was on
-M.calltree_tab = nil
--- direction of calltree (incoming(from)/outgoing(to))
-M.calltree_dir = "empty"
--- the window in which the calltree was invoked.
-M.invoking_calltree_win = nil
-
--- the global symboltree buffer
-M.symboltree_buf = nil
--- handle to our symboltree tree
--- see calltree.tree.tree
-M.symboltree_handle = nil
--- the global symboltree window
-M.symboltree_win = nil
--- the last tabpage our symboltree ui was on
-M.symboltree_tab = nil
--- the window in which the calltree was invoked.
-M.invoking_symboltree_win = nil
-
--- the active lsp clients which invoked the calltree
-M.active_lsp_clients = nil
--- the buffer switched to when the user asks for help
-M.help_buf = nil
-
--- obtains the tree type for the given buffer.
+-- obtains the tree type for the given buffer and tab,
+--
+-- tab : tabpage_handle - the tabpage where the calltree ui
+-- buffer exists.
+--
+-- buf : buffer_handle - the calltree ui buffer to retrieve
+-- the type for.
 M.get_type_from_buf = function(tab, buf)
-    ui_state = M.ui_state_registry[tab]
+    local ui_state = M.ui_state_registry[tab]
     if buf == ui_state.calltree_buf then
         return "calltree"
     end
@@ -85,9 +60,15 @@ M.get_type_from_buf = function(tab, buf)
     return nil
 end
 
--- obtains the tree handle for a given buffer.
+-- obtains the tree handle for a given buffer and tab.
+--
+-- tab : tabpage_handle - the tabpage where the calltree ui
+-- buffer exists.
+--
+-- buf : buffer_handle - the calltree ui buffer to retrieve
+-- the type for.
 M.get_tree_from_buf = function(tab, buf)
-    ui_state = M.ui_state_registry[tab]
+    local ui_state = M.ui_state_registry[tab]
     local type = M.get_type_from_buf(tab, buf)
     if type == "calltree" then
         return ui_state.calltree_handle
@@ -97,6 +78,10 @@ M.get_tree_from_buf = function(tab, buf)
     end
 end
 
+-- a buffer with help contents that will be swapped into
+-- a calltree window when requested.
+M.help_buf = nil
+
 -- help opens the help buffer in the current calltree window
 -- if it exists.
 --
@@ -104,24 +89,30 @@ end
 -- closing really means, swap the calltree window to the
 -- outline buffer.
 M.help = function(open)
-    if
-        not vim.api.nvim_win_is_valid(M.calltree_win) or
-        M.calltree_win == nil or
-        not vim.api.nvim_buf_is_valid(M.calltree_buf) or
-        M.calltree_buf == nil
-    then
+    local win    = vim.api.nvim_get_current_win()
+    local tab    = vim.api.nvim_win_get_tabpage(win)
+    local ui_state  = M.ui_state_registry[tab]
+    if ui_state == nil then
         return
     end
     if not open then
-        vim.api.nvim_win_set_buf(M.calltree_win, M.calltree_buf)
+        if ui_state.calltree_win == win then
+            vim.api.nvim_win_set_buf(win, ui_state.calltree_buf)
+        elseif ui_state.symboltree_win == win then
+            vim.api.nvim_win_set_buf(win, ui_state.symboltree_buf)
+        end
         return
     end
     M.help_buf =
         help_buf._setup_help_buffer(M.help_buf)
-    vim.api.nvim_win_set_buf(M.calltree_win, M.help_buf)
+    vim.api.nvim_win_set_buf(win, M.help_buf)
 end
 
--- open_calltree will open the call tree ui
+-- open_calltree will open a calltree ui in the current tab.
+--
+-- if a valid tree handle and buffer exists in the tab's calltree
+-- state then the tree will be written to the buffer before opening
+-- the window.
 M.open_calltree = function()
     local win    = vim.api.nvim_get_current_win()
     local tab    = vim.api.nvim_win_get_tabpage(win)
@@ -146,7 +137,7 @@ M.open_calltree = function()
     ui_win._open_window("calltree", ui_state)
 end
 
--- close will close the call tree ui
+-- close will close the calltree ui in the current tab.
 M.close_calltree = function()
     local win    = vim.api.nvim_get_current_win()
     local tab    = vim.api.nvim_win_get_tabpage(win)
@@ -159,7 +150,11 @@ M.close_calltree = function()
     M.calltree_win = nil
 end
 
--- open_symboltree will open the symboltree ui
+-- open_symboltree will open a symboltree ui in the current tab.
+--
+-- if a valid tree handle and buffer exists in the tab's calltree
+-- state then the tree will be written to the buffer before opening
+-- the window.
 M.open_symboltree = function()
     local win    = vim.api.nvim_get_current_win()
     local tab    = vim.api.nvim_win_get_tabpage(win)
@@ -178,6 +173,11 @@ M.open_symboltree = function()
     ui_win._open_window("symboltree", ui_state)
 end
 
+-- refresh_symbol_tree is used as an autocommand and
+-- keeps the symboltree outline live while moving around
+-- buffers in a given tab.
+--
+-- autocommand is set in the calltree.lua module.
 M.refresh_symbol_tree = function()
     local win    = vim.api.nvim_get_current_win()
     local tab    = vim.api.nvim_win_get_tabpage(win)
@@ -186,12 +186,16 @@ M.refresh_symbol_tree = function()
         return
     end
 
-    if ui_state.symboltree_win ~= nil and
-        vim.api.nvim_win_is_valid(ui_state.symboltree_win) then
+    if
+        ui_state.symboltree_win ~= nil and
+        vim.api.nvim_win_is_valid(ui_state.symboltree_win)
+        and #vim.lsp.get_active_clients() > 0
+    then
         vim.lsp.buf.document_symbol()
     end
 end
 
+-- close_symboltree will close the symboltree ui in the current tab.
 M.close_symboltree = function()
     local win    = vim.api.nvim_get_current_win()
     local tab    = vim.api.nvim_win_get_tabpage(win)
@@ -234,49 +238,6 @@ M.collapse = function()
     end
 end
 
--- ch_expand_handler is the call_hierarchy handler
--- when expanding an existing node in the calltree.
---
--- node : tree.Node - the node being expanded
---
--- linenr : table - the line the cursor was on in the ui
--- buffer before expand writes to it.
---
--- direction : string - the call hierarchy direction
--- "to" or "from".
-local function calltree_expand_handler(node, linenr, direction, ui_state)
-    return function(err, result, _, _)
-        if err ~= nil then
-            vim.api.nvim_err_writeln(vim.inspect(err))
-            return
-        end
-        if result == nil then
-            -- rewrite the tree still to expand node giving ui
-            -- feedback that no further callers/callees exist
-            tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
-            vim.api.nvim_win_set_cursor(ui_state.calltree_win, linenr)
-            return
-        end
-
-        local children = {}
-        for _, call_hierarchy_call in pairs(result) do
-            local child = tree_node.new(
-                call_hierarchy_call[direction].name,
-                0, -- tree.add_node will compute depth for us
-                call_hierarchy_call[direction],
-                call_hierarchy_call.fromRanges
-            )
-            -- try to resolve the workspace symbol for child
-            child.symbol = lsp_util.symbol_from_node(ui_state.active_lsp_clients, child, ui_state.calltree_buf)
-            table.insert(children, child)
-        end
-
-        tree.add_node(ui_state.calltree_handle, node, children)
-        tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
-        vim.api.nvim_win_set_cursor(ui_state.calltree_win, linenr)
-    end
-end
-
 -- expand will expand a symbol at the current cursor position
 M.expand = function()
     local buf    = vim.api.nvim_get_current_buf()
@@ -306,7 +267,7 @@ M.expand = function()
             ui_state.active_lsp_clients,
             direction_map[ui_state.calltree_dir].method,
             {item = node.call_hierarchy_item},
-            calltree_expand_handler(node, linenr, ui_state.calltree_dir, ui_state),
+            handlers.calltree_expand_handler(node, linenr, ui_state.calltree_dir, ui_state),
             ui_state.calltree_buf
         )
     end
@@ -315,6 +276,8 @@ end
 -- focus will reparent the calltree to the symbol under
 -- the cursor, creating a calltree with the symbol
 -- as root.
+--
+-- the tree must be of type "calltree"
 M.focus = function()
     local buf    = vim.api.nvim_get_current_buf()
     local win    = vim.api.nvim_get_current_win()
@@ -335,48 +298,6 @@ M.focus = function()
 
     tree.reparent_node(ui_state.calltree_handle, 0, node)
     tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
-end
-
--- switch handler is the call_hierarchy handler
--- used when switching directions.
---
--- direction : string - the call hierarchy direction
--- "to" or "from".
-local function ch_switch_handler(direction, ui_state)
-    return function(err, result, ctx, _)
-        if err ~= nil then
-            return
-        end
-        -- create the root of our call tree, the request which
-        -- signaled this response is in ctx.params
-        local root = tree_node.new(ctx.params.item.name,
-        0,
-        ctx.params.item,
-        nil)
-        -- try to resolve the workspace symbol for root
-        root.symbol = lsp_util.symbol_from_node(ui_state.active_lsp_clients, root, ui_state.calltree_buf)
-
-        -- create the root's children nodes via the response array.
-        local children = {}
-        for _, call_hierarchy_call in pairs(result) do
-          local child = tree_node.new(
-             call_hierarchy_call[direction].name,
-             0, -- tree.add_node will set the depth correctly.
-             call_hierarchy_call[direction],
-             call_hierarchy_call.fromRanges
-          )
-          -- try to resolve the workspace symbol for child
-          child.symbol = lsp_util.symbol_from_node(ui_state.active_lsp_clients, child, ui_state.calltree_buf)
-          table.insert(children, child)
-        end
-
-        -- add the new root, its children, and rewrite the
-        -- tree (will open the calltree ui if necessary).
-        tree.add_node(ui_state.calltree_handle, root, children)
-
-        tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
-        vim.api.nvim_buf_set_name(ui_state.calltree_buf, direction_map[direction].buf_name)
-    end
 end
 
 -- switch_direction will focus the symbol under the
@@ -409,7 +330,7 @@ M.switch_direction = function()
         ui_state.active_lsp_clients,
         direction_map[ui_state.calltree_dir].method,
         {item = node.call_hierarchy_item},
-        ch_switch_handler(ui_state.calltree_dir, ui_state),
+        handlers.calltree_switch_handler(ui_state.calltree_dir, ui_state),
         ui_state.calltree_buf
     )
 end
@@ -471,7 +392,13 @@ M.hover = function()
     if params == nil then
         return
     end
-    lsp_util.multi_client_request(ui_state.active_lsp_clients, "textDocument/hover", params, hover.hover_handler, ui_state.calltree_buf)
+    lsp_util.multi_client_request(
+        ui_state.active_lsp_clients,
+        "textDocument/hover",
+        params,
+        hover.hover_handler,
+        ui_state.calltree_buf
+    )
 end
 
 -- details opens a popup window for the given symbol
@@ -498,9 +425,16 @@ M.details = function()
     deets.details_popup(node, direction)
 end
 
+-- dumptree will dump the tree datastructure to a 
+-- buffer for debugging.
+--
+-- must be called when the cursor is in the window of
+-- the tree being dumped.
 M.dump_tree = function()
-    local buf = vim.api.nvim_get_current_buf()
-    local tree_handle = M.get_tree_from_buf(buf)
+    local buf    = vim.api.nvim_get_current_buf()
+    local win    = vim.api.nvim_get_current_win()
+    local tab    = vim.api.nvim_win_get_tabpage(win)
+    local tree_handle = M.get_tree_from_buf(tab, buf)
     if tree_handle == nil then
         return
     end

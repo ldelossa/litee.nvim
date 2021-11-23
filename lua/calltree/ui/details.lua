@@ -8,6 +8,7 @@ local direction_map = {
     symboltree   = nil
 }
 
+-- a singleton float window for a details popup.
 local float_win = nil
 
 -- close_details_popups closes the created popup window
@@ -27,7 +28,6 @@ end
 --
 -- direction : string - the current direction of the call tree
 -- must be "to" or "from"
---
 function M.details_popup(node, direction)
     local buf = vim.api.nvim_create_buf(false, true)
     if buf == 0 then
