@@ -62,14 +62,16 @@ function M.marshal_node(node)
 
     -- ▶ Func1
     str = str .. glyph
+
     if ct.config.icons ~= "none" then
-        -- ▶   Func1 
+        -- ▶   Func1
         str = str .. " " .. icon .. "  " .. name .. " "
     else
-        -- ▶ Func1 • [Function]
+        -- ▶ [Function] Func1 
         str = str .. " " .. "[" .. kind .. "]" .. " " .. M.glyphs.separator .. " " .. name .. " "
     end
 
+    -- ▶   Func1 main.go
     str = str .. detail
 
     return str
@@ -80,6 +82,9 @@ end
 --
 -- linenr : {row,col} - the UI buffer line typically returned by
 -- vim.api.nvim_win_get_cursor(calltree_win_handle)
+--
+-- tree: the handle of the tree we are marshaling the
+-- line from.
 --
 -- returns:
 --   tree.Node - the marshaled tree.Node table.
@@ -97,8 +102,10 @@ end
 -- lines : array of strings - recursive accumlator of marshaled lines.
 -- call this function with an empty array.
 --
--- node : tree.Node - the root node of the tree where marshaling will
+-- node : tree.tree.Node - the root node of the tree where marshaling will
 -- begin.
+--
+-- tree : tree_handle - a handle to a the tree we are marshaling.
 function M.marshal_tree(buf_handle, lines, node, tree)
     if node.depth == 0 then
         -- create a new line mapping

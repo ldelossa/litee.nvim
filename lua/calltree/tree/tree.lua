@@ -15,7 +15,7 @@ local reg = {}
 -- new_tree registers an empty tree and returns
 -- the handle to the caller.
 --
--- kind : "calltree" | "symboltree"
+-- kind : string - "calltree" | "symboltree"
 -- returns:
 --  tree_handle
 function M.new_tree(kind)
@@ -24,12 +24,22 @@ function M.new_tree(kind)
     return handle
 end
 
+-- get_tree takes a call handle and returns a table
+-- representing our tree components.
+--
+-- handle : tree_handle - a valid handle to a tree
+--
+-- returns:
+--  tree : table - a table with our tree componnts,
+-- see "reg" comments above.
 function M.get_tree(handle)
     return reg[handle]
 end
 
 -- recursive_dpt_compute traverses the tree
 -- and flattens it into out depth_table
+--
+-- tree : tree_handle - a handle to a valid tree
 --
 -- node : Node - calltree's root node.
 local function _recursive_dpt_compute(tree, node)
@@ -46,11 +56,32 @@ end
 
 -- _refresh_dpt dumps the current depth_table
 -- and writes a new one.
+--
+-- tree : tree_handle - a handle to a valid tree
 local function _refresh_dpt(tree)
     reg[tree].depth_table = {}
     _recursive_dpt_compute(tree, reg[tree].root)
 end
 
+-- add_node will add a node to the tree pointed to by the
+-- provided tree handle.
+--
+-- tree : tree_handle - a handle to a valid tree
+--
+-- parent : tree.tree.Node - the parent of the subtree being
+-- added. the parent's "depth" field is significant. setting it to
+-- 0 will throw away the current root and create a new tree.
+-- See usages of this function to understand how depth can be safely
+-- set.
+--
+--
+-- children : tree.tree.Node array - the children of the parent.
+-- the child's depth field has no significant and can be computed
+-- from the parent's.
+--
+-- external : bool - if true an entire tree has been built externally
+-- and the root will be added to the tree without any modifications.
+-- the children param has no significance in this scenario.
 function M.add_node(tree, parent, children, external)
     -- external nodes are roots of trees built externally
     -- if this is true set the tree's root to the incoming parent
@@ -139,6 +170,8 @@ end
 --
 -- the subtree from node down is preserved.
 --
+-- tree : tree_handle - a handle to a valid tree
+--
 -- depth : int  - indicator of the incoming node's depth
 --                useful for understanding when recursion is done.
 -- node  : Node - the Node object being reparented.
@@ -162,6 +195,10 @@ function M.reparent_node(tree, depth, node)
     end
 end
 
+-- dump_tree will dump the tree data structure to a
+-- buffer for debugging.
+--
+-- tree : tree_handle - a handle to a valid tree
 function M.dump_tree(tree)
     local buf = vim.api.nvim_create_buf(true, false)
     vim.api.nvim_buf_set_name(buf, "calltree-dump")

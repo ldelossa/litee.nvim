@@ -1,4 +1,3 @@
-
 local tree_node = require('calltree.tree.node')
 local M = {}
 

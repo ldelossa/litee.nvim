@@ -28,7 +28,7 @@ INTRODUCTION                                                        *calltree-in
 Calltree is a simple plugin which adds the missing "call-hierarchy" tool
 found in IDEs such as Pycharm and VSCode. 
 
-A "call-hierarchy" tool creates a tree view of incoming (callers) or outging
+A "call-hierarchy" tool creates a tree view of incoming (callers) or outgoing
 (callees) for a given symbol.
 
 From there you can drive down further, discovering "callers-of-callers" or
@@ -40,9 +40,9 @@ Usage                                                               *calltree-us
 Calltree's entry point is the "calltree.lsp.handlers.ch_lsp_handler" function. 
 
 This function returns a handler suitable for usage in neovim's LSP handler
-dicationary.
+table.
 
-While the setup function will hijack the handlers dict for you, you can also do this 
+While the setup function will hijack the handlers table for you, you can also do this 
 manually like so:
 
     vim.lsp.handlers['callHierarchy/incomingCalls'] = vim.lsp.with(
@@ -51,8 +51,11 @@ manually like so:
     vim.lsp.handlers['callHierarchy/outgoingCalls'] = vim.lsp.with(
                 require('calltree.lsp.handlers').ch_lsp_handler("to"), {}
     )
+    vim.lsp.handlers['textDocument/documentSymbol'] = vim.lsp.with(
+                require('calltree.lsp.handlers').ws_lsp_handler(), {}
+    )
 
-This is what the "callsigns.setup()" function does.
+This is what the "calltree.setup()" function does.
 
 Once the calltree handlers are in place issuing the normal "vim.lsp.buf.incoming_calls" 
 and "vim.lsp.buf.outgoing_calls" will open the calltree window.
@@ -71,6 +74,14 @@ Calltree exports several commands for manipulating the calltree UI.
                                                                           *:CTClose*       
 :CTClose       
     Closes the calltree window
+                                                                           *:STOpen*
+:STOpen                                         
+    Open the symboltree window with the most recent outline tree present. 
+
+                                                                          *:STClose*       
+:STClose       
+    Closes the symboltree window
+
 
                                                                          *:CTExpand*
 :CTExpand      
@@ -143,7 +154,7 @@ The default buffer mapping is set via lua and should feel familiar if you use vi
 ====================================================================================
 CONFIG                                                             *calltree-config*
 
-To configure calltree you can pass the a config table to "require('calltree').setup(config)".
+To configure calltree you can pass a config table to "require('calltree').setup(config)".
 You only need to specify the fields you wish to override.
 
 The config table is described below:
@@ -163,6 +174,8 @@ The config table is described below:
         -- int              - An integer used in the initial "resize" command for
         --                    the ui. 
         layout_size = 30,
+        -- whether to automatically open the calltree and symboltree ui on start.
+        auto_open = false,
         -- the method used when jumping to a symbol in the calltree 
         -- "invoking"       - Jumping to a symbol will use the window which the calltree
         --                    was initially invoked from.
