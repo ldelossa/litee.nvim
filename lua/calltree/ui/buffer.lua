@@ -17,18 +17,21 @@ end
 -- returns:
 --  buffer_handle : int - handle to a valid calltree
 --  buffer.
-function M._setup_buffer(name, buffer_handle)
-    if buffer_handle == nil then
+function M._setup_buffer(name, buffer_handle, tab)
+    if buffer_handle == nil or not vim.api.nvim_buf_is_valid(buffer_handle) then
         local buf = vim.api.nvim_create_buf(false, false)
         if buf == 0 then
             vim.api.nvim_err_writeln("ui.buffer: buffer create failed")
             return
         end
         buffer_handle = buf
+    else
+        -- we have  valid buffer on the requested tab.
+        return buffer_handle
     end
 
     -- set buf options
-    vim.api.nvim_buf_set_name(buffer_handle, name)
+    vim.api.nvim_buf_set_name(buffer_handle, name .. ":" .. tab)
     vim.api.nvim_buf_set_option(buffer_handle, 'bufhidden', 'hide')
     vim.api.nvim_buf_set_option(buffer_handle, 'filetype', 'Calltree')
     vim.api.nvim_buf_set_option(buffer_handle, 'buftype', 'nofile')

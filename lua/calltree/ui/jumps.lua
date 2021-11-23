@@ -72,7 +72,6 @@ function M.jump_invoking(location, win_handle, node)
         elseif layout == "top" then
             vim.cmd("topleft split")
         elseif layout == "bottom" then
-            print("doint a split")
             vim.cmd("topleft split")
         end
         win_handle = vim.api.nvim_get_current_win()
