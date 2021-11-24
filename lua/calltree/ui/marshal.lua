@@ -20,7 +20,9 @@ M.buf_line_map = {}
 -- a buffer line.
 --
 -- returns:
---    string - the marshalled string
+--    string - a string for the collapsed or expanded symbol name
+--    table  - a virt_text chunk that can be passed directly to 
+-- vim.api.nvim_buf_set_extmark() via the virt_text option.
 function M.marshal_node(node)
     local str = ""
     local glyph
@@ -71,9 +73,7 @@ function M.marshal_node(node)
         str = str .. " " .. "[" .. kind .. "]" .. " " .. M.glyphs.separator .. " " .. name
     end
 
-    --[[ -- ▶   Func1 main.go
-    str = str .. detail ]]
-
+    -- return detail as virtual text chunk. 
     return str, {{detail, ct.hls.SymbolDetailHL}}
 end
 

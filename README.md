@@ -101,9 +101,9 @@ You'll need a patched font for them to work correctly. see (h: calltree-config)
 
 ## Symbol Outline
 
-Because the tree module can be used for symbols as well calltree implements a live symbol outline of the given buffer as well.
+Because the tree module can be used for symbols as well calltree implements a live symbol outline of the focused buffer.
 
-Expanding and collapsing codes is done with the same commands as the call hierarchy tree. 
+Expanding and collapsing nodes is done with the same commands as the call hierarchy tree. 
 
 The UI works together and will always ensure a static layout with call hierarchy on top/left and symbols on bottom/right.
 

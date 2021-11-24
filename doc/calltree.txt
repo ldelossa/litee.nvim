@@ -191,21 +191,19 @@ The config table is described below:
         -- "nerd"           - Use Nerd font icon set for symbol types (requires patched font)
         -- "codicon"        - Use VSCode codicon icon set for symbol types (requires patched font)
         icons = "none",
-        -- the highlight group used for highlighting the symbol being jumped too.
-        symbol_hl = "Search",
-        -- the highlight group used for highlighting the references to the symbol
-        -- being jumped to.
-        symbol_refs_hl = "Search",
         -- user provided icon highlight overrides. 
-        -- see *calltree-highlights*
+        -- see *calltree-icon-highlights*
         icon_highlights = {}
+        -- user provided UI highlights.
+        -- see *calltree-ui-highlights*
+        hls = {}
     }
 
 ====================================================================================
 HIGHLIGHTS                                                     *calltree-highlights*
 
                                                           *calltree-icon-highlights*
-Each icon in the calltree UI can have it's own highlight applied to it. 
+Each icon in the calltree UI can have its own highlight applied to it. 
 
 By default the following highlight groups will be used for each icon type:
 
@@ -263,10 +261,10 @@ For example:
         }
     })
 
-Will higlight file icons in the calltree UI using "MyFileIconHL" and highlight all others with the
+Will highlight "File" icons in the calltree UI using "MyFileIconHL" and highlight all others with the
 default "CT*" highlight group defined above.
 
-Individuals who are using tree-sitter highlights across the board should provide this table to the setup function:
+Individuals who are using tree-sitter highlights across the board (you're using a tree-sitter color scheme) should provide this table to the setup function:
 
     M.icon_hls = {
         Folder = "TSNamespace",
@@ -323,8 +321,7 @@ M.hls = {
 
 The usage is similar to the icon highlights but are specified by supplying a "hls" table within the config supplied to calltree's setup function.
 
-List of unique highlights:
-
+List of all unique highlights:
     -- ui
     hi CTSymbol             
     hi CTSymbolDetail         
