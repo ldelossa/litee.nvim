@@ -21,6 +21,7 @@ CONTENTS                                                         *calltree-conte
   3. Commands.....................................|calltree-commands|
   4. Mappings.....................................|calltree-mappings|
   5. Config.......................................|calltree-config|
+  6. Highlights...................................|calltree-highlights|
 
 ====================================================================================
 INTRODUCTION                                                        *calltree-intro*
@@ -195,4 +196,153 @@ The config table is described below:
         -- the highlight group used for highlighting the references to the symbol
         -- being jumped to.
         symbol_refs_hl = "Search"
+        -- user provided icon highlight overrides. 
+        -- see *calltree-highlights*
+        icon_highlights = {}
     }
+
+====================================================================================
+HIGHLIGHTS                                                     *calltree-highlights*
+
+                                                          *calltree-icon-highlights*
+Each icon in the calltree UI can have it's own highlight applied to it. 
+
+By default the following highlight groups will be used for each icon type:
+
+    M.icon_hls = {
+        Folder = "CTNamespace",
+        Reference = "CTParameterReference",
+        Color = "CTType",
+        Snippet = "CTType",
+        Keyword = "CTType",
+        Value = "CTType",
+        Unit = "CTType",
+        Text = "CTString",
+        File = "CTURI",
+        Module = "CTNamespace",
+        Namespace = "CTNamespace",
+        Package = "CTNamespace",
+        Class = "CTType",
+        Method = "CTMethod",
+        Property = "CTMethod",
+        Field = "CTField",
+        Constructor = "CTConstructor",
+        Enum = "CTType",
+        Interface = "CTType",
+        Function = "CTFunction",
+        Variable = "CTConstant",
+        Constant = "CTConstant",
+        String = "CTString",
+        Number = "CTNumber",
+        Boolean = "CTBoolean",
+        Array = "CTConstant",
+        Object = "CTType",
+        Key = "CTType",
+        Struct = "CTType",
+        Null = "CTType",
+        EnumMember = "CTField",
+        Struct = "CTType",
+        Event = "CTType",
+        Operator = "CTOperator",
+        TypeParameter = "CTParameter",
+    }
+
+If you maintain your own colorscheme then feel free to add or link these highlight groups
+accordingly. 
+
+If you don't want to define these highlight groups yourself and have a set of highlight groups
+you'd like to use instead you can provide them via calltree's setup function. 
+
+Any provided highlight groups will be merged with the table above. 
+
+For example:
+
+    calltree.setup({
+        icon_highlights = {
+            File = MyFileIconHL
+        }
+    })
+
+Will higlight file icons in the calltree UI using "MyFileIconHL" and highlight all others with the
+default "CT*" highlight group defined above.
+
+Individuals who are using tree-sitter highlights across the board should provide this table to the setup function:
+
+    M.icon_hls = {
+        Folder = "TSNamespace",
+        Reference = "TSParameterReference",
+        Color = "TSType",
+        Snippet = "TSType",
+        Keyword = "TSType",
+        Value = "TSType",
+        Unit = "TSType",
+        Text = "TSString",
+        File = "TSURI",
+        Module = "TSNamespace",
+        Namespace = "TSNamespace",
+        Package = "TSNamespace",
+        Class = "TSType",
+        Method = "TSMethod",
+        Property = "TSMethod",
+        Field = "TSField",
+        Constructor = "TSConstructor",
+        Enum = "TSType",
+        Interface = "TSType",
+        Function = "TSFunction",
+        Variable = "TSConstant",
+        Constant = "TSConstant",
+        String = "TSString",
+        Number = "TSNumber",
+        Boolean = "TSBoolean",
+        Array = "TSConstant",
+        Object = "TSType",
+        Key = "TSType",
+        Struct = "TSType",
+        Null = "TSType",
+        EnumMember = "TSField",
+        Struct = "TSType",
+        Event = "TSType",
+        Operator = "TSOperator",
+        TypeParameter = "TSParameter",
+    }
+
+                                                            *calltree-ui-highlights* 
+
+Other UI highlights are provided by the "calltree.hls" table.
+ 
+M.hls = {
+    -- highlight of the virtual text positioned next to the symbol name in the calltree UI.
+    SymbolDetailHL        = "CTSymbolDetail",
+    -- highlight of the symbol itself in the calltree UI, e.g. "Func1"
+    SymbolHL            = "CTSymbol",
+    -- the hight of the symbol being jumped to in it's source file.
+    SymbolJumpHL        = "CTSymbolJump",
+    -- the highlight of any references to the above symbol.
+    SymbolJumpRefsHL    = "CTSymbolJumpRefs"
+}
+
+The usage is similar to the icon highlights but are specified by supplying a "hls" table within the config supplied to calltree's setup function.
+
+List of unique highlights:
+
+    -- ui
+    hi CTSymbol             
+    hi CTSymbolDetail         
+    hi CTSymbolJump         
+    hi CTSymbolJumpRefs     
+    -- icons
+    hi CTParameterReference 
+    hi CTURI                
+    hi CTNamespace          
+    hi CTMethod             
+    hi CTField              
+    hi CTConstructor        
+    hi CTType               
+    hi CTFunction           
+    hi CTConstant           
+    hi CTString             
+    hi CTNumber             
+    hi CTBoolean            
+    hi CTConstant           
+    hi CTOperator           
+    hi CTParameter          

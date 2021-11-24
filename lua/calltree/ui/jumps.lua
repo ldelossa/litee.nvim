@@ -1,3 +1,4 @@
+local ct = require('calltree')
 local config = require('calltree').config
 local lsp_util = require('calltree.lsp.util')
 
@@ -114,7 +115,7 @@ function M.set_jump_hl(set, node)
     vim.api.nvim_buf_add_highlight(
         M.last_highlighted_buffer,
         M.jump_higlight_ns,
-        config.symbol_hl,
+        ct.hls.SymbolJumpHL,
         range["start"].line,
         range["start"].character,
         range["end"].character
@@ -125,7 +126,7 @@ function M.set_jump_hl(set, node)
             vim.api.nvim_buf_add_highlight(
                 M.last_highlighted_buffer,
                 M.jump_higlight_ns,
-                config.symbol_refs_hl,
+                ct.hls.SymbolJumpRefsHL,
                 ref["start"].line,
                 ref["start"].character,
                 ref["end"].character

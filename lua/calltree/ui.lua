@@ -133,6 +133,7 @@ M.open_calltree = function()
     if ui_state.calltree_handle ~= nil then
         tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
     end
+    ui_state.calltree_tab = tab
 
     ui_win._open_window("calltree", ui_state)
 end
@@ -169,6 +170,7 @@ M.open_symboltree = function()
     if ui_state.symboltree_handle ~= nil then
         tree.write_tree(ui_state.symboltree_handle, ui_state.symboltree_buf)
     end
+    ui_state.symboltree_tab = tab
 
     ui_win._open_window("symboltree", ui_state)
 end
@@ -426,7 +428,7 @@ M.details = function()
     deets.details_popup(node, direction)
 end
 
--- dumptree will dump the tree datastructure to a 
+-- dumptree will dump the tree datastructure to a
 -- buffer for debugging.
 --
 -- must be called when the cursor is in the window of

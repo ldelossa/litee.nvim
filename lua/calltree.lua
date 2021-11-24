@@ -1,67 +1,5 @@
 local M = {}
 
--- alot of these are yoinked from:
--- https://github.com/onsails/lspkind-nvim/blob/master/lua/lspkind/init.lua
-M.nerd = {
-    Text = "",
-    Method = "",
-    Function = "",
-    Constructor = "",
-    Field = "ﰠ",
-    Variable = "",
-    Class = "ﴯ",
-    Interface = "",
-    Module = "",
-    Namespace = "",
-    Object = "",
-    Property = "ﰠ",
-    Unit = "塞",
-    Value = "",
-    Enum = "",
-    Keyword = "",
-    Snippet = "",
-    Color = "",
-    File = "",
-    Reference = "",
-    Folder = "",
-    EnumMember = "",
-    Constant = "",
-    Struct = "פּ",
-    Event = "",
-    Operator = "",
-    TypeParameter = ""
-}
-
-M.codicons = {
-    Text = "",
-    Method = "",
-    Function = "",
-    Constructor = "",
-    Field = "",
-    Variable = "",
-    Class = "",
-    Interface = "",
-    Module = "",
-    Namespace = "",
-    Object = "",
-    Property = "",
-    Unit = "",
-    Value = "",
-    Enum = "",
-    Keyword = "",
-    Snippet = "",
-    Color = "",
-    File = "",
-    Reference = "",
-    Folder = "",
-    EnumMember = "",
-    Constant = "",
-    Struct = "",
-    Event = "",
-    Operator = "",
-    TypeParameter = "",
-}
-
 -- config is explained via ":help calltree-config"
 M.config = {
     layout = "left",
@@ -69,12 +7,9 @@ M.config = {
     auto_open = false,
     jump_mode = "invoking",
     icons = "none",
-    symbol_hl = "Search",
-    symbol_refs_hl = "Search"
+    icon_highlights = {},
+    hls = {}
 }
-
--- the configured icon set after setup() is ran.
-M.active_icon_set = {}
 
 function M.setup(user_config)
     -- hijack the normal lsp handlers
@@ -91,7 +26,22 @@ function M.setup(user_config)
     -- merge config
     if user_config ~= nil then
         for k, v in pairs(user_config) do
+            -- merge user provied icon_highlights
+            if k == "icon_highlights" then
+                for icon, hl in pairs(v) do
+                    M.icon_hls[icon] = hl
+                end
+                goto continue
+            end
+            -- merge user provided highlights
+            if k == "hls" then
+                for hl_name, hl in pairs(v) do
+                    M.hls[hl_name] = hl
+                end
+                goto continue
+            end
             M.config[k] = v
+            ::continue::
         end
     end
 
@@ -144,5 +94,152 @@ function M.setup(user_config)
    vim.cmd("command! CTClearHL     lua require('calltree.ui.jumps').set_jump_hl(false)")
    vim.cmd("command! CTDumpTree    lua require('calltree.ui').dump_tree()")
 end
+
+-- the configured icon set after setup() is ran.
+M.active_icon_set = {}
+
+-- alot of these are yoinked from:
+-- https://github.com/onsails/lspkind-nvim/blob/master/lua/lspkind/init.lua
+M.nerd = {
+    Text = "",
+    Method = "",
+    Function = "",
+    Constructor = "",
+    Field = "ﰠ",
+    Variable = "",
+    Class = "ﴯ",
+    Interface = "",
+    Module = "",
+    Namespace = "",
+    Package = "",
+    Object = "",
+    Property = "ﰠ",
+    Unit = "塞",
+    Value = "",
+    Enum = "",
+    Keyword = "",
+    Snippet = "",
+    Color = "",
+    File = "",
+    Reference = "",
+    Folder = "",
+    EnumMember = "",
+    Constant = "",
+    Struct = "פּ",
+    Event = "",
+    Operator = "",
+    TypeParameter = "",
+    Array = "",
+    Key = "",
+    Null = "",
+}
+
+M.codicons = {
+    Text = "",
+    Method = "",
+    Function = "",
+    Constructor = "",
+    Field = "",
+    Variable = "",
+    Class = "",
+    Interface = "",
+    Module = "",
+    Namespace = "",
+    Object = "",
+    Package = "",
+    Property = "",
+    Unit = "",
+    Value = "",
+    Enum = "",
+    Keyword = "",
+    Snippet = "",
+    Color = "",
+    File = "",
+    Reference = "",
+    Folder = "",
+    EnumMember = "",
+    Constant = "",
+    Struct = "",
+    Event = "",
+    Operator = "",
+    TypeParameter = "",
+    Array = "",
+    Key = "",
+    Null = "",
+    Collapsed = "",
+    Expanded = ""
+}
+
+M.icon_hls = {
+    Text = "",
+    Method = "",
+    Function = "",
+    Constructor = "",
+    Field = "",
+    Variable = "",
+    Class = "",
+    Interface = "",
+    Module = "",
+    Namespace = "",
+    Object = "",
+    Package = "",
+    Property = "",
+    Unit = "",
+    Value = "",
+    Enum = "",
+    Keyword = "",
+    Snippet = "",
+    Color = "",
+    File = "",
+    Reference = "",
+    Folder = "",
+    EnumMember = "",
+    Constant = "",
+    Struct = "",
+    Event = "",
+    Operator = "",
+    TypeParameter = "",
+    Array = "",
+    Key = "",
+    Null = "",
+    Collapsed = "",
+    Expanded = ""
+}
+
+M.icon_hls = {
+    File = "CTURI",
+    Module = "CTNamespace",
+    Namespace = "CTNamespace",
+    Package = "CTNamespace",
+    Class = "CTType",
+    Method = "CTMethod",
+    Property = "CTMethod",
+    Field = "CTField",
+    Constructor = "CTConstructor",
+    Enum = "CTType",
+    Interface = "CTType",
+    Function = "CTFunction",
+    Variable = "CTConstant",
+    Constant = "CTConstant",
+    String = "CTString",
+    Number = "CTNumber",
+    Boolean = "CTBoolean",
+    Array = "CTConstant",
+    Object = "CTType",
+    Key = "CTType",
+    Null = "CTType",
+    EnumMember = "CTField",
+    Struct = "CTType",
+    Event = "CTType",
+    Operator = "CTOperator",
+    TypeParameter = "CTParameter",
+}
+
+M.hls = {
+    SymbolDetailHL      = "CTSymbolDetail",
+    SymbolHL            = "CTSymbol",
+    SymbolJumpHL        = "CTSymbolJump",
+    SymbolJumpRefsHL    = "CTSymbolJumpRefs"
+}
 
 return M
