@@ -55,9 +55,8 @@ function _setup_default_highlights()
     }
     local bg = vim.api.nvim_get_option("background")
     if bg == "dark" then
-        print("here - dark")
         for hl_name, hl in pairs(dark) do
-            if not vim.fn.hlexists(hl_name) == 0 then
+            if vim.fn.hlexists(hl_name) == 0 then
                 vim.cmd(hl)
             end
         end
