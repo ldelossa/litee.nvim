@@ -3,6 +3,12 @@ local tree_node  = require('calltree.tree.node')
 local lsp_util = require('calltree.lsp.util')
 local M = {}
 
+local direction_map = {
+    from = {method ="callHierarchy/incomingCalls", buf_name="incomingCalls"},
+    to   = {method="callHierarchy/outgoingCalls", buf_name="outgoingCalls"},
+    empty = {method="callHierarchy/outgoingCalls", buf_name="calltree: empty"}
+}
+
 -- calltree_expand_handler is the call_hierarchy request handler
 -- used when expanding an existing node in the calltree.
 --
@@ -90,7 +96,7 @@ function M.calltree_switch_handler(direction, ui_state)
         tree.add_node(ui_state.calltree_handle, root, children)
 
         tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
-        vim.api.nvim_buf_set_name(ui_state.calltree_buf, direction_map[direction].buf_name)
+        vim.api.nvim_buf_set_name(ui_state.calltree_buf, direction_map[direction].buf_name .. ":" .. ui_state.calltree_tab)
     end
 end
 

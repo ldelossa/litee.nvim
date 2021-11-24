@@ -65,16 +65,16 @@ function M.marshal_node(node)
 
     if ct.config.icons ~= "none" then
         -- ▶   Func1
-        str = str .. " " .. icon .. "  " .. name .. " "
+        str = str .. " " .. icon .. "  " .. name
     else
         -- ▶ [Function] Func1 
-        str = str .. " " .. "[" .. kind .. "]" .. " " .. M.glyphs.separator .. " " .. name .. " "
+        str = str .. " " .. "[" .. kind .. "]" .. " " .. M.glyphs.separator .. " " .. name
     end
 
-    -- ▶   Func1 main.go
-    str = str .. detail
+    --[[ -- ▶   Func1 main.go
+    str = str .. detail ]]
 
-    return str
+    return str, {{detail, ct.hls.SymbolDetailHL}}
 end
 
 -- marshal_line takes a UI buffer line and
@@ -106,19 +106,24 @@ end
 -- begin.
 --
 -- tree : tree_handle - a handle to a the tree we are marshaling.
-function M.marshal_tree(buf_handle, lines, node, tree)
+function M.marshal_tree(buf_handle, lines, node, tree, virtual_text_lines)
     if node.depth == 0 then
+        if virtual_text_lines == nil then
+            virtual_text_lines = {}
+        end
         -- create a new line mapping
         M.buf_line_map[tree] = {}
     end
-    table.insert(lines, M.marshal_node(node))
+    local line, virtual_text = M.marshal_node(node)
+    table.insert(lines, line)
+    table.insert(virtual_text_lines, virtual_text)
     M.buf_line_map[tree][#lines] = node
 
     -- if we are an expanded node or we are the root (always expand)
     -- recurse
     if node.expanded  or node.depth == 0 then
         for _, child in ipairs(node.children) do
-            M.marshal_tree(buf_handle, lines, child, tree)
+            M.marshal_tree(buf_handle, lines, child, tree, virtual_text_lines)
         end
     end
 
@@ -129,6 +134,14 @@ function M.marshal_tree(buf_handle, lines, node, tree)
         vim.api.nvim_buf_set_lines(buf_handle, 0, -1, true, {})
         vim.api.nvim_buf_set_lines(buf_handle, 0, #lines, false, lines)
         vim.api.nvim_buf_set_option(buf_handle, 'modifiable', false)
+        for i, vt in ipairs(virtual_text_lines) do
+            local opts = {
+                virt_text = vt,
+                virt_text_pos = 'eol',
+                hl_mode = 'combine'
+            }
+            vim.api.nvim_buf_set_extmark(buf_handle, 1, i-1, 0, opts)
+        end
     end
 end
 

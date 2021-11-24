@@ -10,6 +10,8 @@
                           Neovim's missing call-hierarchy UI
 ```
 
+![calltree screenshot](./contrib/calltree-screenshot.png)
+
 # Calltree
 
 Calltree implements the missing "call-hierarchy" tree UI seen in other popular IDE's
@@ -96,6 +98,14 @@ How jumping occurs is controlled by the config, see (h: calltree-config)
 Nerd font icons along with codicons are currently supported. 
 
 You'll need a patched font for them to work correctly. see (h: calltree-config)
+
+## Symbol Outline
+
+Because the tree module can be used for symbols as well calltree implements a live symbol outline of the given buffer as well.
+
+Expanding and collapsing codes is done with the same commands as the call hierarchy tree. 
+
+The UI works together and will always ensure a static layout with call hierarchy on top/left and symbols on bottom/right.
 
 ## Demo
 

@@ -1,4 +1,5 @@
 local config = require("calltree").config
+local ct = require("calltree")
 local M = {}
 
 -- window.lua offers a declartive way to open new windows
@@ -158,6 +159,12 @@ function M._setup_window(current_layout, desired_layout, ui_state)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'wrap', false)
 
         ::continue::
+        -- set configured icon highlights
+        for icon, hl in pairs(ct.icon_hls) do
+            vim.cmd(string.format("syn match %s /%s/", hl, ct.active_icon_set[icon]))
+        end
+        -- set configured symbol highlight
+        vim.cmd(string.format("syn match %s /%s/", ct.hls.SymbolHL, [[\w]]))
     end
 end
 
