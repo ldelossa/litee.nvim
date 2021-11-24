@@ -190,12 +190,12 @@ The config table is described below:
         -- "none"           - No icons for symbol types will just use text
         -- "nerd"           - Use Nerd font icon set for symbol types (requires patched font)
         -- "codicon"        - Use VSCode codicon icon set for symbol types (requires patched font)
-        icons = "none"
+        icons = "none",
         -- the highlight group used for highlighting the symbol being jumped too.
         symbol_hl = "Search",
         -- the highlight group used for highlighting the references to the symbol
         -- being jumped to.
-        symbol_refs_hl = "Search"
+        symbol_refs_hl = "Search",
         -- user provided icon highlight overrides. 
         -- see *calltree-highlights*
         icon_highlights = {}
