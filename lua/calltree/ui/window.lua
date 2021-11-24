@@ -160,8 +160,10 @@ function M._setup_window(current_layout, desired_layout, ui_state)
 
         ::continue::
         -- set configured icon highlights
-        for icon, hl in pairs(ct.icon_hls) do
-            vim.cmd(string.format("syn match %s /%s/", hl, ct.active_icon_set[icon]))
+        if ct.active_icon_set ~= nil then
+            for icon, hl in pairs(ct.icon_hls) do
+                vim.cmd(string.format("syn match %s /%s/", hl, ct.active_icon_set[icon]))
+            end
         end
         -- set configured symbol highlight
         vim.cmd(string.format("syn match %s /%s/", ct.hls.SymbolHL, [[\w]]))

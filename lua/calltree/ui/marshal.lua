@@ -54,7 +54,9 @@ function M.marshal_node(node)
     end
     local icon = ""
     if kind ~= "" then
-        icon = ct.active_icon_set[kind]
+        if ct.active_icon_set ~= nil then
+            icon = ct.active_icon_set[kind]
+        end
     end
 
     -- add spacing up to node's depth

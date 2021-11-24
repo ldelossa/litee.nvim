@@ -96,7 +96,7 @@ function M.setup(user_config)
 end
 
 -- the configured icon set after setup() is ran.
-M.active_icon_set = {}
+M.active_icon_set = nil
 
 -- alot of these are yoinked from:
 -- https://github.com/onsails/lspkind-nvim/blob/master/lua/lspkind/init.lua
