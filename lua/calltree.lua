@@ -7,9 +7,69 @@ M.config = {
     auto_open = false,
     jump_mode = "invoking",
     icons = "none",
+    no_hls = false,
     icon_highlights = {},
     hls = {}
 }
+
+function _setup_default_highlights() 
+    local dark = {
+        CTBoolean              = 'hi CTBoolean                guifg=#0087af guibg=None',
+        CTConstant             = 'hi CTConstant               guifg=#0087af guibg=None',
+        CTConstructor          = 'hi CTConstructor            guifg=#4DC5C6 guibg=None',
+        CTField                = 'hi CTField                  guifg=#0087af guibg=None',
+        CTFunction             = 'hi CTFunction               guifg=#988ACF guibg=None',
+        CTMethod               = 'hi CTMethod                 guifg=#0087af guibg=None',
+        CTNamespace            = 'hi CTNamespace              guifg=#87af87 guibg=None',
+        CTNumber               = 'hi CTNumber                 guifg=#9b885c guibg=None',
+        CTOperator             = 'hi CTOperator               guifg=#988ACF guibg=None',
+        CTParameter            = 'hi CTParameter              guifg=#988ACF guibg=None',
+        CTParameterReference   = 'hi CTParameterReference     guifg=#4DC5C6 guibg=None',
+        CTString               = 'hi CTString                 guifg=#af5f5f guibg=None',
+        CTSymbol               = 'hi CTSymbol                 guifg=#87afd7 gui=underline',
+        CTSymbolDetail         = 'hi CTSymbolDetail           ctermfg=024 cterm=italic guifg=#988ACF gui=italic',
+        CTSymbolJump           = 'hi CTSymbolJump             ctermfg=015 ctermbg=110 cterm=italic,bold,underline   guifg=#464646 guibg=#87afd7 gui=italic,bold',
+        CTSymbolJumpRefs       = 'hi CTSymbolJumpRefs         ctermfg=015 ctermbg=110 cterm=italic,bold,underline   guifg=#464646 guibg=#9b885c gui=italic,bold',
+        CTType                 = 'hi CTType                   guifg=#9b885c guibg=None',
+        CTURI                  = 'hi CTURI                    guifg=#988ACF guibg=None',
+    }
+    local light = {
+        CTBoolean               = 'hi CTBoolean                guifg=#005f87 guibg=None',
+        CTConstant              = 'hi CTConstant               guifg=#005f87 guibg=None',
+        CTConstructor           = 'hi CTConstructor            guifg=#9b885c guibg=None',
+        CTField                 = 'hi CTField                  guifg=#005f87 guibg=None',
+        CTFunction              = 'hi CTFunction               guifg=#806CCF guibg=None',
+        CTMethod                = 'hi CTMethod                 guifg=#005f87 guibg=None',
+        CTNamespace             = 'hi CTNamespace              guifg=#87af87 guibg=None',
+        CTNumber                = 'hi CTNumber                 guifg=#9b885c guibg=None',
+        CTOperator              = 'hi CTOperator               guifg=#806CCF guibg=None',
+        CTParameter             = 'hi CTParameter              guifg=#806CCF guibg=None',
+        CTParameterReference    = 'hi CTParameterReference     guifg=#268889 guibg=None',
+        CTString                = 'hi CTString                 guifg=#af5f5f guibg=None',
+        CTSymbol                = 'hi CTSymbol                 guifg=#806CCF gui=underline',
+        CTSymbolDetail          = 'hi CTSymbolDetail           ctermfg=024 cterm=italic guifg=#005f87 gui=italic',
+        CTSymbolJump            = 'hi CTSymbolJump             ctermfg=015 ctermbg=110 cterm=italic,bold,underline   guifg=#464646 guibg=#87afd7 gui=italic,bold',
+        CTSymbolJumpRefs        = 'hi CTSymbolJumpRefs         ctermfg=015 ctermbg=110 cterm=italic,bold,underline   guifg=#464646 guibg=#9b885c gui=italic,bold',
+        CTType                  = 'hi CTType                   guifg=#268889 guibg=None',
+        CTURI                   = 'hi CTURI                    guifg=#806CCF guibg=None',
+    }
+    local bg = vim.api.nvim_get_option("background")
+    if bg == "dark" then
+        print("here - dark")
+        for hl_name, hl in pairs(dark) do
+            if not vim.fn.hlexists(hl_name) == 0 then
+                vim.cmd(hl)
+            end
+        end
+    end
+    if bg == "light" then
+        for hl_name, hl in pairs(light) do
+            if vim.fn.hlexists(hl_name) == 0 then
+                vim.cmd(hl)
+            end
+        end
+    end
+end
 
 function M.setup(user_config)
     -- hijack the normal lsp handlers
@@ -68,6 +128,11 @@ function M.setup(user_config)
         if M.config.icons == "nerd" then
             M.active_icon_set = M.nerd
         end
+    end
+
+    -- setup default highlights
+    if not M.config.no_hls then
+        _setup_default_highlights()
     end
 
     -- automatically open the ui elements on buf enters.
