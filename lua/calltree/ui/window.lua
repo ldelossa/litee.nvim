@@ -159,14 +159,16 @@ function M._setup_window(current_layout, desired_layout, ui_state)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'wrap', false)
 
         ::continue::
-        -- set configured icon highlights
-        if ct.active_icon_set ~= nil then
-            for icon, hl in pairs(ct.icon_hls) do
-                vim.cmd(string.format("syn match %s /%s/", hl, ct.active_icon_set[icon]))
+        if not config.no_hls then
+            -- set configured icon highlights
+            if ct.active_icon_set ~= nil then
+                for icon, hl in pairs(ct.icon_hls) do
+                    vim.cmd(string.format("syn match %s /%s/", hl, ct.active_icon_set[icon]))
+                end
             end
+            -- set configured symbol highlight
+            vim.cmd(string.format("syn match %s /%s/", ct.hls.SymbolHL, [[\w]]))
         end
-        -- set configured symbol highlight
-        vim.cmd(string.format("syn match %s /%s/", ct.hls.SymbolHL, [[\w]]))
     end
 end
 

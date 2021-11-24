@@ -191,6 +191,8 @@ The config table is described below:
         -- "nerd"           - Use Nerd font icon set for symbol types (requires patched font)
         -- "codicon"        - Use VSCode codicon icon set for symbol types (requires patched font)
         icons = "none",
+        -- disables highlights in the calltree UI completely.
+        no_hls = false,
         -- user provided icon highlight overrides. 
         -- see *calltree-icon-highlights*
         icon_highlights = {}
@@ -201,6 +203,18 @@ The config table is described below:
 
 ====================================================================================
 HIGHLIGHTS                                                     *calltree-highlights*
+
+A default set of highlights will be applied as long as "no_hls=false" is provided 
+in the config (this is the default setting). 
+
+Flipping this settings to true will disable all highlights (accept for jumps).
+
+The default set of highlights may not work for your color scheme, therefore its
+possible to theme calltree further. 
+
+The default higlights will stay in sync with "https://github.com/ldelossa/vimdark"
+
+See *calltree-icon-highlights* and *calltree-ui-highlights* for more info.
 
                                                           *calltree-icon-highlights*
 Each icon in the calltree UI can have its own highlight applied to it. 
