@@ -21,7 +21,7 @@ M.buf_line_map = {}
 --
 -- returns:
 --    string - a string for the collapsed or expanded symbol name
---    table  - a virt_text chunk that can be passed directly to 
+--    table  - a virt_text chunk that can be passed directly to
 -- vim.api.nvim_buf_set_extmark() via the virt_text option.
 function M.marshal_node(node)
     local str = ""
@@ -40,17 +40,30 @@ function M.marshal_node(node)
     if node.symbol ~= nil then
         name = node.symbol.name
         kind = vim.lsp.protocol.SymbolKind[node.symbol.kind]
-        detail = lsp_util.relative_path_from_uri(node.symbol.location.uri)
+
+        local file, relative = lsp_util.relative_path_from_uri(node.symbol.location.uri)
+        if not relative and node.symbol.detail ~= nil then
+            detail = node.symbol.detail
+        else
+            detail = file
+        end
     elseif node.document_symbol ~= nil then
         name = node.document_symbol.name
         kind = vim.lsp.protocol.SymbolKind[node.document_symbol.kind]
+
         if node.document_symbol.detail ~= nil then
             detail = node.document_symbol.detail
         end
-    elseif node.call_hierarchy_item then
+    elseif node.call_hierarchy_item ~= nil then
         name = node.name
         kind = vim.lsp.protocol.SymbolKind[node.call_hierarchy_item.kind]
-        detail = lsp_util.relative_path_from_uri(node.call_hierarchy_item.uri)
+
+        local file, relative = lsp_util.relative_path_from_uri(node.call_hierarchy_item.uri)
+        if not relative and node.call_hierarchy_item.detail ~= nil then
+            detail = node.call_hierarchy_item.detail
+        else
+            detail = file
+        end
     end
     local icon = ""
     if kind ~= "" then
@@ -71,11 +84,11 @@ function M.marshal_node(node)
         -- ▶   Func1
         str = str .. " " .. icon .. "  " .. name
     else
-        -- ▶ [Function] Func1 
+        -- ▶ [Function] Func1
         str = str .. " " .. "[" .. kind .. "]" .. " " .. M.glyphs.separator .. " " .. name
     end
 
-    -- return detail as virtual text chunk. 
+    -- return detail as virtual text chunk.
     return str, {{detail, ct.hls.SymbolDetailHL}}
 end
 
