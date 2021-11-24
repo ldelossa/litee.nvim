@@ -150,12 +150,16 @@ function M.marshal_tree(buf_handle, lines, node, tree, virtual_text_lines)
         vim.api.nvim_buf_set_lines(buf_handle, 0, #lines, false, lines)
         vim.api.nvim_buf_set_option(buf_handle, 'modifiable', false)
         for i, vt in ipairs(virtual_text_lines) do
+            if vt[1][1] == "" then
+                goto continue
+            end
             local opts = {
                 virt_text = vt,
                 virt_text_pos = 'eol',
                 hl_mode = 'combine'
             }
             vim.api.nvim_buf_set_extmark(buf_handle, 1, i-1, 0, opts)
+            ::continue::
         end
     end
 end

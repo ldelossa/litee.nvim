@@ -115,7 +115,8 @@ M.ws_lsp_handler = function()
             range = {start = {line = -1}}, -- provide this so keyify works in tree_node.add
             selectionRange = {start = {line = -1}}, -- provide this so keyify works in tree_node.add
             children = result,
-            uri = ctx.params.textDocument.uri
+            uri = ctx.params.textDocument.uri,
+            detail = "file"
         }
 
         local root = lsp_util.build_recursive_symbol_tree(0, synthetic_root_ds, nil, prev_depth_table)
