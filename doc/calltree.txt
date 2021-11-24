@@ -35,6 +35,8 @@ A "call-hierarchy" tool creates a tree view of incoming (callers) or outgoing
 From there you can drive down further, discovering "callers-of-callers" or
 "callees-of-callees", and producing a tree view.
 
+Calltree also provides a document symbol tree.
+
 ====================================================================================
 Usage                                                               *calltree-usage*
 
@@ -82,7 +84,6 @@ Calltree exports several commands for manipulating the calltree UI.
                                                                           *:STClose*       
 :STClose       
     Closes the symboltree window
-
 
                                                                          *:CTExpand*
 :CTExpand      
@@ -137,7 +138,8 @@ Calltree exports several commands for manipulating the calltree UI.
 ====================================================================================
 MAPPINGS                                                         *calltree-mappings*
 
-Since all of calltree's usage happens within it's own buffer, its pretty safe to assign this buffer a default keymap. 
+Since all of calltree's usage happens within it's own buffer, 
+its pretty safe to assign this buffer a default keymap. 
 
 This does not stop you from mapping *calltree-commands* to your own liking.
 
@@ -270,7 +272,7 @@ Any provided highlight groups will be merged with the table above.
 For example:
 
     calltree.setup({
-        icon_highlights = {
+        icon_hls = {
             File = MyFileIconHL
         }
     })
