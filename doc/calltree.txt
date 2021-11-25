@@ -201,6 +201,21 @@ The config table is described below:
         -- user provided UI highlights.
         -- see *calltree-ui-highlights*
         hls = {}
+        -- some LSP's will provide symbols with different names depending on
+        -- the method called. 
+        --
+        -- if resolve_symbols is set to true a workspace symbol request will
+        -- be made for any responses from LSP's, providing clearer information 
+        -- for symbols in the calltree.
+        --
+        -- this will cause the UI to open slower, tho the symbol requests are 
+        -- async so it will not block the editor.
+        -- for full context see: 
+        -- https://github.com/golang/go/issues/49690#issuecomment-975902067
+        --
+        -- set this to false for large codebases to speed up opening
+        -- the calltree.
+        resolve_symbols = true
     }
 
 ====================================================================================

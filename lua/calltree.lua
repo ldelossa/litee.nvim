@@ -9,7 +9,8 @@ M.config = {
     icons = "none",
     no_hls = false,
     icon_highlights = {},
-    hls = {}
+    hls = {},
+    resolve_symbols = true
 }
 
 function _setup_default_highlights() 

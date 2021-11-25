@@ -1,6 +1,7 @@
 local tree  = require('calltree.tree.tree')
 local tree_node  = require('calltree.tree.node')
 local lsp_util = require('calltree.lsp.util')
+local config = require('calltree').config
 local M = {}
 
 local direction_map = {
@@ -44,9 +45,16 @@ function M.calltree_expand_handler(node, linenr, direction, ui_state)
                 call_hierarchy_call[direction],
                 call_hierarchy_call.fromRanges
             )
-            -- try to resolve the workspace symbol for child
-            child.symbol = lsp_util.symbol_from_node(ui_state.active_lsp_clients, child, ui_state.calltree_buf)
             table.insert(children, child)
+        end
+
+        if config.resolve_symbols then
+            lsp_util.gather_symbols_async(node, children, ui_state, function()
+                tree.add_node(ui_state.calltree_handle, node, children)
+                tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
+                ui.open_calltree()
+            end)
+            return
         end
 
         tree.add_node(ui_state.calltree_handle, node, children)
