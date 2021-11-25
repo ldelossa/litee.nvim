@@ -2,6 +2,7 @@ local tree_node = require('calltree.tree.node')
 local tree = require('calltree.tree.tree')
 local ui = require('calltree.ui')
 local lsp_util = require('calltree.lsp.util')
+local config = require('calltree').config
 
 local M = {}
 
@@ -23,7 +24,7 @@ M.ch_lsp_handler = function(direction)
 
         cur_tabpage = vim.api.nvim_win_get_tabpage(cur_win)
 
-        ui_state = ui.ui_state_registry[cur_tabpage] 
+        ui_state = ui.ui_state_registry[cur_tabpage]
         if ui_state == nil then
             ui_state = {}
             ui.ui_state_registry[cur_tabpage] = ui_state
@@ -51,9 +52,6 @@ M.ch_lsp_handler = function(direction)
         ctx.params.item,
         nil)
 
-        -- try to resolve the workspace symbol for root.
-        root.symbol = lsp_util.symbol_from_node(ui_state.active_lsp_clients, root, ui_state.invoking_calltree_win)
-
         -- create the root's children nodes via the response array.
         local children = {}
         for _, call_hierarchy_call in pairs(result) do
@@ -63,14 +61,20 @@ M.ch_lsp_handler = function(direction)
              call_hierarchy_call[direction],
              call_hierarchy_call.fromRanges
           )
-          -- try to resolve the workspace symbol for child
-          child.symbol = lsp_util.symbol_from_node(ui_state.active_lsp_clients, child, ui_state.invoking_calltree_win)
           table.insert(children, child)
         end
 
+        -- gather symbols async
+        if config.resolve_symbols then
+            lsp_util.gather_symbols_async(root, children, ui_state, function()
+                tree.add_node(ui_state.calltree_handle, root, children)
+                ui.open_calltree()
+            end)
+            return
+        end
         tree.add_node(ui_state.calltree_handle, root, children)
         ui.open_calltree()
-    end
+   end
 end
 
 M.ws_lsp_handler = function()
@@ -89,7 +93,7 @@ M.ws_lsp_handler = function()
         ui_state = ui.ui_state_registry[cur_tabpage] 
         if ui_state == nil then
             ui_state = {}
-            ui.ui_state_registry[cur_tabpage] = ui_state
+            ui.ui_state_registry[cur_tabpage] = ui_sate
         end
 
         -- snag the lsp clients from the buffer issuing the

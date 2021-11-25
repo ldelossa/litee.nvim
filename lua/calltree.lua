@@ -10,7 +10,8 @@ M.config = {
     no_hls = false,
     indent_guides = true,
     icon_highlights = {},
-    hls = {}
+    hls = {},
+    resolve_symbols = true
 }
 
 function _setup_default_highlights() 

@@ -157,6 +157,64 @@ function M.symbol_from_node(clients, node, bufnr)
     return nil
 end
 
+function M.gather_symbols_async_handler(node, co)
+    return function(err, result, _, _)
+        if err ~= nil then
+            coroutine.resume(co, nil)
+            return
+        end
+
+        local start_line, uri = "", ""
+        if node.call_hierarchy_item ~= nil then
+            start_line = node.call_hierarchy_item.range.start.line
+            uri = node.call_hierarchy_item.uri
+        elseif node.document_symbol ~= nil then
+            start_line = node.document_symbol.range.start.line
+            uri = node.uri
+        end
+
+        for _, res in ipairs(result) do
+            if
+                res.location.uri == uri and
+                res.location.range.start.line ==
+                start_line
+            then
+                coroutine.resume(co, res)
+                return
+            end
+        end
+        coroutine.resume(co, nil)
+    end
+end
+
+function M.gather_symbols_async(root, children, ui_state, callback)
+    local co = nil
+    all_nodes = {}
+    table.insert(all_nodes, root)
+    for _, child in ipairs(children) do
+        table.insert(all_nodes, child)
+    end
+    co = coroutine.create(function()
+        for _, node in ipairs(all_nodes) do
+            local params = {
+                query = node.name,
+            }
+            print(node.name)
+            M.multi_client_request(
+                ui_state.active_lsp_clients,
+                "workspace/symbol",
+                params,
+                -- handler will call resume for this co.
+                M.gather_symbols_async_handler(node, co),
+                ui_state.invoking_calltree_win
+            )
+            node.symbol = coroutine.yield()
+        end
+        callback()
+    end)
+    coroutine.resume(co)
+end
+
 function M.build_recursive_symbol_tree(depth, document_symbol, parent, prev_depth_table)
         local node = tree_node.new(
             document_symbol.name,
