@@ -65,7 +65,7 @@ end
 -- of the current tab. defined in ui.lua
 function M.calltree_switch_handler(direction, ui_state)
     return function(err, result, ctx, _)
-        if err ~= nil then
+        if err ~= nil or result == nil then
             return
         end
         -- create the root of our call tree, the request which

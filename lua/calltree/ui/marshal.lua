@@ -42,10 +42,10 @@ function M.marshal_node(node)
         kind = vim.lsp.protocol.SymbolKind[node.symbol.kind]
 
         local file, relative = lsp_util.relative_path_from_uri(node.symbol.location.uri)
-        if not relative and node.symbol.detail ~= nil then
-            detail = node.symbol.detail
-        else
+        if relative then
             detail = file
+        elseif node.symbol.detail ~= nil then
+            detail = node.symbol.detail
         end
     elseif node.document_symbol ~= nil then
         name = node.document_symbol.name
@@ -59,10 +59,10 @@ function M.marshal_node(node)
         kind = vim.lsp.protocol.SymbolKind[node.call_hierarchy_item.kind]
 
         local file, relative = lsp_util.relative_path_from_uri(node.call_hierarchy_item.uri)
-        if not relative and node.call_hierarchy_item.detail ~= nil then
-            detail = node.call_hierarchy_item.detail
-        else
+        if relative then
             detail = file
+        elseif node.call_hierarchy_item.detail ~= nil then
+            detail = node.symbol.detail
         end
     end
     local icon = ""
