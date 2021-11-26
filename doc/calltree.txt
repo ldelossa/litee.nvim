@@ -197,7 +197,10 @@ The config table is described below:
         no_hls = false,
         -- user provided icon highlight overrides. 
         -- see *calltree-icon-highlights*
-        icon_highlights = {}
+        icon_highlights = {},
+        -- bool which enables or diables indentation guides in the UI.
+        -- defaults to true.
+        indent_guides = true,
         -- user provided UI highlights.
         -- see *calltree-ui-highlights*
         hls = {}
