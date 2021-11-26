@@ -8,6 +8,7 @@ M.config = {
     jump_mode = "invoking",
     icons = "none",
     no_hls = false,
+    indent_guides = true,
     icon_highlights = {},
     hls = {}
 }
@@ -196,6 +197,8 @@ M.nerd = {
     Unit            = "塞",
     Value           = "",
     Variable        = "",
+    Expanded        = "",
+    Collapsed       = "",
 }
 
 M.codicons = {
@@ -232,6 +235,8 @@ M.codicons = {
     Unit            = "",
     Value           = "",
     Variable        = "",
+    Expanded        = "",
+    Collapsed       = "",
 }
 
 M.icon_hls = {

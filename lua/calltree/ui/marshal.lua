@@ -1,4 +1,5 @@
 local ct = require('calltree')
+local config = require('calltree').config
 local lsp_util = require('calltree.lsp.util')
 
 local M = {}
@@ -6,7 +7,12 @@ local M = {}
 M.glyphs = {
     expanded= "▼",
     collapsed= "▶",
-    separator = "•"
+    separator = "•",
+    guide = "│",
+    end_guide = "╰",
+    t_guide = "├",
+    space = " "
+
 }
 
 -- buf_line_map keeps a mapping between marshaled
@@ -23,20 +29,25 @@ M.buf_line_map = {}
 --    string - a string for the collapsed or expanded symbol name
 --    table  - a virt_text chunk that can be passed directly to
 -- vim.api.nvim_buf_set_extmark() via the virt_text option.
-function M.marshal_node(node)
-    local str = ""
-    local glyph
+function M.marshal_node(node, final)
+    local glyph = ""
     if node.expanded then
-        glyph = M.glyphs["expanded"]
+        if ct.active_icon_set ~= nil then
+            glyph = ct.active_icon_set.Expanded
+        else
+            glyph = M.glyphs["expanded"]
+        end
     else
-        glyph = M.glyphs["collapsed"]
+        if ct.active_icon_set ~= nil then
+            glyph = ct.active_icon_set.Collapsed
+        else
+            glyph = M.glyphs["collapsed"]
+        end
     end
 
     -- prefer using workspace symbol details if available.
     -- fallback to callhierarchy object details.
-    local name = ""
-    local kind = ""
-    local detail = ""
+    local name, kind, detail, str = "", "", "", ""
     if node.symbol ~= nil then
         name = node.symbol.name
         kind = vim.lsp.protocol.SymbolKind[node.symbol.kind]
@@ -62,9 +73,10 @@ function M.marshal_node(node)
         if relative then
             detail = file
         elseif node.call_hierarchy_item.detail ~= nil then
-            detail = node.symbol.detail
+            detail = node.call_hierarchy_item.detail
         end
     end
+
     local icon = ""
     if kind ~= "" then
         if ct.active_icon_set ~= nil then
@@ -72,20 +84,32 @@ function M.marshal_node(node)
         end
     end
 
-    -- add spacing up to node's depth
-    for _=1, node.depth do
-        str = str .. " "
+    -- compute guides or spaces dependent on configs.
+    if config.indent_guides then
+        for i=1, node.depth do
+            if final and i == node.depth and #node.children == 0 then
+                str = str .. M.glyphs.end_guide .. M.glyphs.space
+            elseif final and i == node.depth and #node.children > 0 then
+                str = str .. M.glyphs.t_guide .. M.glyphs.space
+            else
+                str = str .. M.glyphs.guide .. M.glyphs.space
+            end
+        end
+    else
+        for _=1, node.depth do
+            str = str .. M.glyphs.space
+        end
     end
 
     -- ▶ Func1
-    str = str .. glyph
+    str = str .. glyph .. M.glyphs.space
 
     if ct.config.icons ~= "none" then
         -- ▶   Func1
-        str = str .. " " .. icon .. "  " .. name
+        str = str .. M.glyphs.space .. icon .. M.glyphs.space  .. M.glyphs.space .. name
     else
         -- ▶ [Function] Func1
-        str = str .. " " .. "[" .. kind .. "]" .. " " .. M.glyphs.separator .. " " .. name
+        str = str .. M.glyphs.space .. "[" .. kind .. "]" .. M.glyphs.space .. M.glyphs.separator .. M.glyphs.space .. name
     end
 
     -- return detail as virtual text chunk.
@@ -121,15 +145,13 @@ end
 -- begin.
 --
 -- tree : tree_handle - a handle to a the tree we are marshaling.
-function M.marshal_tree(buf_handle, lines, node, tree, virtual_text_lines)
+function M.marshal_tree(buf_handle, lines, node, tree, virtual_text_lines, final)
     if node.depth == 0 then
-        if virtual_text_lines == nil then
-            virtual_text_lines = {}
-        end
+        virtual_text_lines = {}
         -- create a new line mapping
         M.buf_line_map[tree] = {}
     end
-    local line, virtual_text = M.marshal_node(node)
+    local line, virtual_text = M.marshal_node(node, final)
     table.insert(lines, line)
     table.insert(virtual_text_lines, virtual_text)
     M.buf_line_map[tree][#lines] = node
@@ -137,8 +159,13 @@ function M.marshal_tree(buf_handle, lines, node, tree, virtual_text_lines)
     -- if we are an expanded node or we are the root (always expand)
     -- recurse
     if node.expanded  or node.depth == 0 then
-        for _, child in ipairs(node.children) do
-            M.marshal_tree(buf_handle, lines, child, tree, virtual_text_lines)
+        for i, child in ipairs(node.children) do
+            if i == #node.children then
+                final = true
+            else
+                final = false
+            end
+            M.marshal_tree(buf_handle, lines, child, tree, virtual_text_lines, final)
         end
     end
 
