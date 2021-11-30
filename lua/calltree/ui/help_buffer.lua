@@ -24,13 +24,14 @@ function M._setup_help_buffer(help_buf_handle)
             "press 'c' to close",
             "",
             "KEYMAP:",
-            "zo      - expand a symbol",
-            "zc      - collapse a symbol",
-            "return  - jump to symbol",
-            "f       - focus the tree on this symbol (call hierarhies)",
-            "s       - switch the symbol from incoming/outgoing calls (call hierarchies)",
-            "i       - show hover info for symbol",
-            "d       - show symbol details"
+            "zo                 - expand a symbol",
+            "zc                 - collapse a symbol",
+            "return             - jump to symbol",
+            "f                  - focus the tree on this symbol (call hierarhies)",
+            "s                  - switch the symbol from incoming/outgoing calls (call hierarchies)",
+            "i                  - show hover info for symbol",
+            "d                  - show symbol details",
+            "Up,Down,Right,Left - resize calltree windows"
         }
         vim.api.nvim_buf_set_lines(help_buf_handle, 0, #lines, false, lines)
     end

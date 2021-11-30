@@ -1,3 +1,4 @@
+local config = require('calltree').config
 local M = {}
 
 -- close_all_popups is a convenience function to close any
@@ -7,6 +8,31 @@ local M = {}
 function M.close_all_popups()
     require('calltree.ui.hover').close_hover_popup()
     require('calltree.ui.details').close_details_popup()
+end
+
+local function map_resize_keys(buffer_handle, opts) 
+    local l = config.layout
+    if l == "top" or l == "bottom"  then
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Right>", ":vert resize +5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Left>", ":vert resize -5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Up>", ":resize +5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Down>", ":resize -5<cr>", opts)
+    elseif l == "bottom" then
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Right>", ":vert resize +5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Left>", ":vert resize -5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Down>", ":resize +5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Up>", ":resize -5<cr>", opts)
+    elseif l == "left" then
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Up>", ":resize +5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Down>", ":resize -5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Left>", ":vert resize -5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Right>", ":vert resize +5<cr>", opts)
+    elseif l == "right" then
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Up>", ":resize +5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Down>", ":resize -5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Left>", ":vert resize +5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Right>", ":vert resize -5<cr>", opts)
+    end
 end
 
 -- _setup_buffer performs an idempotent creation
@@ -62,6 +88,7 @@ function M._setup_buffer(name, buffer_handle, tab)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":CTDetails<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":CTSwitch<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "?", ":lua require('calltree.ui').help(true)<CR>", opts)
+    map_resize_keys(buffer_handle, opts)
 
     return buffer_handle
 end
