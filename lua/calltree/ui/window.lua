@@ -82,6 +82,44 @@ function M._open_window(kind, ui_state)
     M._setup_window(current_layout, desired_layout, ui_state)
 end
 
+-- toggle_panel is a helper function which will toggle
+-- all calltree ui windows open or closed.
+--
+-- on toggle, only previously opened calltree ui windows
+-- will be opened once again.
+--
+-- this is similar to having a collap
+--
+-- ui_state : table - the current ui_state table
+-- provided by the ui module.
+--
+-- keep_open : bool - if true we do not close any
+-- UI windows, effectivetly making this a no-op if
+-- the panel is already open. Useful for LSP handlers
+-- which want to refresh the state of the UI but not
+-- close the panels.
+function M._toggle_panel(ui_state, keep_open)
+    local open = true
+    if not keep_open then
+        for _, win_name in pairs(type_to_ui_state_win) do
+            local win = ui_state[win_name]
+            if win ~= nil and vim.api.nvim_win_is_valid(win) then
+                vim.api.nvim_win_close(win, true)
+                ui_state[win_name] = nil
+                open = false
+            end
+        end
+        if not open then
+            return
+        end
+    end
+
+    -- we didn't find any open calltree windows, toggle
+    -- the pannel open
+    M._open_window("calltree", ui_state)
+    M._open_window("symboltree", ui_state)
+end
+
 -- setup_window evaluates the current layout and the desired layout
 -- and opens the necessary windows to obtain the desired layout.
 --

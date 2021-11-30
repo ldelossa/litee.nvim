@@ -106,7 +106,7 @@ function M.marshal_node(node, final)
 
     if ct.config.icons ~= "none" then
         -- ▶   Func1
-        str = str .. M.glyphs.space .. icon .. M.glyphs.space  .. M.glyphs.space .. name
+        str = str .. icon .. M.glyphs.space  .. M.glyphs.space .. name
     else
         -- ▶ [Function] Func1
         str = str .. M.glyphs.space .. "[" .. kind .. "]" .. M.glyphs.space .. M.glyphs.separator .. M.glyphs.space .. name
