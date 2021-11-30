@@ -11,7 +11,8 @@ M.config = {
     indent_guides = true,
     icon_highlights = {},
     hls = {},
-    resolve_symbols = true
+    resolve_symbols = true,
+    unified_panel = false
 }
 
 function _setup_default_highlights() 
@@ -148,6 +149,7 @@ function M.setup(user_config)
    -- setup commands
    vim.cmd("command! CTOpen        lua require('calltree.ui').open_calltree()")
    vim.cmd("command! STOpen        lua require('calltree.ui').open_symboltree()")
+   vim.cmd("command! CTToggle      lua require('calltree.ui').toggle_panel()")
    vim.cmd("command! CTClose       lua require('calltree.ui').close_calltree()")
    vim.cmd("command! STClose       lua require('calltree.ui').close_symboltree()")
    vim.cmd("command! CTExpand      lua require('calltree.ui').expand()")

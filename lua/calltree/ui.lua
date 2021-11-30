@@ -151,6 +151,37 @@ M.close_calltree = function()
     M.calltree_win = nil
 end
 
+M.toggle_panel = function(keep_open)
+    local win       = vim.api.nvim_get_current_win()
+    local tab       = vim.api.nvim_win_get_tabpage(win)
+    local ui_state  = M.ui_state_registry[tab]
+    if ui_state == nil then
+        ui_state = {}
+        M.ui_state_registry[tab] = ui_state
+    end
+
+    local buf_name = "calltree: empty"
+    if ui_state.calltree_dir ~= nil then
+        buf_name = direction_map[ui_state.calltree_dir].buf_name
+    end
+
+    ui_state.calltree_buf =
+        ui_buf._setup_buffer(buf_name, ui_state.calltree_buf, tab)
+    if ui_state.calltree_handle ~= nil then
+        tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
+    end
+    ui_state.calltree_tab = tab
+
+    ui_state.symboltree_buf =
+        ui_buf._setup_buffer("documentSymbols", ui_state.symboltree_buf, tab)
+    if ui_state.symboltree_handle ~= nil then
+        tree.write_tree(ui_state.symboltree_handle, ui_state.symboltree_buf)
+    end
+
+    ui_state.symboltree_tab = tab
+    ui_win._toggle_panel(ui_state, keep_open)
+end
+
 -- open_symboltree will open a symboltree ui in the current tab.
 --
 -- if a valid tree handle and buffer exists in the tab's calltree

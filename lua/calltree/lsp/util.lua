@@ -199,7 +199,6 @@ function M.gather_symbols_async(root, children, ui_state, callback)
             local params = {
                 query = node.name,
             }
-            print(node.name)
             M.multi_client_request(
                 ui_state.active_lsp_clients,
                 "workspace/symbol",

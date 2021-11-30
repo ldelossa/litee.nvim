@@ -63,6 +63,22 @@ This is what the "calltree.setup()" function does.
 Once the calltree handlers are in place issuing the normal "vim.lsp.buf.incoming_calls" 
 and "vim.lsp.buf.outgoing_calls" will open the calltree window.
 
+The calltree UI can be used as a unified panel or as individual elements. 
+
+A unified panel would feel similar to IDE's such as VSCode where you can "hide"
+and "unhide" a persistent informational panel. Both the symbol tree and the call tree will
+always be present in the toggled panel, unless you manually close a window. 
+Toggling the panel will recreate any closed windows. This functionality
+is provided via the "CTToggle" command.
+
+If you'd rather use each individual component separately this is possible
+too. Utilize the "CTOpen/CTClose" and "STOpen/STClose" commands. These commands
+will only open and close the respective UI components.
+
+By default performing a "call-hierarchy" request for incoming or outgoing calls
+does not assume a unified panel. If you'd like it to open the unified panel on LSP requests
+then set "unified_panel" to true in the config. See *calltree-config*
+
 From there check out *calltree-commands* to manipulate the calltree UI.
 
 ====================================================================================
@@ -76,8 +92,15 @@ Calltree exports several commands for manipulating the calltree UI.
 
                                                                           *:CTClose*       
 :CTClose       
-    Closes the calltree window
+    Closes the calltree window.
                                                                            *:STOpen*
+
+                                                                         *:CTToggle*
+:CTToggle
+    Treats calltree as a persistent panel and toggles it open or close.
+    Using this command will always toggle both the symboltree and calltree
+    components as if they were a single unified panel.
+
 :STOpen                                         
     Open the symboltree window with the most recent outline tree present. 
 
@@ -219,6 +242,9 @@ The config table is described below:
         -- set this to false for large codebases to speed up opening
         -- the calltree.
         resolve_symbols = true
+        -- if set to true calling LSP functions which trigger calltree UI 
+        -- will open the unified panel. see *calltree-usage* for details.
+        open_panel = false
     }
 
 ====================================================================================

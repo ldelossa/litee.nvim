@@ -68,12 +68,20 @@ M.ch_lsp_handler = function(direction)
         if config.resolve_symbols then
             lsp_util.gather_symbols_async(root, children, ui_state, function()
                 tree.add_node(ui_state.calltree_handle, root, children)
-                ui.open_calltree()
+                if config.unified_panel then
+                    ui.toggle_panel(true)
+                else
+                    ui.open_calltree()
+                end
             end)
             return
         end
         tree.add_node(ui_state.calltree_handle, root, children)
-        ui.open_calltree()
+        if config.unified_panel then
+            ui.toggle_panel(true)
+        else
+            ui.open_calltree()
+        end
    end
 end
 
@@ -86,14 +94,14 @@ M.ws_lsp_handler = function()
             return
         end
 
-        cur_win = vim.api.nvim_get_current_win()
+        local cur_win = vim.api.nvim_get_current_win()
 
-        cur_tabpage = vim.api.nvim_win_get_tabpage(cur_win)
+        local cur_tabpage = vim.api.nvim_win_get_tabpage(cur_win)
 
-        ui_state = ui.ui_state_registry[cur_tabpage] 
+        local ui_state = ui.ui_state_registry[cur_tabpage]
         if ui_state == nil then
             ui_state = {}
-            ui.ui_state_registry[cur_tabpage] = ui_sate
+            ui.ui_state_registry[cur_tabpage] = ui_state
         end
 
         -- snag the lsp clients from the buffer issuing the
@@ -127,7 +135,11 @@ M.ws_lsp_handler = function()
 
         tree.add_node(ui_state.symboltree_handle, root, nil, true)
 
-        ui.open_symboltree()
+        if config.unified_panel then
+            ui.toggle_panel(true)
+        else
+            ui.open_symboltree()
+        end
     end
 end
 
