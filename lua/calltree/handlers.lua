@@ -52,8 +52,10 @@ function M.calltree_expand_handler(node, linenr, direction, ui_state)
             lsp_util.gather_symbols_async(node, children, ui_state, function()
                 tree.add_node(ui_state.calltree_handle, node, children)
                 tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
+                vim.api.nvim_win_set_cursor(ui_state.calltree_win, linenr)
                 ui.open_calltree()
             end)
+            vim.api.nvim_win_set_cursor(ui_state.calltree_win, linenr)
             return
         end
 
