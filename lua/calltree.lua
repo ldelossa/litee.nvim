@@ -148,8 +148,8 @@ function M.setup(user_config)
     vim.cmd([[au TextChanged,BufEnter,BufWritePost * lua require('calltree.ui').refresh_symbol_tree()]])
 
    -- setup commands
-   vim.cmd("command! CTOpen        lua require('calltree.ui').open_calltree()")
-   vim.cmd("command! STOpen        lua require('calltree.ui').open_symboltree()")
+   vim.cmd("command! CTOpen        lua require('calltree.ui').open_to('calltree')")
+   vim.cmd("command! STOpen        lua require('calltree.ui').open_to('symboltree')")
    vim.cmd("command! CTToggle      lua require('calltree.ui').toggle_panel()")
    vim.cmd("command! CTClose       lua require('calltree.ui').close_calltree()")
    vim.cmd("command! STClose       lua require('calltree.ui').close_symboltree()")

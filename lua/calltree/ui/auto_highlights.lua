@@ -19,7 +19,13 @@ M.higlight_ns = vim.api.nvim_create_namespace("calltree-hl")
 -- ui_state : table - the current calltree ui_state provided by the ui
 -- module.
 function M.highlight(node, set, ui_state)
+    if not vim.api.nvim_win_is_valid(ui_state.invoking_symboltree_win) then
+        return
+    end
     local buf = vim.api.nvim_win_get_buf(ui_state.invoking_symboltree_win)
+    if not vim.api.nvim_buf_is_valid(buf) then
+        return
+    end
     vim.api.nvim_buf_clear_namespace(
         buf,
         M.higlight_ns,
