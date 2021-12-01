@@ -53,7 +53,6 @@ function M.calltree_expand_handler(node, linenr, direction, ui_state)
                 tree.add_node(ui_state.calltree_handle, node, children)
                 tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
                 vim.api.nvim_win_set_cursor(ui_state.calltree_win, linenr)
-                ui.open_calltree()
             end)
             vim.api.nvim_win_set_cursor(ui_state.calltree_win, linenr)
             return
@@ -101,10 +100,18 @@ function M.calltree_switch_handler(direction, ui_state)
           table.insert(children, child)
         end
 
+        if config.resolve_symbols then
+            lsp_util.gather_symbols_async(root, children, ui_state, function()
+                tree.add_node(ui_state.calltree_handle, root, children)
+                tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
+                vim.api.nvim_buf_set_name(ui_state.calltree_buf, direction_map[direction].buf_name .. ":" .. ui_state.calltree_tab)
+            end)
+            return
+        end
+
         -- add the new root, its children, and rewrite the
         -- tree (will open the calltree ui if necessary).
         tree.add_node(ui_state.calltree_handle, root, children)
-
         tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
         vim.api.nvim_buf_set_name(ui_state.calltree_buf, direction_map[direction].buf_name .. ":" .. ui_state.calltree_tab)
     end

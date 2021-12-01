@@ -7,7 +7,7 @@ local M = {}
 
 -- static_layout defines the order of calltree windows in
 -- the ui.
-local static_layout = {calltree=1, symboltree=2}
+local static_layout = {symboltree=1, calltree=2}
 
 -- type_to_ui_state_win is a helper map which maps the
 -- window type being opened to the win field on the ui_state.

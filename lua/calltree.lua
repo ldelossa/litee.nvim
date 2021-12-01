@@ -12,7 +12,8 @@ M.config = {
     icon_highlights = {},
     hls = {},
     resolve_symbols = true,
-    unified_panel = false
+    unified_panel = false,
+    auto_highlight = true
 }
 
 function _setup_default_highlights() 

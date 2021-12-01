@@ -9,6 +9,7 @@ local deets = require('calltree.ui.details')
 local hover = require('calltree.ui.hover')
 local tree  = require('calltree.tree.tree')
 local handlers = require('calltree.handlers')
+local au_hl = require('calltree.ui.auto_highlights')
 
 local M = {}
 
@@ -457,6 +458,24 @@ M.details = function()
         direction = ui_state.calltree_dir
     end
     deets.details_popup(node, direction)
+end
+
+M.auto_highlight = function(set)
+    local buf    = vim.api.nvim_get_current_buf()
+    local win    = vim.api.nvim_get_current_win()
+    local tab    = vim.api.nvim_win_get_tabpage(win)
+    local linenr = vim.api.nvim_win_get_cursor(win)
+    local tree_type   = M.get_type_from_buf(tab, buf)
+    local tree_handle = M.get_tree_from_buf(tab, buf)
+    local node = marshal.marshal_line(linenr, tree_handle)
+    if node == nil then
+        return
+    end
+    if tree_type ~= "symboltree" then
+        return
+    end
+    local ui_state  = M.ui_state_registry[tab]
+    au_hl.highlight(node, set, ui_state)
 end
 
 -- dumptree will dump the tree datastructure to a

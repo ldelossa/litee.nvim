@@ -10,7 +10,7 @@ function M.close_all_popups()
     require('calltree.ui.details').close_details_popup()
 end
 
-local function map_resize_keys(buffer_handle, opts) 
+local function map_resize_keys(buffer_handle, opts)
     local l = config.layout
     if l == "top" or l == "bottom"  then
         vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Right>", ":vert resize +5<cr>", opts)
@@ -77,6 +77,11 @@ function M._setup_buffer(name, buffer_handle, tab)
     vim.cmd("au BufWinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.jumps').set_jump_hl(false)")
     -- au to close popup with cursor moves or buffer is closed.
     vim.cmd("au CursorMoved,BufWinLeave,WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.buffer').close_all_popups()")
+
+    if config.auto_highlight then
+        vim.cmd("au BufWinLeave,WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui').auto_highlight(false)")
+        vim.cmd("au CursorHold <buffer=" .. buffer_handle .. "> lua require('calltree.ui').auto_highlight(true)")
+    end
 
     -- set buffer local keymaps
     local opts = {silent=true}
