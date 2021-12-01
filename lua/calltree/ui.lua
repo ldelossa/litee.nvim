@@ -1,4 +1,5 @@
 local ct = require('calltree')
+local config = require('calltree').config
 local lsp_util = require('calltree.lsp.util')
 local ui_buf = require('calltree.ui.buffer')
 local ui_win = require('calltree.ui.window')
@@ -109,12 +110,58 @@ M.help = function(open)
     vim.api.nvim_win_set_buf(win, M.help_buf)
 end
 
+-- open_to opens the calltree ui, either a single component
+-- or the unified panel, and moves the cursor to the requested
+-- calltree ui component.
+--
+-- if open_to is called when nvim is focused inside a calltree ui
+-- element the focus will be switched back to the window the ui
+-- was invoked from.
+--
+-- ui : string - the ui component to open and focus, "calltree"
+-- or "symboltree"
+M.open_to = function(ui)
+    local win    = vim.api.nvim_get_current_win()
+    local tab    = vim.api.nvim_win_get_tabpage(win)
+    if ui == "calltree" then
+        local ui_state  = M.ui_state_registry[tab]
+        if ui_state ~= nil then
+            if win == ui_state.calltree_win then
+                vim.api.nvim_set_current_win(ui_state.invoking_calltree_win)
+                return
+            end
+        end
+        if config.unified_panel then
+            M.toggle_panel(true)
+        else
+            M._open_calltree()
+        end
+        local ui_state  = M.ui_state_registry[tab]
+        vim.api.nvim_set_current_win(ui_state.calltree_win)
+    elseif ui == "symboltree" then
+        local ui_state  = M.ui_state_registry[tab]
+        if ui_state ~= nil then
+            if win == ui_state.symboltree_win then
+                vim.api.nvim_set_current_win(ui_state.invoking_symboltree_win)
+                return
+            end
+        end
+        if config.unified_panel then
+            M.toggle_panel(true)
+        else
+            M._open_symboltree()
+        end
+        local ui_state  = M.ui_state_registry[tab]
+        vim.api.nvim_set_current_win(ui_state.symboltree_win)
+    end
+end
+
 -- open_calltree will open a calltree ui in the current tab.
 --
 -- if a valid tree handle and buffer exists in the tab's calltree
 -- state then the tree will be written to the buffer before opening
 -- the window.
-M.open_calltree = function()
+M._open_calltree = function()
     local win    = vim.api.nvim_get_current_win()
     local tab    = vim.api.nvim_win_get_tabpage(win)
     local ui_state  = M.ui_state_registry[tab]
@@ -188,7 +235,7 @@ end
 -- if a valid tree handle and buffer exists in the tab's calltree
 -- state then the tree will be written to the buffer before opening
 -- the window.
-M.open_symboltree = function()
+M._open_symboltree = function()
     local win    = vim.api.nvim_get_current_win()
     local tab    = vim.api.nvim_win_get_tabpage(win)
     local ui_state  = M.ui_state_registry[tab]

@@ -68,20 +68,12 @@ M.ch_lsp_handler = function(direction)
         if config.resolve_symbols then
             lsp_util.gather_symbols_async(root, children, ui_state, function()
                 tree.add_node(ui_state.calltree_handle, root, children)
-                if config.unified_panel then
-                    ui.toggle_panel(true)
-                else
-                    ui.open_calltree()
-                end
+                ui.open_to("calltree")
             end)
             return
         end
         tree.add_node(ui_state.calltree_handle, root, children)
-        if config.unified_panel then
-            ui.toggle_panel(true)
-        else
-            ui.open_calltree()
-        end
+        ui.open_to("calltree")
    end
 end
 
@@ -121,11 +113,14 @@ M.ws_lsp_handler = function()
         ui_state.symboltree_handle = tree.new_tree("symboltree")
 
         -- create a synthetic document symbol to act as a root
+        local synthetic_range = {}
+        synthetic_range["start"] = {line=0,character=0}
+        synthetic_range["end"] = {line=0,character=0}
         local synthetic_root_ds = {
             name = lsp_util.relative_path_from_uri(ctx.params.textDocument.uri),
             kind = 1,
-            range = {start = {line = -1}}, -- provide this so keyify works in tree_node.add
-            selectionRange = {start = {line = -1}}, -- provide this so keyify works in tree_node.add
+            range = synthetic_range, -- provide this so keyify works in tree_node.add
+            selectionRange = synthetic_range, -- provide this so keyify works in tree_node.add
             children = result,
             uri = ctx.params.textDocument.uri,
             detail = "file"
@@ -138,7 +133,7 @@ M.ws_lsp_handler = function()
         if config.unified_panel then
             ui.toggle_panel(true)
         else
-            ui.open_symboltree()
+            ui._open_symboltree()
         end
     end
 end

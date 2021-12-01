@@ -163,6 +163,10 @@ function M.gather_symbols_async_handler(node, co)
             coroutine.resume(co, nil)
             return
         end
+        if result == nil then
+            coroutine.resume(co, nil)
+            return
+        end
 
         local start_line, uri = "", ""
         if node.call_hierarchy_item ~= nil then
