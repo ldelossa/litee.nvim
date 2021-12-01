@@ -244,7 +244,10 @@ The config table is described below:
         resolve_symbols = true
         -- if set to true calling LSP functions which trigger calltree UI 
         -- will open the unified panel. see *calltree-usage* for details.
-        open_panel = false
+        unified_panel = false
+        -- automatic highlighting and window position updates when 
+        -- navigating the symboltree UI. Set to false to disable.
+        auto_highlight = true
     }
 
 ====================================================================================

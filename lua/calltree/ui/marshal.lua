@@ -128,6 +128,12 @@ end
 -- returns:
 --   tree.Node - the marshaled tree.Node table.
 function M.marshal_line(linenr, tree)
+    if M.buf_line_map == nil then
+        return nil
+    end
+    if M.buf_line_map[tree] == nil then
+        return nil
+    end
     local node = M.buf_line_map[tree][linenr[1]]
     return node
 end
