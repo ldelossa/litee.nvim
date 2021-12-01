@@ -199,35 +199,40 @@ M.close_calltree = function()
     M.calltree_win = nil
 end
 
-M.toggle_panel = function(keep_open)
-    local win       = vim.api.nvim_get_current_win()
-    local tab       = vim.api.nvim_win_get_tabpage(win)
-    local ui_state  = M.ui_state_registry[tab]
-    if ui_state == nil then
-        ui_state = {}
-        M.ui_state_registry[tab] = ui_state
+-- _smart_close is a convenience function which closes
+-- the calltree ui when the cursor is inside of it.
+--
+-- useful when mapped to a buffer local key binding
+-- to quickly close the window after jumped too.
+M._smart_close = function()
+    local buf    = vim.api.nvim_get_current_buf()
+    local win    = vim.api.nvim_get_current_win()
+    local tab    = vim.api.nvim_win_get_tabpage(win)
+    local tree_type   = M.get_type_from_buf(tab, buf)
+    if tree_type == "calltree" then
+        if ui_state.calltree_win ~= nil then
+            if vim.api.nvim_win_is_valid(ui_state.calltree_win) then
+                vim.api.nvim_win_close(ui_state.calltree_win, true)
+            end
+        end
+        M.calltree_win = nil
+        if vim.api.nvim_win_is_valid(ui_state.invoking_calltree_win) then
+            vim.api.nvim_set_current_win(ui_state.invoking_calltree_win)
+        end
+        return
     end
-
-    local buf_name = "calltree: empty"
-    if ui_state.calltree_dir ~= nil then
-        buf_name = direction_map[ui_state.calltree_dir].buf_name
+    if tree_type == "symboltree" then
+        if ui_state.symboltree_win ~= nil then
+            if vim.api.nvim_win_is_valid(ui_state.symboltree_win) then
+                vim.api.nvim_win_close(ui_state.symboltree_win, true)
+            end
+        end
+        ui_state.symboltree_win = nil
+        if vim.api.nvim_win_is_valid(ui_state.invoking_symboltree_win) then
+            vim.api.nvim_set_current_win(ui_state.invoking_symboltree_win)
+        end
+        return
     end
-
-    ui_state.calltree_buf =
-        ui_buf._setup_buffer(buf_name, ui_state.calltree_buf, tab)
-    if ui_state.calltree_handle ~= nil then
-        tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
-    end
-    ui_state.calltree_tab = tab
-
-    ui_state.symboltree_buf =
-        ui_buf._setup_buffer("documentSymbols", ui_state.symboltree_buf, tab)
-    if ui_state.symboltree_handle ~= nil then
-        tree.write_tree(ui_state.symboltree_handle, ui_state.symboltree_buf)
-    end
-
-    ui_state.symboltree_tab = tab
-    ui_win._toggle_panel(ui_state, keep_open)
 end
 
 -- open_symboltree will open a symboltree ui in the current tab.
@@ -288,6 +293,43 @@ M.close_symboltree = function()
         end
     end
     ui_state.symboltree_win = nil
+end
+
+-- toggle_panel will open and close the unified panel
+-- the unified panel treats all calltree ui elements as 
+-- a single panel similar to  other IDE's.
+--
+-- keep_open : bool - if true, and the panel is open,
+-- the panel will be left open when this function terminates.
+M.toggle_panel = function(keep_open)
+    local win       = vim.api.nvim_get_current_win()
+    local tab       = vim.api.nvim_win_get_tabpage(win)
+    local ui_state  = M.ui_state_registry[tab]
+    if ui_state == nil then
+        ui_state = {}
+        M.ui_state_registry[tab] = ui_state
+    end
+
+    local buf_name = "calltree: empty"
+    if ui_state.calltree_dir ~= nil then
+        buf_name = direction_map[ui_state.calltree_dir].buf_name
+    end
+
+    ui_state.calltree_buf =
+        ui_buf._setup_buffer(buf_name, ui_state.calltree_buf, tab)
+    if ui_state.calltree_handle ~= nil then
+        tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
+    end
+    ui_state.calltree_tab = tab
+
+    ui_state.symboltree_buf =
+        ui_buf._setup_buffer("documentSymbols", ui_state.symboltree_buf, tab)
+    if ui_state.symboltree_handle ~= nil then
+        tree.write_tree(ui_state.symboltree_handle, ui_state.symboltree_buf)
+    end
+
+    ui_state.symboltree_tab = tab
+    ui_win._toggle_panel(ui_state, keep_open)
 end
 
 -- collapse will collapse a symbol at the current cursor
@@ -507,6 +549,15 @@ M.details = function()
     deets.details_popup(node, direction)
 end
 
+-- auto_highlight will automatically highlight
+-- the symbol under the cursor in symboltree
+-- if set is true.
+--
+-- if set is false it will remove any highlights
+-- in the source code's buffer.
+--
+-- set : bool - whether to remove or set highlights
+-- for the symbol under the cursor in a symboltree.
 M.auto_highlight = function(set)
     local buf    = vim.api.nvim_get_current_buf()
     local win    = vim.api.nvim_get_current_win()
