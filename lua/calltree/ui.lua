@@ -71,6 +71,9 @@ end
 -- the type for.
 M.get_tree_from_buf = function(tab, buf)
     local ui_state = M.ui_state_registry[tab]
+    if ui_state == nil then
+        return nil
+    end
     local type = M.get_type_from_buf(tab, buf)
     if type == "calltree" then
         return ui_state.calltree_handle
@@ -130,6 +133,10 @@ M.open_to = function(ui)
                 vim.api.nvim_set_current_win(ui_state.invoking_calltree_win)
                 return
             end
+            if vim.api.nvim_win_is_valid(ui_state.calltree_win) then
+                vim.api.nvim_set_current_win(ui_state.calltree_win)
+                return
+            end
         end
         if config.unified_panel then
             M.toggle_panel(true)
@@ -143,6 +150,10 @@ M.open_to = function(ui)
         if ui_state ~= nil then
             if win == ui_state.symboltree_win then
                 vim.api.nvim_set_current_win(ui_state.invoking_symboltree_win)
+                return
+            end
+            if vim.api.nvim_win_is_valid(ui_state.symboltree_win) then
+                vim.api.nvim_set_current_win(ui_state.symboltree_win)
                 return
             end
         end
@@ -296,7 +307,7 @@ M.close_symboltree = function()
 end
 
 -- toggle_panel will open and close the unified panel
--- the unified panel treats all calltree ui elements as 
+-- the unified panel treats all calltree ui elements as
 -- a single panel similar to  other IDE's.
 --
 -- keep_open : bool - if true, and the panel is open,
@@ -574,6 +585,42 @@ M.auto_highlight = function(set)
     end
     local ui_state  = M.ui_state_registry[tab]
     au_hl.highlight(node, set, ui_state)
+end
+
+-- source tracking updates the symboltree ui
+-- a source code line is encountered and a symbol
+-- exists for the line.
+M.source_tracking = function ()
+    local buf    = vim.api.nvim_get_current_buf()
+    local win    = vim.api.nvim_get_current_win()
+    local tab    = vim.api.nvim_win_get_tabpage(win)
+    local linenr = vim.api.nvim_win_get_cursor(win)
+    local ui_state  = M.ui_state_registry[tab]
+    if ui_state == nil then
+        return
+    end
+
+    local tree_type = M.get_type_from_buf(tab, buf)
+    if tree_type == "calltree" or tree_type == "symboltree" then
+        return
+    end
+    local tree_handle = ui_state.symboltree_handle
+    local map = marshal.source_to_buf_line[tree_handle]
+
+    if map == nil then
+        return
+    end
+
+    local symboltree_line = map[linenr[1]]
+    if
+        symboltree_line ~= nil
+        and ui_state.symboltree_win ~= nil
+        and vim.api.nvim_win_is_valid(ui_state.symboltree_win)
+    then
+        vim.api.nvim_win_set_cursor(ui_state.symboltree_win, {symboltree_line, 0})
+        vim.cmd("redraw!")
+        return
+    end
 end
 
 -- dumptree will dump the tree datastructure to a

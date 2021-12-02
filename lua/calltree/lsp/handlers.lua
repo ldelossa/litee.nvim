@@ -130,11 +130,25 @@ M.ws_lsp_handler = function()
 
         tree.add_node(ui_state.symboltree_handle, root, nil, true)
 
+        local cursor = nil
+        if vim.api.nvim_win_is_valid(ui_state.symboltree_win) then
+            cursor = vim.api.nvim_win_get_cursor(ui_state.symboltree_win)
+        end
+
         if config.unified_panel then
             ui.toggle_panel(true)
         else
             ui._open_symboltree()
         end
+        -- restore cursor if possible
+        if cursor ~= nil then
+           local count = vim.api.nvim_buf_line_count(ui_state.symboltree_buf)
+           if  count ~= nil
+               and vim.api.nvim_buf_is_valid(ui_state.symboltree_buf)
+               and vim.api.nvim_buf_line_count(ui_state.symboltree_buf) >= cursor[1] then
+                vim.api.nvim_win_set_cursor(ui_state.symboltree_win, cursor)
+            end
+       end
     end
 end
 
