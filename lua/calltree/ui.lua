@@ -598,7 +598,6 @@ end
 -- a source code line is encountered and a symbol
 -- exists for the line.
 M.source_tracking = function ()
-    local buf    = vim.api.nvim_get_current_buf()
     local win    = vim.api.nvim_get_current_win()
     local tab    = vim.api.nvim_win_get_tabpage(win)
     local linenr = vim.api.nvim_win_get_cursor(win)
@@ -607,26 +606,41 @@ M.source_tracking = function ()
         return
     end
 
-    local tree_type = M.get_type_from_buf(tab, buf)
-    if tree_type == "calltree" or tree_type == "symboltree" then
-        return
-    end
-    local tree_handle = ui_state.symboltree_handle
-    local map = marshal.source_to_buf_line[tree_handle]
-
-    if map == nil then
-        return
-    end
-
-    local symboltree_line = map[linenr[1]]
+    local tree_type = M.get_type_from_buf(tab, ui_state.symboltree_buf)
     if
-        symboltree_line ~= nil
-        and ui_state.symboltree_win ~= nil
-        and vim.api.nvim_win_is_valid(ui_state.symboltree_win)
+        tree_type ~= "symboltree" or
+        ui_state.symboltree_win == nil or
+        not vim.api.nvim_win_is_valid(ui_state.symboltree_win)
+        or win == ui_state.calltree_win
+        or win == ui_state.symboltree_win
     then
-        vim.api.nvim_win_set_cursor(ui_state.symboltree_win, {symboltree_line, 0})
-        vim.cmd("redraw!")
         return
+    end
+
+    local tree_handle = ui_state.symboltree_handle
+
+    -- if there's a direct match for this line, use this
+    local line = marshal.source_to_buf_line[tree_handle][linenr[1]]
+    if line ~= nil then
+            vim.api.nvim_win_set_cursor(ui_state.symboltree_win, {line, 0})
+            vim.cmd("redraw!")
+            return
+    end
+
+    -- no direct match for the line, so search for symbols with a range
+    -- interval overlapping our line number.
+    local buf_lines = marshal.buf_line_map[tree_handle]
+    if buf_lines == nil then
+        return
+    end
+    for line, node in pairs(buf_lines) do
+        if linenr[1] >= node.document_symbol.range["start"].line
+            and linenr[1] <= node.document_symbol.range["end"].line
+        then
+            vim.api.nvim_win_set_cursor(ui_state.symboltree_win, {line, 0})
+            vim.cmd("redraw!")
+            return
+        end
     end
 end
 
