@@ -225,7 +225,8 @@ M._smart_close = function()
     local buf    = vim.api.nvim_get_current_buf()
     local win    = vim.api.nvim_get_current_win()
     local tab    = vim.api.nvim_win_get_tabpage(win)
-    local tree_type   = M.get_type_from_buf(tab, buf)
+    local tree_type  = M.get_type_from_buf(tab, buf)
+    local ui_state  = M.ui_state_registry[tab]
     if tree_type == "calltree" then
         if ui_state.calltree_win ~= nil then
             if vim.api.nvim_win_is_valid(ui_state.calltree_win) then
