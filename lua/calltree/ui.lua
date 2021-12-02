@@ -133,7 +133,10 @@ M.open_to = function(ui)
                 vim.api.nvim_set_current_win(ui_state.invoking_calltree_win)
                 return
             end
-            if vim.api.nvim_win_is_valid(ui_state.calltree_win) then
+            if
+                ui_state.calltree_win ~= nil
+                and vim.api.nvim_win_is_valid(ui_state.calltree_win)
+            then
                 vim.api.nvim_set_current_win(ui_state.calltree_win)
                 return
             end
@@ -143,7 +146,7 @@ M.open_to = function(ui)
         else
             M._open_calltree()
         end
-        local ui_state  = M.ui_state_registry[tab]
+        ui_state  = M.ui_state_registry[tab]
         vim.api.nvim_set_current_win(ui_state.calltree_win)
     elseif ui == "symboltree" then
         local ui_state  = M.ui_state_registry[tab]
@@ -152,7 +155,10 @@ M.open_to = function(ui)
                 vim.api.nvim_set_current_win(ui_state.invoking_symboltree_win)
                 return
             end
-            if vim.api.nvim_win_is_valid(ui_state.symboltree_win) then
+            if
+                ui_state.symboltree_win ~= nil
+                and vim.api.nvim_win_is_valid(ui_state.symboltree_win)
+            then
                 vim.api.nvim_set_current_win(ui_state.symboltree_win)
                 return
             end
@@ -162,7 +168,7 @@ M.open_to = function(ui)
         else
             M._open_symboltree()
         end
-        local ui_state  = M.ui_state_registry[tab]
+        ui_state  = M.ui_state_registry[tab]
         vim.api.nvim_set_current_win(ui_state.symboltree_win)
     end
 end
