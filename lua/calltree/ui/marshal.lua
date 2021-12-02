@@ -16,8 +16,14 @@ M.glyphs = {
 }
 
 -- buf_line_map keeps a mapping between marshaled
--- buffer lines and the node objects
+-- buffer lines and the node objects for a given tree.
 M.buf_line_map = {}
+
+-- maps source code lines to buffer lines
+-- for a given tree.
+--
+-- currently only useful for symboltree.
+M.source_to_buf_line = {}
 
 -- marshal_node takes a node and marshals
 -- it into a UI buffer line.
@@ -156,11 +162,21 @@ function M.marshal_tree(buf_handle, lines, node, tree, virtual_text_lines, final
         virtual_text_lines = {}
         -- create a new line mapping
         M.buf_line_map[tree] = {}
+        M.source_to_buf_line[tree] = {}
     end
     local line, virtual_text = M.marshal_node(node, final)
     table.insert(lines, line)
     table.insert(virtual_text_lines, virtual_text)
     M.buf_line_map[tree][#lines] = node
+
+    -- track the source code line that maps to
+    -- this is really only used for symboltree at
+    -- the moment.
+    local loc = lsp_util.resolve_location(node)
+    if loc ~= nil then
+        local start_line = loc["range"]["start"].line
+        M.source_to_buf_line[tree][start_line+1] = #lines
+    end
 
     -- if we are an expanded node or we are the root (always expand)
     -- recurse

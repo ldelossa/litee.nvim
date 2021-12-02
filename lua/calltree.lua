@@ -147,6 +147,9 @@ function M.setup(user_config)
     -- will keep the outline view up to date when moving around buffers.
     vim.cmd([[au TextChanged,BufEnter,BufWritePost * lua require('calltree.ui').refresh_symbol_tree()]])
 
+    -- will enable symboltree ui tracking with source code lines.
+    vim.cmd([[au CursorHold * lua require('calltree.ui').source_tracking()]])
+
    -- setup commands
    vim.cmd("command! CTOpen        lua require('calltree.ui').open_to('calltree')")
    vim.cmd("command! STOpen        lua require('calltree.ui').open_to('symboltree')")
