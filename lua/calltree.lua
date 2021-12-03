@@ -165,6 +165,7 @@ function M.setup(user_config)
    vim.cmd("command! CTDetails     lua require('calltree.ui').details()")
    vim.cmd("command! CTClearHL     lua require('calltree.ui.jumps').set_jump_hl(false)")
    vim.cmd("command! CTDumpTree    lua require('calltree.ui').dump_tree()")
+   vim.cmd("command! CTDumpNode    lua require('calltree.ui').dump_node()")
 end
 
 -- the configured icon set after setup() is ran.

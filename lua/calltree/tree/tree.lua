@@ -199,12 +199,12 @@ end
 -- buffer for debugging.
 --
 -- tree : tree_handle - a handle to a valid tree
-function M.dump_tree(tree)
+function M.dump_tree(node)
     local buf = vim.api.nvim_create_buf(true, false)
     vim.api.nvim_buf_set_name(buf, "calltree-dump")
     vim.cmd("botright split")
     local win = vim.api.nvim_get_current_win()
-    local lines = vim.fn.split(vim.inspect(reg[tree].root), "\n")
+    local lines = vim.fn.split(vim.inspect(node), "\n")
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
     vim.api.nvim_win_set_buf(win, buf)
     vim.api.nvim_set_current_win(win)

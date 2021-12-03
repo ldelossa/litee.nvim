@@ -624,7 +624,12 @@ M.dump_tree = function()
     if ctx.tree_handle == nil then
         return
     end
-    tree.dump_tree(ctx.tree_handle)
+    tree.dump_tree(tree.get_tree(ctx.tree_handle).root)
+end
+
+M.dump_node = function()
+    local ctx = ui_req_ctx()
+    tree.dump_tree(ctx.node)
 end
 
 return M
