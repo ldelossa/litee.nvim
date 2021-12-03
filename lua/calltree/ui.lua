@@ -542,11 +542,13 @@ M.details = function()
 end
 
 -- auto_highlight will automatically highlight
--- the symbol under the cursor in symboltree
--- if set is true.
+-- symbols in the source code files when the symbol
+-- is selected in the symboltree.
 --
 -- if set is false it will remove any highlights
 -- in the source code's buffer.
+--
+-- this method is intended for use as an autocommand.
 --
 -- set : bool - whether to remove or set highlights
 -- for the symbol under the cursor in a symboltree.
@@ -563,9 +565,12 @@ M.auto_highlight = function(set)
     au_hl.highlight(ctx.node, set, ctx.state)
 end
 
--- source tracking updates the symboltree ui
--- a source code line is encountered and a symbol
--- exists for the line.
+-- source_tracking is a method for keeping the cursor position
+-- and relevant highlighting within a source code file in sync
+-- with the cursor position and relevant highlighting within the
+-- symboltree, or vice versa.
+--
+-- this method is intended for use as an autocommand.
 M.source_tracking = function ()
     local ctx = ui_req_ctx()
     if ctx.state == nil then
@@ -586,7 +591,7 @@ M.source_tracking = function ()
     ctx.tree_handle = ctx.state.symboltree_handle
 
     -- if there's a direct match for this line, use this
-    local source_map = marshal.source_to_buf_line[ctx.tree_handle]
+    local source_map = marshal.source_line_map[ctx.tree_handle]
     if source_map == nil then
         return
     end
@@ -603,6 +608,7 @@ M.source_tracking = function ()
     if buf_lines == nil then
         return
     end
+---@diagnostic disable-next-line: redefined-local
     for line, node in pairs(buf_lines) do
         if ctx.linenr[1] >= node.document_symbol.range["start"].line
             and ctx.linenr[1] <= node.document_symbol.range["end"].line
