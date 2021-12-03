@@ -620,7 +620,11 @@ M.source_tracking = function ()
     local tree_handle = ui_state.symboltree_handle
 
     -- if there's a direct match for this line, use this
-    local line = marshal.source_to_buf_line[tree_handle][linenr[1]]
+    local source_map = marshal.source_to_buf_line[tree_handle]
+    if source_map == nil then
+        return
+    end
+    local line = source_map[linenr[1]]
     if line ~= nil then
             vim.api.nvim_win_set_cursor(ui_state.symboltree_win, {line, 0})
             vim.cmd("redraw!")
