@@ -53,6 +53,9 @@ M.ui_state_registry = {}
 -- the type for.
 M.get_type_from_buf = function(tab, buf)
     local ui_state = M.ui_state_registry[tab]
+    if ui_state == nil then
+        return nil
+    end
     if buf == ui_state.calltree_buf then
         return "calltree"
     end
@@ -83,6 +86,40 @@ M.get_tree_from_buf = function(tab, buf)
     end
 end
 
+-- ui_req_ctx creates a context table summarizing the
+-- environment when a calltree.nvim request is being
+-- made.
+--
+-- see return type for details.
+local function ui_req_ctx()
+    local buf    = vim.api.nvim_get_current_buf()
+    local win    = vim.api.nvim_get_current_win()
+    local tab    = vim.api.nvim_win_get_tabpage(win)
+    local linenr = vim.api.nvim_win_get_cursor(win)
+    local tree_type   = M.get_type_from_buf(tab, buf)
+    local tree_handle = M.get_tree_from_buf(tab, buf)
+    local node = marshal.marshal_line(linenr, tree_handle)
+    local ui_state = M.ui_state_registry[tab]
+    return {
+        -- the buffer where the calltree method is being invoked
+        buf = buf,
+        -- the window where the calltree method is being invoked
+        win = win,
+        -- the tab where the calltree method is being invoked
+        tab = tab,
+        -- the line where the calltree method is being invoked
+        linenr = linenr,
+        -- if inside a calltree element, the type of calltree element
+        tree_type = tree_type,
+        -- if inside a calltree element, the handle to the tree
+        tree_handle = tree_handle,
+        -- if inside a calltree element, the node at the current line
+        node = node,
+        -- the current ui state for the given tab
+        state = ui_state
+    }
+end
+
 -- a buffer with help contents that will be swapped into
 -- a calltree window when requested.
 M.help_buf = nil
@@ -94,23 +131,18 @@ M.help_buf = nil
 -- closing really means, swap the calltree window to the
 -- outline buffer.
 M.help = function(open)
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local ui_state  = M.ui_state_registry[tab]
-    if ui_state == nil then
-        return
-    end
+    local ctx = ui_req_ctx()
     if not open then
-        if ui_state.calltree_win == win then
-            vim.api.nvim_win_set_buf(win, ui_state.calltree_buf)
-        elseif ui_state.symboltree_win == win then
-            vim.api.nvim_win_set_buf(win, ui_state.symboltree_buf)
+        if ctx.state.calltree_win == ctx.win then
+            vim.api.nvim_win_set_buf(ctx.win, ctx.state.calltree_buf)
+        elseif ctx.state.symboltree_win == ctx.win then
+            vim.api.nvim_win_set_buf(ctx.win, ctx.state.symboltree_buf)
         end
         return
     end
     M.help_buf =
         help_buf._setup_help_buffer(M.help_buf)
-    vim.api.nvim_win_set_buf(win, M.help_buf)
+    vim.api.nvim_win_set_buf(ctx.win, M.help_buf)
 end
 
 -- open_to opens the calltree ui, either a single component
@@ -124,12 +156,11 @@ end
 -- ui : string - the ui component to open and focus, "calltree"
 -- or "symboltree"
 M.open_to = function(ui)
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
+    local ctx = ui_req_ctx()
     if ui == "calltree" then
-        local ui_state  = M.ui_state_registry[tab]
+        local ui_state = M.ui_state_registry[ctx.tab]
         if ui_state ~= nil then
-            if win == ui_state.calltree_win then
+            if ctx.win == ui_state.calltree_win then
                 vim.api.nvim_set_current_win(ui_state.invoking_calltree_win)
                 return
             end
@@ -146,12 +177,12 @@ M.open_to = function(ui)
         else
             M._open_calltree()
         end
-        ui_state  = M.ui_state_registry[tab]
+        ui_state = M.ui_state_registry[ctx.tab]
         vim.api.nvim_set_current_win(ui_state.calltree_win)
     elseif ui == "symboltree" then
-        local ui_state  = M.ui_state_registry[tab]
+        local ui_state = M.ui_state_registry[ctx.tab]
         if ui_state ~= nil then
-            if win == ui_state.symboltree_win then
+            if ctx.win == ui_state.symboltree_win then
                 vim.api.nvim_set_current_win(ui_state.invoking_symboltree_win)
                 return
             end
@@ -168,7 +199,7 @@ M.open_to = function(ui)
         else
             M._open_symboltree()
         end
-        ui_state  = M.ui_state_registry[tab]
+        ui_state = M.ui_state_registry[ctx.tab]
         vim.api.nvim_set_current_win(ui_state.symboltree_win)
     end
 end
@@ -182,38 +213,37 @@ M._open_calltree = function()
     local win    = vim.api.nvim_get_current_win()
     local tab    = vim.api.nvim_win_get_tabpage(win)
     local ui_state  = M.ui_state_registry[tab]
+    local ctx = ui_req_ctx()
     -- this allows for empty windows to be opened
-    if ui_state == nil then
-        ui_state = {}
-        M.ui_state_registry[tab] = ui_state
+    if ctx.state == nil then
+        ctx.state = {}
+        M.ui_state_registry[tab] = ctx.state
     end
 
     local buf_name = "calltree: empty"
-    if ui_state.calltree_dir ~= nil then
-        buf_name = direction_map[ui_state.calltree_dir].buf_name
+    if ctx.state.calltree_dir ~= nil then
+        buf_name = direction_map[ctx.state.calltree_dir].buf_name
     end
 
-    ui_state.calltree_buf =
-        ui_buf._setup_buffer(buf_name, ui_state.calltree_buf, tab)
+    ctx.state.calltree_buf =
+        ui_buf._setup_buffer(buf_name, ctx.state.calltree_buf, tab)
     if ui_state.calltree_handle ~= nil then
-        tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
+        tree.write_tree(ctx.state.calltree_handle, ctx.state.calltree_buf)
     end
-    ui_state.calltree_tab = tab
+    ctx.state.calltree_tab = tab
 
-    ui_win._open_window("calltree", ui_state)
+    ui_win._open_window("calltree", ctx.state)
 end
 
 -- close will close the calltree ui in the current tab.
 M.close_calltree = function()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local ui_state  = M.ui_state_registry[tab]
-    if ui_state.calltree_win ~= nil then
-        if vim.api.nvim_win_is_valid(ui_state.calltree_win) then
-            vim.api.nvim_win_close(ui_state.calltree_win, true)
+    local ctx = ui_req_ctx()
+    if ctx.state.calltree_win ~= nil then
+        if vim.api.nvim_win_is_valid(ctx.state.calltree_win) then
+            vim.api.nvim_win_close(ctx.state.calltree_win, true)
         end
     end
-    M.calltree_win = nil
+    ctx.state.calltree_win = nil
 end
 
 -- _smart_close is a convenience function which closes
@@ -222,32 +252,28 @@ end
 -- useful when mapped to a buffer local key binding
 -- to quickly close the window after jumped too.
 M._smart_close = function()
-    local buf    = vim.api.nvim_get_current_buf()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local tree_type  = M.get_type_from_buf(tab, buf)
-    local ui_state  = M.ui_state_registry[tab]
-    if tree_type == "calltree" then
-        if ui_state.calltree_win ~= nil then
-            if vim.api.nvim_win_is_valid(ui_state.calltree_win) then
-                vim.api.nvim_win_close(ui_state.calltree_win, true)
+    local ctx = ui_req_ctx()
+    if ctx.tree_type == "calltree" then
+        if ctx.state.calltree_win ~= nil then
+            if vim.api.nvim_win_is_valid(ctx.state.calltree_win) then
+                vim.api.nvim_win_close(ctx.state.calltree_win, true)
             end
         end
-        M.calltree_win = nil
-        if vim.api.nvim_win_is_valid(ui_state.invoking_calltree_win) then
-            vim.api.nvim_set_current_win(ui_state.invoking_calltree_win)
+        ctx.state.calltree_win = nil
+        if vim.api.nvim_win_is_valid(ctx.state.invoking_calltree_win) then
+            vim.api.nvim_set_current_win(ctx.state.invoking_calltree_win)
         end
         return
     end
-    if tree_type == "symboltree" then
-        if ui_state.symboltree_win ~= nil then
-            if vim.api.nvim_win_is_valid(ui_state.symboltree_win) then
-                vim.api.nvim_win_close(ui_state.symboltree_win, true)
+    if ctx.tree_type == "symboltree" then
+        if ctx.state.symboltree_win ~= nil then
+            if vim.api.nvim_win_is_valid(ctx.state.symboltree_win) then
+                vim.api.nvim_win_close(ctx.state.symboltree_win, true)
             end
         end
-        ui_state.symboltree_win = nil
-        if vim.api.nvim_win_is_valid(ui_state.invoking_symboltree_win) then
-            vim.api.nvim_set_current_win(ui_state.invoking_symboltree_win)
+        ctx.state.symboltree_win = nil
+        if vim.api.nvim_win_is_valid(ctx.state.invoking_symboltree_win) then
+            vim.api.nvim_set_current_win(ctx.state.invoking_symboltree_win)
         end
         return
     end
@@ -259,22 +285,20 @@ end
 -- state then the tree will be written to the buffer before opening
 -- the window.
 M._open_symboltree = function()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local ui_state  = M.ui_state_registry[tab]
-    if ui_state == nil then
-        ui_state = {}
-        M.ui_state_registry[tab] = ui_state
+    local ctx = ui_req_ctx()
+    if ctx.state == nil then
+        ctx.state = {}
+        M.ui_state_registry[ctx.tab] = ctx.state
     end
 
-    ui_state.symboltree_buf =
-        ui_buf._setup_buffer("documentSymbols", ui_state.symboltree_buf, tab)
-    if ui_state.symboltree_handle ~= nil then
-        tree.write_tree(ui_state.symboltree_handle, ui_state.symboltree_buf)
+    ctx.state.symboltree_buf =
+        ui_buf._setup_buffer("documentSymbols", ctx.state.symboltree_buf, ctx.tab)
+    if ctx.state.symboltree_handle ~= nil then
+        tree.write_tree(ctx.state.symboltree_handle, ctx.state.symboltree_buf)
     end
-    ui_state.symboltree_tab = tab
+    ctx.state.symboltree_tab = ctx.tab
 
-    ui_win._open_window("symboltree", ui_state)
+    ui_win._open_window("symboltree", ctx.state)
 end
 
 -- refresh_symbol_tree is used as an autocommand and
@@ -283,16 +307,13 @@ end
 --
 -- autocommand is set in the calltree.lua module.
 M.refresh_symbol_tree = function()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local ui_state  = M.ui_state_registry[tab]
-    if ui_state == nil then
+    local ctx = ui_req_ctx()
+    if ctx.state == nil then
         return
     end
-
     if
-        ui_state.symboltree_win ~= nil and
-        vim.api.nvim_win_is_valid(ui_state.symboltree_win)
+        ctx.state.symboltree_win ~= nil and
+        vim.api.nvim_win_is_valid(ctx.state.symboltree_win)
         and #vim.lsp.get_active_clients() > 0
     then
         vim.lsp.buf.document_symbol()
@@ -301,16 +322,13 @@ end
 
 -- close_symboltree will close the symboltree ui in the current tab.
 M.close_symboltree = function()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local ui_state  = M.ui_state_registry[tab]
-
-    if ui_state.symboltree_win ~= nil then
-        if vim.api.nvim_win_is_valid(ui_state.symboltree_win) then
-            vim.api.nvim_win_close(ui_state.symboltree_win, true)
+    local ctx = ui_req_ctx()
+    if ctx.state.symboltree_win ~= nil then
+        if vim.api.nvim_win_is_valid(ctx.state.symboltree_win) then
+            vim.api.nvim_win_close(ctx.state.symboltree_win, true)
         end
     end
-    ui_state.symboltree_win = nil
+    ctx.state.symboltree_win = nil
 end
 
 -- toggle_panel will open and close the unified panel
@@ -320,97 +338,84 @@ end
 -- keep_open : bool - if true, and the panel is open,
 -- the panel will be left open when this function terminates.
 M.toggle_panel = function(keep_open)
-    local win       = vim.api.nvim_get_current_win()
-    local tab       = vim.api.nvim_win_get_tabpage(win)
-    local ui_state  = M.ui_state_registry[tab]
-    if ui_state == nil then
-        ui_state = {}
-        M.ui_state_registry[tab] = ui_state
+    local ctx = ui_req_ctx()
+    if ctx.state == nil then
+        ctx.state = {}
+        M.ui_state_registry[ctx.tab] = ctx.state
     end
 
     local buf_name = "calltree: empty"
-    if ui_state.calltree_dir ~= nil then
-        buf_name = direction_map[ui_state.calltree_dir].buf_name
+    if ctx.state.calltree_dir ~= nil then
+        buf_name = direction_map[ctx.state.calltree_dir].buf_name
     end
 
-    ui_state.calltree_buf =
-        ui_buf._setup_buffer(buf_name, ui_state.calltree_buf, tab)
-    if ui_state.calltree_handle ~= nil then
-        tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
+    ctx.state.calltree_buf =
+        ui_buf._setup_buffer(buf_name, ctx.state.calltree_buf, ctx.tab)
+    if ctx.state.calltree_handle ~= nil then
+        tree.write_tree(ctx.state.calltree_handle, ctx.state.calltree_buf)
     end
-    ui_state.calltree_tab = tab
+    ctx.state.calltree_tab = ctx.tab
 
-    ui_state.symboltree_buf =
-        ui_buf._setup_buffer("documentSymbols", ui_state.symboltree_buf, tab)
-    if ui_state.symboltree_handle ~= nil then
-        tree.write_tree(ui_state.symboltree_handle, ui_state.symboltree_buf)
+    ctx.state.symboltree_buf =
+        ui_buf._setup_buffer("documentSymbols", ctx.state.symboltree_buf, ctx.tab)
+    if ctx.state.symboltree_handle ~= nil then
+        tree.write_tree(ctx.state.symboltree_handle, ctx.state.symboltree_buf)
     end
 
-    ui_state.symboltree_tab = tab
-    ui_win._toggle_panel(ui_state, keep_open)
+    ctx.state.symboltree_tab = ctx.tab
+    ui_win._toggle_panel(ctx.state, keep_open)
 end
 
 -- collapse will collapse a symbol at the current cursor
 -- position
 M.collapse = function()
-    local buf    = vim.api.nvim_get_current_buf()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local linenr = vim.api.nvim_win_get_cursor(win)
-    local tree_type   = M.get_type_from_buf(tab, buf)
-    local tree_handle = M.get_tree_from_buf(tab, buf)
-    local node = marshal.marshal_line(linenr, tree_handle)
-    if node == nil then
+    local ctx = ui_req_ctx()
+    if ctx.node == nil then
         return
     end
 
-    node.expanded = false
+    ctx.node.expanded = false
 
-    if tree_type == "symboltree" then
-        tree.write_tree(tree_handle, buf)
-        vim.api.nvim_win_set_cursor(win, linenr)
+    if ctx.tree_type == "symboltree" then
+        tree.write_tree(ctx.tree_handle, ctx.buf)
+        vim.api.nvim_win_set_cursor(ctx.win, ctx.linenr)
         return
     end
 
-    if tree_type == "calltree" then
-        tree.remove_subtree(tree_handle, node, true)
-        tree.write_tree(tree_handle, buf)
-        vim.api.nvim_win_set_cursor(win, linenr)
+    if ctx.tree_type == "calltree" then
+        tree.remove_subtree(ctx.tree_handle, ctx.node, true)
+        tree.write_tree(ctx.tree_handle, ctx.buf)
+        vim.api.nvim_win_set_cursor(ctx.win, ctx.linenr)
     end
 end
 
 -- expand will expand a symbol at the current cursor position
 M.expand = function()
-    local buf    = vim.api.nvim_get_current_buf()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local linenr = vim.api.nvim_win_get_cursor(win)
-    local tree_type   = M.get_type_from_buf(tab, buf)
-    local tree_handle = M.get_tree_from_buf(tab, buf)
-    local node   = marshal.marshal_line(linenr, tree_handle)
-    if node == nil then
+    local ctx = ui_req_ctx()
+    if ctx.node == nil then
         return
     end
-    local ui_state  = M.ui_state_registry[tab]
 
-    if not node.expanded then
-        node.expanded = true
+    ctx.state  = M.ui_state_registry[ctx.tab]
+
+    if not ctx.node.expanded then
+        ctx.node.expanded = true
     end
 
-    if tree_type == "symboltree" then
-        tree.write_tree(tree_handle, buf)
-        vim.api.nvim_win_set_cursor(win, linenr)
+    if ctx.tree_type == "symboltree" then
+        tree.write_tree(ctx.tree_handle, ctx.buf)
+        vim.api.nvim_win_set_cursor(ctx.win, ctx.linenr)
         return
     end
 
     -- calltree nodes are lazily expanded and require an LSP request.
-    if tree_type == "calltree" then
+    if ctx.tree_type == "calltree" then
         lsp_util.multi_client_request(
-            ui_state.active_lsp_clients,
-            direction_map[ui_state.calltree_dir].method,
-            {item = node.call_hierarchy_item},
-            handlers.calltree_expand_handler(node, linenr, ui_state.calltree_dir, ui_state),
-            ui_state.calltree_buf
+            ctx.state.active_lsp_clients,
+            direction_map[ctx.state.calltree_dir].method,
+            {item = ctx.node.call_hierarchy_item},
+            handlers.calltree_expand_handler(ctx.node, ctx.linenr, ctx.state.calltree_dir, ctx.state),
+            ctx.state.calltree_buf
         )
     end
 end
@@ -421,94 +426,77 @@ end
 --
 -- the tree must be of type "calltree"
 M.focus = function()
-    local buf    = vim.api.nvim_get_current_buf()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local linenr = vim.api.nvim_win_get_cursor(win)
-    local tree_type   = M.get_type_from_buf(tab, buf)
-    local tree_handle = M.get_tree_from_buf(tab, buf)
-    local node = marshal.marshal_line(linenr, tree_handle)
-    if node == nil then
+    local ctx = ui_req_ctx()
+    if ctx.node == nil then
         return
     end
-    local ui_state  = M.ui_state_registry[tab]
+
+    ctx.state = M.ui_state_registry[ctx.tab]
 
     -- only valid for calltrees
-    if tree_type ~= "calltree" then
+    if ctx.tree_type ~= "calltree" then
         return
     end
 
-    tree.reparent_node(ui_state.calltree_handle, 0, node)
-    tree.write_tree(ui_state.calltree_handle, ui_state.calltree_buf)
+    tree.reparent_node(ctx.state.calltree_handle, 0, ctx.node)
+    tree.write_tree(ctx.state.calltree_handle, ctx.state.calltree_buf)
 end
 
 -- switch_direction will focus the symbol under the
 -- cursor and then invert the call hierarchy direction.
 M.switch_direction = function()
-    local buf    = vim.api.nvim_get_current_buf()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local linenr = vim.api.nvim_win_get_cursor(win)
-    local tree_type   = M.get_type_from_buf(tab, buf)
-    local tree_handle = M.get_tree_from_buf(tab, buf)
-    local node = marshal.marshal_line(linenr, tree_handle)
-    if node == nil then
+    local ctx = ui_req_ctx()
+    if ctx.node == nil then
         return
     end
 
-    local ui_state  = M.ui_state_registry[tab]
+    ctx.state = M.ui_state_registry[ctx.tab]
 
-    if tree_type ~= "calltree" then
+    if ctx.tree_type ~= "calltree" then
         return
     end
 
-    if ui_state.calltree_dir == "from" then
-        ui_state.calltree_dir = "to"
+    if ctx.state.calltree_dir == "from" then
+        ctx.state.calltree_dir = "to"
     else
-        ui_state.calltree_dir = "from"
+        ctx.state.calltree_dir = "from"
     end
 
     lsp_util.multi_client_request(
-        ui_state.active_lsp_clients,
-        direction_map[ui_state.calltree_dir].method,
-        {item = node.call_hierarchy_item},
-        handlers.calltree_switch_handler(ui_state.calltree_dir, ui_state),
-        ui_state.calltree_buf
+        ctx.state.active_lsp_clients,
+        direction_map[ctx.state.calltree_dir].method,
+        {item = ctx.node.call_hierarchy_item},
+        handlers.calltree_switch_handler(ctx.state.calltree_dir, ctx.state),
+        ctx.state.calltree_buf
     )
 end
 
 -- jump will jump to the source code location of the
 -- symbol under the cursor.
 M.jump = function()
-    local buf    = vim.api.nvim_get_current_buf()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local linenr = vim.api.nvim_win_get_cursor(win)
-    local tree_type   = M.get_type_from_buf(tab, buf)
-    local tree_handle = M.get_tree_from_buf(tab, buf)
-    local node = marshal.marshal_line(linenr, tree_handle)
-    if node == nil then
+    local ctx = ui_req_ctx()
+    if ctx.node == nil then
         return
     end
 
-    local ui_state  = M.ui_state_registry[tab]
+    ctx.state  = M.ui_state_registry[ctx.tab]
 
-    local location = lsp_util.resolve_location(node)
+    local location = lsp_util.resolve_location(ctx.node)
     if location == nil or location.range.start.line == -1 then
         return
     end
     if ct.config.jump_mode == "neighbor" then
-        jumps.jump_neighbor(location, ct.config.layout, node)
+        jumps.jump_neighbor(location, ct.config.layout, ctx.node)
         return
     end
     if ct.config.jump_mode == "invoking" then
         local invoking_win = nil
-        if tree_type == "calltree" then
-            invoking_win = ui_state.invoking_calltree_win
-            ui_state.invoking_calltree_win = jumps.jump_invoking(location, invoking_win, node)
-        elseif tree_type == "symboltree" then
-            invoking_win = ui_state.invoking_symboltree_win
-            ui_state.invoking_symboltree_win = jumps.jump_invoking(location, invoking_win, node)
+        if ctx.tree_type == "calltree" then
+            invoking_win = ctx.state.invoking_calltree_win
+            ctx.state.invoking_calltree_win = jumps.jump_invoking(location, invoking_win, ctx.node)
+        elseif ctx.tree_type == "symboltree" then
+            invoking_win = ctx.state.invoking_symboltree_win
+            ctx.state.invoking_symboltree_win = jumps.jump_invoking(location, invoking_win, ctx.node)
         end
         return
     end
@@ -518,28 +506,23 @@ end
 -- under the cursor.
 M.hover = function()
     ui_buf.close_all_popups()
-    local buf    = vim.api.nvim_get_current_buf()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local linenr = vim.api.nvim_win_get_cursor(win)
-    local tree_handle = M.get_tree_from_buf(tab, buf)
-    local node = marshal.marshal_line(linenr, tree_handle)
-    if node == nil then
+    local ctx = ui_req_ctx()
+    if ctx.node == nil then
         return
     end
 
-    local ui_state  = M.ui_state_registry[tab]
+    ctx.state  = M.ui_state_registry[ctx.tab]
 
-    local params = lsp_util.resolve_hover_params(node)
+    local params = lsp_util.resolve_hover_params(ctx.node)
     if params == nil then
         return
     end
     lsp_util.multi_client_request(
-        ui_state.active_lsp_clients,
+        ctx.state.active_lsp_clients,
         "textDocument/hover",
         params,
         hover.hover_handler,
-        ui_state.calltree_buf
+        ctx.state.calltree_buf
     )
 end
 
@@ -547,24 +530,18 @@ end
 -- showing more information.
 M.details = function()
     ui_buf.close_all_popups()
-    local buf    = vim.api.nvim_get_current_buf()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local linenr = vim.api.nvim_win_get_cursor(win)
-    local tree_type   = M.get_type_from_buf(tab, buf)
-    local tree_handle = M.get_tree_from_buf(tab, buf)
-    local node = marshal.marshal_line(linenr, tree_handle)
-    if node == nil then
+    local ctx = ui_req_ctx()
+    if ctx.node == nil then
         return
     end
 
-    local ui_state  = M.ui_state_registry[tab]
+    ctx.state  = M.ui_state_registry[ctx.tab]
 
     local direction = "symboltree"
-    if tree_type == "calltree" then
-        direction = ui_state.calltree_dir
+    if ctx.tree_type == "calltree" then
+        direction = ctx.state.calltree_dir
     end
-    deets.details_popup(node, direction)
+    deets.details_popup(ctx.node, direction)
 end
 
 -- auto_highlight will automatically highlight
@@ -577,71 +554,63 @@ end
 -- set : bool - whether to remove or set highlights
 -- for the symbol under the cursor in a symboltree.
 M.auto_highlight = function(set)
-    local buf    = vim.api.nvim_get_current_buf()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local linenr = vim.api.nvim_win_get_cursor(win)
-    local tree_type   = M.get_type_from_buf(tab, buf)
-    local tree_handle = M.get_tree_from_buf(tab, buf)
-    local node = marshal.marshal_line(linenr, tree_handle)
-    if node == nil then
+    local ctx = ui_req_ctx()
+    if ctx.node == nil then
         return
     end
-    if tree_type ~= "symboltree" then
+
+    if ctx.tree_type ~= "symboltree" then
         return
     end
-    local ui_state  = M.ui_state_registry[tab]
-    au_hl.highlight(node, set, ui_state)
+    ctx.ui_state  = M.ui_state_registry[ctx.tab]
+    au_hl.highlight(ctx.node, set, ctx.state)
 end
 
 -- source tracking updates the symboltree ui
 -- a source code line is encountered and a symbol
 -- exists for the line.
 M.source_tracking = function ()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local linenr = vim.api.nvim_win_get_cursor(win)
-    local ui_state  = M.ui_state_registry[tab]
-    if ui_state == nil then
+    local ctx = ui_req_ctx()
+    if ctx.state == nil then
         return
     end
 
-    local tree_type = M.get_type_from_buf(tab, ui_state.symboltree_buf)
+    ctx.tree_type = M.get_type_from_buf(ctx.tab, ctx.state.symboltree_buf)
     if
-        tree_type ~= "symboltree" or
-        ui_state.symboltree_win == nil or
-        not vim.api.nvim_win_is_valid(ui_state.symboltree_win)
-        or win == ui_state.calltree_win
-        or win == ui_state.symboltree_win
+        ctx.tree_type ~= "symboltree" or
+        ctx.state.symboltree_win == nil or
+        not vim.api.nvim_win_is_valid(ctx.state.symboltree_win)
+        or ctx.win == ctx.state.calltree_win
+        or ctx.win == ctx.state.symboltree_win
     then
         return
     end
 
-    local tree_handle = ui_state.symboltree_handle
+    ctx.tree_handle = ctx.state.symboltree_handle
 
     -- if there's a direct match for this line, use this
-    local source_map = marshal.source_to_buf_line[tree_handle]
+    local source_map = marshal.source_to_buf_line[ctx.tree_handle]
     if source_map == nil then
         return
     end
-    local line = source_map[linenr[1]]
+    local line = source_map[ctx.linenr[1]]
     if line ~= nil then
-            vim.api.nvim_win_set_cursor(ui_state.symboltree_win, {line, 0})
+            vim.api.nvim_win_set_cursor(ctx.state.symboltree_win, {line, 0})
             vim.cmd("redraw!")
             return
     end
 
     -- no direct match for the line, so search for symbols with a range
     -- interval overlapping our line number.
-    local buf_lines = marshal.buf_line_map[tree_handle]
+    local buf_lines = marshal.buf_line_map[ctx.tree_handle]
     if buf_lines == nil then
         return
     end
     for line, node in pairs(buf_lines) do
-        if linenr[1] >= node.document_symbol.range["start"].line
-            and linenr[1] <= node.document_symbol.range["end"].line
+        if ctx.linenr[1] >= node.document_symbol.range["start"].line
+            and ctx.linenr[1] <= node.document_symbol.range["end"].line
         then
-            vim.api.nvim_win_set_cursor(ui_state.symboltree_win, {line, 0})
+            vim.api.nvim_win_set_cursor(ctx.state.symboltree_win, {line, 0})
             vim.cmd("redraw!")
             return
         end
@@ -654,14 +623,11 @@ end
 -- must be called when the cursor is in the window of
 -- the tree being dumped.
 M.dump_tree = function()
-    local buf    = vim.api.nvim_get_current_buf()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
-    local tree_handle = M.get_tree_from_buf(tab, buf)
-    if tree_handle == nil then
+    local ctx = ui_req_ctx()
+    if ctx.tree_handle == nil then
         return
     end
-    tree.dump_tree(tree_handle)
+    tree.dump_tree(ctx.tree_handle)
 end
 
 return M
