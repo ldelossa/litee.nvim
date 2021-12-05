@@ -1,4 +1,5 @@
 local tree_node = require('calltree.tree.node')
+local notify = require('calltree.ui.notify')
 local M = {}
 
 M.multi_client_request = function(clients, method, params, handler, bufnr)
@@ -199,10 +200,11 @@ function M.gather_symbols_async(root, children, ui_state, callback)
         table.insert(all_nodes, child)
     end
     co = coroutine.create(function()
-        for _, node in ipairs(all_nodes) do
+        for i, node in ipairs(all_nodes) do
             local params = {
                 query = node.name,
             }
+            notify.notify_popup("gathering symbols [" .. i .. "/" .. #all_nodes .. "]")
             M.multi_client_request(
                 ui_state.active_lsp_clients,
                 "workspace/symbol",
@@ -212,6 +214,7 @@ function M.gather_symbols_async(root, children, ui_state, callback)
                 ui_state.invoking_calltree_win
             )
             node.symbol = coroutine.yield()
+            notify.close_notify_popup()
         end
         callback()
     end)
