@@ -16,12 +16,15 @@ License:  MIT license
 ====================================================================================
 CONTENTS                                                         *calltree-contents*
 
-  1. Intro........................................|calltree-intro|
-  2. Usage........................................|caltree-usage|
-  3. Commands.....................................|calltree-commands|
-  4. Mappings.....................................|calltree-mappings|
-  5. Config.......................................|calltree-config|
-  6. Highlights...................................|calltree-highlights|
+  1     Intro.........................................|calltree-intro|
+  2     Usage.........................................|caltree-usage|
+  2.1    Unified Panel................................|calltree-unified-panel|  
+  3     Commands......................................|calltree-commands|
+  4     Mappings......................................|calltree-mappings|
+  5     Config........................................|calltree-config|
+  6     Highlights....................................|calltree-highlights|
+  6.1    Icon Highlights..............................|calltree-icon-highlights|
+  6.2    UI Highlights................................|calltree-ui-highlights|
 
 ====================================================================================
 INTRODUCTION                                                        *calltree-intro*
@@ -65,19 +68,19 @@ and "vim.lsp.buf.outgoing_calls" will open the calltree window.
 
 The calltree UI can be used as a unified panel or as individual elements. 
 
-A unified panel would feel similar to IDE's such as VSCode where you can "hide"
-and "unhide" a persistent informational panel. Both the symbol tree and the call tree will
-always be present in the toggled panel, unless you manually close a window. 
-Toggling the panel will recreate any closed windows. This functionality
-is provided via the "CTPanel" command.
+                                                            *calltree-unified-panel*
 
-If you'd rather use each individual component separately this is possible
-too. Utilize the "CTOpen/CTClose" and "STOpen/STClose" commands. These commands
-will only open and close the respective UI components.
+It's possible to treat Calltree.nvim's UI as a persistent but collapsible panel. 
 
-By default performing a "call-hierarchy" request for incoming or outgoing calls
-does not assume a unified panel. If you'd like it to open the unified panel on LSP requests
-then set "unified_panel" to true in the config. See *calltree-config*
+This would be similar to VSCode and JetBrain IDEs, where an informational panel is present on the left, bottom, right, or top of the editor depending on configuration. 
+
+When enabling the unified panel, both the symboltree (document symbol outline) and the calltree (any recently requested call hierarchy outline) are always displayed together. 
+
+The "CTPanel" command may be used to open and collapse the unified panel when desired. 
+
+The configuration options `unified_panel` and `auto_open_panel` can be set to true to ensure the unified panel is opened when LSP requests are made and the unified panel is opened on Neovim's start, respectively.
+
+The unified panel is completely opt-in. By keeping the `unified_panel` and `auto_open_panel` options false only the respectively Calltree.nvim UI elements will open when LSP requests are made. Furthermore, you can use ":CTPanel" freely without either option above set, if you'd like to "sometimes" use the unified panel without any constraints.
 
 From there check out *calltree-commands* to manipulate the calltree UI.
 
