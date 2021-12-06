@@ -69,7 +69,7 @@ A unified panel would feel similar to IDE's such as VSCode where you can "hide"
 and "unhide" a persistent informational panel. Both the symbol tree and the call tree will
 always be present in the toggled panel, unless you manually close a window. 
 Toggling the panel will recreate any closed windows. This functionality
-is provided via the "CTToggle" command.
+is provided via the "CTPanel" command.
 
 If you'd rather use each individual component separately this is possible
 too. Utilize the "CTOpen/CTClose" and "STOpen/STClose" commands. These commands
@@ -89,20 +89,25 @@ Calltree exports several commands for manipulating the calltree UI.
                                                                            *:CTOpen*
 :CTOpen                                         
     Open the calltree window with the most recent call tree present. 
+    As a convenience, calling this again will jump back to the window
+    which opened the calltree.
 
                                                                           *:CTClose*       
 :CTClose       
     Closes the calltree window.
-                                                                           *:STOpen*
+                                                                           
 
-                                                                         *:CTToggle*
-:CTToggle
+                                                                         *:CTPanel*
+:CTPanel
     Treats calltree as a persistent panel and toggles it open or close.
     Using this command will always toggle both the symboltree and calltree
     components as if they were a single unified panel.
 
+                                                                           *:STOpen*
 :STOpen                                         
     Open the symboltree window with the most recent outline tree present. 
+    As a convenience, calling this again will jump back to the window
+    which opened the symboltree.
 
                                                                           *:STClose*       
 :STClose       
@@ -155,8 +160,13 @@ Calltree exports several commands for manipulating the calltree UI.
 
                                                                        *:CTDumpTree* 
 :CTDumpTree       
-    Echos the current calltree in lua dictonary syntax. 
-    Useful for debugging.
+    Only valid when inside a calltree window.
+    Dumps the tree data structure to a buffer for debugging.
+
+                                                                       *:CTDumpNode* 
+:CTDumpNode       
+    Same as CTDumpTree but dumps the current node and it's children to
+    a buffer for debugging.
 
 ====================================================================================
 MAPPINGS                                                         *calltree-mappings*
@@ -200,8 +210,6 @@ The config table is described below:
         -- int              - An integer used in the initial "resize" command for
         --                    the ui. 
         layout_size = 30,
-        -- whether to automatically open the calltree and symboltree ui on start.
-        auto_open = false,
         -- the method used when jumping to a symbol in the calltree 
         -- "invoking"       - Jumping to a symbol will use the window which the calltree
         --                    was initially invoked from.
@@ -245,6 +253,10 @@ The config table is described below:
         -- if set to true calling LSP functions which trigger calltree UI 
         -- will open the unified panel. see *calltree-usage* for details.
         unified_panel = false
+        -- whether to automatically open the unified ui on start.
+        -- unified_panel need not be true to open the panel
+        -- on start.
+        auto_open_panel = false,
         -- automatic highlighting and window position updates when 
         -- navigating the symboltree UI. Set to false to disable.
         auto_highlight = true
