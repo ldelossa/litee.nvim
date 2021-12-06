@@ -73,11 +73,13 @@ function M._setup_buffer(name, buffer_handle, tab)
     vim.api.nvim_buf_set_option(buffer_handle, 'textwidth', 0)
     vim.api.nvim_buf_set_option(buffer_handle, 'wrapmargin', 0)
 
-    -- au to clear highlights on window close
+    -- au to clear jump highlights on window close
     vim.cmd("au BufWinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.jumps').set_jump_hl(false)")
+
     -- au to close popup with cursor moves or buffer is closed.
     vim.cmd("au CursorMoved,BufWinLeave,WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.buffer').close_all_popups()")
 
+    -- au to (re)set source code highlights when a symboltree node is hovered.
     if config.auto_highlight then
         vim.cmd("au BufWinLeave,WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui').auto_highlight(false)")
         vim.cmd("au CursorHold <buffer=" .. buffer_handle .. "> lua require('calltree.ui').auto_highlight(true)")

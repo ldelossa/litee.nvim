@@ -1,4 +1,30 @@
+local config = require('calltree').config
 local M = {}
+
+local function map_resize_keys(buffer_handle, opts)
+    local l = config.layout
+    if l == "top" or l == "bottom"  then
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Right>", ":vert resize +5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Left>", ":vert resize -5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Up>", ":resize +5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Down>", ":resize -5<cr>", opts)
+    elseif l == "bottom" then
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Right>", ":vert resize +5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Left>", ":vert resize -5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Down>", ":resize +5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Up>", ":resize -5<cr>", opts)
+    elseif l == "left" then
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Up>", ":resize +5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Down>", ":resize -5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Left>", ":vert resize -5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Right>", ":vert resize +5<cr>", opts)
+    elseif l == "right" then
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Up>", ":resize +5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Down>", ":resize -5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Left>", ":vert resize +5<cr>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Right>", ":vert resize -5<cr>", opts)
+    end
+end
 
 -- _setup_help_buffer performs an idempotent creation
 -- of the calltree help buffer
@@ -21,7 +47,7 @@ function M._setup_help_buffer(help_buf_handle)
         help_buf_handle = buf
         local lines = {
             "CALLTREE HELP:",
-            "press 'c' to close",
+            "press '?' to close",
             "",
             "KEYMAP:",
             "zo                 - expand a symbol",
@@ -46,7 +72,8 @@ function M._setup_help_buffer(help_buf_handle)
 
     -- set buffer local keymaps
     local opts = {silent=true}
-    vim.api.nvim_buf_set_keymap(help_buf_handle, "n", "c", ":lua require('calltree.ui').help(false)<CR>", opts)
+    vim.api.nvim_buf_set_keymap(help_buf_handle, "n", "?", ":lua require('calltree.ui').help(false)<CR>", opts)
+    map_resize_keys(help_buf_handle, opts)
 
     return help_buf_handle
 end

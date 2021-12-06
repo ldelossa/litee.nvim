@@ -99,6 +99,7 @@ end
 -- which want to refresh the state of the UI but not
 -- close the panels.
 function M._toggle_panel(ui_state, keep_open)
+    local cur_win = vim.api.nvim_get_current_win()
     local open = true
     if not keep_open then
         for _, win_name in pairs(type_to_ui_state_win) do
@@ -118,6 +119,7 @@ function M._toggle_panel(ui_state, keep_open)
     -- the pannel open
     M._open_window("calltree", ui_state)
     M._open_window("symboltree", ui_state)
+    vim.api.nvim_set_current_win(cur_win)
 end
 
 -- setup_window evaluates the current layout and the desired layout
