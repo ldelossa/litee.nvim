@@ -53,12 +53,16 @@ function M._setup_help_buffer(help_buf_handle)
             "zo                 - expand a symbol",
             "zc                 - collapse a symbol",
             "return             - jump to symbol",
-            "f                  - focus the tree on this symbol (call hierarhies)",
-            "s                  - switch the symbol from incoming/outgoing calls (call hierarchies)",
+            "s                  - jump to symbol in a new split",
+            "v                  - jump to symbol in a new vsplit",
+            "t                  - jump to symbol in a new tab",
+            "f                  - focus the tree on this symbol (call hierarchies)",
+            "S                  - switch the symbol from incoming/outgoing calls (call hierarchies)",
             "i                  - show hover info for symbol",
             "d                  - show symbol details",
-            "h                  - hide the current ui in the buffer, will appear again on panel toggle",
-            "Up,Down,Right,Left - resize calltree windows"
+            "h                  - hide this element from the panel, will appear again on toggle",
+            "x                  - remove this element from the panel, will not appear until another LSP request",
+            "Up,Down,Right,Left - resize the panel"
         }
         vim.api.nvim_buf_set_lines(help_buf_handle, 0, #lines, false, lines)
     end
