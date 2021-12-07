@@ -57,7 +57,7 @@ function M._setup_help_buffer(help_buf_handle)
             "s                  - switch the symbol from incoming/outgoing calls (call hierarchies)",
             "i                  - show hover info for symbol",
             "d                  - show symbol details",
-            "c                  - close the current ui",
+            "h                  - hide the current ui in the buffer, will appear again on panel toggle",
             "Up,Down,Right,Left - resize calltree windows"
         }
         vim.api.nvim_buf_set_lines(help_buf_handle, 0, #lines, false, lines)

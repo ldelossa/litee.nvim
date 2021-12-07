@@ -172,11 +172,7 @@ M.open_to = function(ui)
                 return
             end
         end
-        if config.unified_panel then
-            M.toggle_panel(true)
-        else
-            M._open_calltree()
-        end
+        M.toggle_panel(true)
         ui_state = M.ui_state_registry[ctx.tab]
         vim.api.nvim_set_current_win(ui_state.calltree_win)
     elseif ui == "symboltree" then
@@ -194,11 +190,7 @@ M.open_to = function(ui)
                 return
             end
         end
-        if config.unified_panel then
-            M.toggle_panel(true)
-        else
-            M._open_symboltree()
-        end
+        M.toggle_panel(true)
         ui_state = M.ui_state_registry[ctx.tab]
         vim.api.nvim_set_current_win(ui_state.symboltree_win)
     end
@@ -232,7 +224,11 @@ M._open_calltree = function()
     ui_win._open_window("calltree", ctx.state)
 end
 
--- close will close the calltree ui in the current tab.
+-- close will close the calltree ui in the current tab
+-- and remove the corresponding tree from memory.
+--
+-- use _smart_close if you simply want to hide a calltree
+-- element temporarily (not removing the tree from memory)
 M.close_calltree = function()
     local ctx = ui_req_ctx()
     if ctx.state.calltree_win ~= nil then
@@ -241,6 +237,10 @@ M.close_calltree = function()
         end
     end
     ctx.state.calltree_win = nil
+    if ctx.state.calltree_handle ~= nil then
+        tree.remove_tree(ctx.state.calltree_handle)
+        ctx.state.calltree_handle = nil
+    end
 end
 
 -- _smart_close is a convenience function which closes
@@ -248,6 +248,9 @@ end
 --
 -- useful when mapped to a buffer local key binding
 -- to quickly close the window after jumped too.
+--
+-- this function will not remove any tree from memory
+-- and is used to temporarily hide a UI element.
 M._smart_close = function()
     local ctx = ui_req_ctx()
     if ctx.tree_type == "calltree" then
@@ -318,6 +321,10 @@ M.refresh_symbol_tree = function()
 end
 
 -- close_symboltree will close the symboltree ui in the current tab.
+-- and remove the corresponding tree from memory.
+--
+-- use _smart_close if you simply want to hide a calltree
+-- element temporarily (not removing the tree from memory)
 M.close_symboltree = function()
     local ctx = ui_req_ctx()
     if ctx.state.symboltree_win ~= nil then
@@ -326,6 +333,10 @@ M.close_symboltree = function()
         end
     end
     ctx.state.symboltree_win = nil
+    if ctx.state.symboltree_handle ~= nil then
+        tree.remove_tree(ctx.state.symboltree_handle)
+        ctx.state.symboltree_handle = nil
+    end
 end
 
 -- toggle_panel will open and close the unified panel

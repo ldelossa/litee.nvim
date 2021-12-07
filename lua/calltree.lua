@@ -11,8 +11,6 @@ M.config = {
     icon_highlights = {},
     hls = {},
     resolve_symbols = true,
-    unified_panel = false,
-    auto_open_panel = false,
     auto_highlight = true
 }
 
@@ -140,11 +138,6 @@ function M.setup(user_config)
     -- setup default highlights
     if not M.config.no_hls then
         _setup_default_highlights()
-    end
-
-    -- automatically open the ui elements on buf enters.
-    if M.config.auto_open then
-        vim.cmd([[au VimEnter * lua require('calltree.ui').toggle_panel()]])
     end
 
     -- will keep the outline view up to date when moving around buffers.

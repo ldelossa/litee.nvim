@@ -95,7 +95,7 @@ function M._setup_buffer(name, buffer_handle, tab)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":CTDetails<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":CTSwitch<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "?", ":lua require('calltree.ui').help(true)<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "c", ":lua require('calltree.ui')._smart_close()<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "h", ":lua require('calltree.ui')._smart_close()<CR>", opts)
     map_resize_keys(buffer_handle, opts)
 
     return buffer_handle

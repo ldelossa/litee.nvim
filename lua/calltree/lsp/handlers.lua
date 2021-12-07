@@ -42,6 +42,11 @@ M.ch_lsp_handler = function(direction)
         -- occur here.
         ui_state.invoking_calltree_win = vim.api.nvim_get_current_win()
 
+        -- remove existing tree from memory if exists
+        if ui_state.calltree_handle ~= nil then
+            tree.remove_tree(ui_state.calltree_handle)
+        end
+
         -- create a new tree
         ui_state.calltree_handle = tree.new_tree("calltree")
 
@@ -109,6 +114,11 @@ M.ws_lsp_handler = function()
 
         ui_state.invoking_symboltree_win = vim.api.nvim_get_current_win()
 
+        -- remove existing tree from memory is exists
+        if ui_state.symboltree_handle ~= nil then
+            tree.remove_tree(ui_state.symboltree_handle)
+        end
+
         -- create a new tree
         ui_state.symboltree_handle = tree.new_tree("symboltree")
 
@@ -135,11 +145,8 @@ M.ws_lsp_handler = function()
             cursor = vim.api.nvim_win_get_cursor(ui_state.symboltree_win)
         end
 
-        if config.unified_panel then
-            ui.toggle_panel(true)
-        else
-            ui._open_symboltree()
-        end
+        ui.toggle_panel(true)
+
         -- restore cursor if possible
         if cursor ~= nil then
            local count = vim.api.nvim_buf_line_count(ui_state.symboltree_buf)
