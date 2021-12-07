@@ -233,7 +233,7 @@ The config table is described below:
         indent_guides = true,
         -- user provided UI highlights.
         -- see *calltree-ui-highlights*
-        hls = {}
+        hls = {},
         -- some LSP's will provide symbols with different names depending on
         -- the method called. 
         --
@@ -248,10 +248,10 @@ The config table is described below:
         --
         -- set this to false for large codebases to speed up opening
         -- the calltree.
-        resolve_symbols = true
+        resolve_symbols = true,
         -- automatic highlighting and window position updates when 
         -- navigating the symboltree UI. Set to false to disable.
-        auto_highlight = true
+        auto_highlight = true,
     }
 
 ====================================================================================

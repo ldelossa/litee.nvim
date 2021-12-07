@@ -41,6 +41,12 @@ end
 --
 -- handle : tree_handle - a valid handle to a tree
 function M.remove_tree(handle)
+    if handle == nil then
+        return
+    end
+    if reg[handle] == nil then
+        return
+    end
     reg[handle] = nil
 end
 
