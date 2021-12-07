@@ -146,6 +146,10 @@ function M.setup(user_config)
     -- will enable symboltree ui tracking with source code lines.
     vim.cmd([[au CursorHold * lua require('calltree.ui').source_tracking()]])
 
+    -- will clean out any tree data for a tab when closed. only necessary
+    -- when CTClose or STClose is not issued before a tab is closed.
+    vim.cmd([[au TabClosed * lua require('calltree.ui').on_tab_closed(vim.fn.expand('<afile>'))]])
+
     -- setup commands
     vim.cmd("command! CTOpen        lua require('calltree.ui').open_to('calltree')")
     vim.cmd("command! STOpen        lua require('calltree.ui').open_to('symboltree')")

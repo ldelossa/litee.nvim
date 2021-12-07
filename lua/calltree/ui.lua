@@ -1,5 +1,4 @@
 local ct = require('calltree')
-local config = require('calltree').config
 local lsp_util = require('calltree.lsp.util')
 local ui_buf = require('calltree.ui.buffer')
 local ui_win = require('calltree.ui.window')
@@ -21,7 +20,7 @@ local direction_map = {
 }
 
 -- ui_state_registry is a registry of vim tabs mapped to calltree's
--- ui ui_state.
+-- ui state.
 --
 -- every tab can have its own UI ui_state.
 --
@@ -639,6 +638,15 @@ M.source_tracking = function ()
             return
         end
     end
+end
+
+M.on_tab_closed = function(tab)
+    local ui_state = M.ui_state_registry[tab]
+    if ui_state == nil then
+        return
+    end
+    tree.remove_tree(ui_state.calltree_handle)
+    tree.remove_tree(ui_state.symboltree_handle)
 end
 
 -- dumptree will dump the tree datastructure to a

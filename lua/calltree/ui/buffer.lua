@@ -85,10 +85,6 @@ function M._setup_buffer(name, buffer_handle, tab, type)
         vim.cmd("au CursorHold <buffer=" .. buffer_handle .. "> lua require('calltree.ui').auto_highlight(true)")
     end
 
-    vim.cmd("command! CTJumpTab     lua require('calltree.ui').jump('tab')")
-    vim.cmd("command! CTJumpSplit   lua require('calltree.ui').jump('split')")
-    vim.cmd("command! CTJumpVSplit  lua require('calltree.ui').jump('vsplit')")
-
     -- set buffer local keymaps
     local close_cmd = nil
     if type == "calltree" then
