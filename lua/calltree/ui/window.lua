@@ -116,9 +116,18 @@ function M._toggle_panel(ui_state, keep_open)
     end
 
     -- we didn't find any open calltree windows, toggle
-    -- the pannel open
-    M._open_window("calltree", ui_state)
-    M._open_window("symboltree", ui_state)
+    -- the panel open
+    if 
+        ui_state.calltree_handle ~= nil
+    then
+        M._open_window("calltree", ui_state)
+    end
+    if 
+        ui_state.symboltree_handle ~= nil
+    then
+        M._open_window("symboltree", ui_state)
+    end
+
     vim.api.nvim_set_current_win(cur_win)
 end
 

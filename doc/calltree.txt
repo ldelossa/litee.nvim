@@ -70,17 +70,14 @@ The calltree UI can be used as a unified panel or as individual elements.
 
                                                             *calltree-unified-panel*
 
-It's possible to treat Calltree.nvim's UI as a persistent but collapsible panel. 
+Calltree.nvim works as a unified panel on the left (or top/right/bottom when configured) of the editor windows. 
 
-This would be similar to VSCode and JetBrain IDEs, where an informational panel is present on the left, bottom, right, or top of the editor depending on configuration. 
+The unified panel will consist of any recently created symboltree or calltree. 
+The panel can be toggled closed and open (once a LSP request has been made) with "CTPanel".
 
-When enabling the unified panel, both the symboltree (document symbol outline) and the calltree (any recently requested call hierarchy outline) are always displayed together. 
+When inside the panel you can use the keybinding "h" to temporarily hide the Calltree.nvim UI element the cursor is inside. When you close and open the panel the hidden element will return. 
 
-The "CTPanel" command may be used to open and collapse the unified panel when desired. 
-
-The configuration options `unified_panel` and `auto_open_panel` can be set to true to ensure the unified panel is opened when LSP requests are made and the unified panel is opened on Neovim's start, respectively.
-
-The unified panel is completely opt-in. By keeping the `unified_panel` and `auto_open_panel` options false only the respectively Calltree.nvim UI elements will open when LSP requests are made. Furthermore, you can use ":CTPanel" freely without either option above set, if you'd like to "sometimes" use the unified panel without any constraints.
+If you'd like to permanently close a Calltree.nvim UI element (until another LSP request) from the panel use the "CTClose" or "STClose" commands. This closes and **removes** the tree from Calltree.nvim's memory. 
 
 From there check out *calltree-commands* to manipulate the calltree UI.
 
@@ -97,14 +94,19 @@ Calltree exports several commands for manipulating the calltree UI.
 
                                                                           *:CTClose*       
 :CTClose       
-    Closes the calltree window.
+    Closes the calltree window until another call hierarchy request is made.
                                                                            
 
                                                                          *:CTPanel*
 :CTPanel
-    Treats calltree as a persistent panel and toggles it open or close.
-    Using this command will always toggle both the symboltree and calltree
-    components as if they were a single unified panel.
+    Toggles the unified panel open and closed.
+    An LSP request must be made for the panel to toggle open.
+    When the panel is toggled closed the trees remain in memory and will
+    appear again when toggled open.
+
+    To remove a calltree or symboltree, such that toggling
+    does not show the tree again, use the CTClose or
+    STClose commands.
 
                                                                            *:STOpen*
 :STOpen                                         
@@ -114,7 +116,8 @@ Calltree exports several commands for manipulating the calltree UI.
 
                                                                           *:STClose*       
 :STClose       
-    Closes the symboltree window
+    Closes the symboltree window until another document symbols lsp
+    request is made.
 
                                                                          *:CTExpand*
 :CTExpand      
@@ -253,13 +256,6 @@ The config table is described below:
         -- set this to false for large codebases to speed up opening
         -- the calltree.
         resolve_symbols = true
-        -- if set to true calling LSP functions which trigger calltree UI 
-        -- will open the unified panel. see *calltree-usage* for details.
-        unified_panel = false
-        -- whether to automatically open the unified ui on start.
-        -- unified_panel need not be true to open the panel
-        -- on start.
-        auto_open_panel = false,
         -- automatic highlighting and window position updates when 
         -- navigating the symboltree UI. Set to false to disable.
         auto_highlight = true

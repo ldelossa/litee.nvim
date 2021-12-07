@@ -36,6 +36,14 @@ function M.get_tree(handle)
     return reg[handle]
 end
 
+-- remove_tree takes a call handle and removes
+-- the associated tree from memory.
+--
+-- handle : tree_handle - a valid handle to a tree
+function M.remove_tree(handle)
+    reg[handle] = nil
+end
+
 -- recursive_dpt_compute traverses the tree
 -- and flattens it into out depth_table
 --

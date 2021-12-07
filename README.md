@@ -49,9 +49,9 @@ require('calltree').setup({})
 
 ## Use it
 
-The setup function hooks directly into the "textDocument/incomingCalls", "textDocument/outgoingCalls", and "textDocument/documentSymbol" LSP handlers. 
+The setup function hooks directly into the "textDocument/incomingCalls", "textDocument/outgoingCalls" (calltress), and "textDocument/documentSymbol" (symboltree) LSP handlers. 
 
-To start a call tree use the LSP client just like you're used to:
+To start a calltree or a symboltree use the LSP client just like you're used to:
 
 ```
 :lua vim.lsp.buf.incoming_calls()
@@ -113,17 +113,14 @@ The UI works together and will always ensure a static layout with call hierarchy
 
 ## Unified Panel
 
-It's possible to treat Calltree.nvim's UI as a persistent but collapsible panel. 
+Calltree.nvim works as a unified panel on the left (or top/right/bottom when configured) of the editor windows. 
 
-This would be similar to VSCode and JetBrain IDEs, where an informational panel is present on the left, bottom, right, or top of the editor depending on configuration. 
+The unified panel will consist of the most recently created symboltree and/or calltree. 
+The panel can be toggled closed and open, once a LSP request has been made, with ":CTPanel".
 
-When enabling the unified panel, both the symboltree (document symbol outline) and the calltree (any recently requested call hierarchy outline) are always displayed together. 
+When inside the panel you can use the keybinding "h" to temporarily hide the Calltree.nvim UI element the cursor is inside. When you toggle the panel the hidden element will return. 
 
-The "CTPanel" command may be used to open and collapse the unified panel when desired. 
-
-The configuration options `unified_panel` and `auto_open_panel` can be set to true to ensure the unified panel is opened when LSP requests are made and the unified panel is opened on Neovim's start, respectively.
-
-The unified panel is completely opt-in. By keeping the `unified_panel` and `auto_open_panel` options false only the respectively Calltree.nvim UI elements will open when LSP requests are made. Furthermore, you can use ":CTPanel" freely without either option above set, if you'd like to "sometimes" use the unified panel without any constraints.
+If you'd like to permanently close a Calltree.nvim UI element (until another LSP request) from the panel use the ":CTClose" or ":STClose" commands. This closes and **removes** the tree from Calltree.nvim's memory. 
 
 ## Demo
 
