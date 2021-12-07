@@ -85,18 +85,14 @@ From there check out *calltree-commands* to manipulate the calltree UI.
 COMMANDS                                                         *calltree-commands*
 
 Calltree exports several commands for manipulating the calltree UI. 
-
                                                                            *:CTOpen*
 :CTOpen                                         
     Open the calltree window with the most recent call tree present. 
     As a convenience, calling this again will jump back to the window
     which opened the calltree.
-
                                                                           *:CTClose*       
 :CTClose       
     Closes the calltree window until another call hierarchy request is made.
-                                                                           
-
                                                                          *:CTPanel*
 :CTPanel
     Toggles the unified panel open and closed.
@@ -107,36 +103,38 @@ Calltree exports several commands for manipulating the calltree UI.
     To remove a calltree or symboltree, such that toggling
     does not show the tree again, use the CTClose or
     STClose commands.
-
                                                                            *:STOpen*
 :STOpen                                         
     Open the symboltree window with the most recent outline tree present. 
     As a convenience, calling this again will jump back to the window
     which opened the symboltree.
-
                                                                           *:STClose*       
 :STClose       
     Closes the symboltree window until another document symbols lsp
     request is made.
-
                                                                          *:CTExpand*
 :CTExpand      
     Expands a calltree symbol resolving any callers/callees of the symbol under 
     the cursor.
-
                                                                        *:CTCollapse*    
 :CTCollapse    
     Collapses a calltree symbol and its subtree.
-
                                                                           *:CTFocus*    
 :CTFocus    
     Create a new calltree with the symbol under the cursor as root.
-
                                                                            *:CTJump*    
 :CTJump        
     Jump to the symbol's definition. 
     How this jump is done is controlled via config.
-
+                                                                        *:CTJumpTab*    
+:CTJumpTab
+    Jump to the symbol's definition in a new tab.
+                                                                      *:CTJumpSplit*    
+:CTJumpSplit  
+    Jump to the symbol's definition in a new split.
+                                                                     *:CTJumpVSplit*    
+:CTJumpVSplit        
+    Jump to the symbol's definition. 
                                                                          *:CTSwitch*    
 :CTSwitch        
     Focus the symbol under the cursor and switch the calltree's
@@ -148,27 +146,22 @@ Calltree exports several commands for manipulating the calltree UI.
 
     The typical use case is calling CTSwitch on the root symbol, turning
     the current outgoing calltree to an incoming call tree (or vice versa).
-                                                                          
                                                                           *:CTHover* 
 :CTHover       
     Show hover info for the symbol
-
                                                                          *CTDetails* 
 :CTDetails      
     Show symbol detail information in a popup.
-
                                                                         *:CTClearHL* 
 :CTClearHL       
     Clears any highlights after jumping to location.
 
     Highlights are also clearned when the current Calltree window
     is closed.
-
                                                                        *:CTDumpTree* 
 :CTDumpTree       
     Only valid when inside a calltree window.
     Dumps the tree data structure to a buffer for debugging.
-
                                                                        *:CTDumpNode* 
 :CTDumpNode       
     Same as CTDumpTree but dumps the current node and it's children to

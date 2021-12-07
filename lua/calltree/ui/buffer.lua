@@ -50,7 +50,7 @@ end
 --
 -- returns:
 --  buffer_handle : int - handle to a valid buffer.
-function M._setup_buffer(name, buffer_handle, tab)
+function M._setup_buffer(name, buffer_handle, tab, type)
     if buffer_handle == nil or not vim.api.nvim_buf_is_valid(buffer_handle) then
         local buf = vim.api.nvim_create_buf(false, false)
         if buf == 0 then
@@ -85,19 +85,33 @@ function M._setup_buffer(name, buffer_handle, tab)
         vim.cmd("au CursorHold <buffer=" .. buffer_handle .. "> lua require('calltree.ui').auto_highlight(true)")
     end
 
+    vim.cmd("command! CTJumpTab     lua require('calltree.ui').jump('tab')")
+    vim.cmd("command! CTJumpSplit   lua require('calltree.ui').jump('split')")
+    vim.cmd("command! CTJumpVSplit  lua require('calltree.ui').jump('vsplit')")
+
     -- set buffer local keymaps
+    local close_cmd = nil
+    if type == "calltree" then
+        close_cmd = ":CTClose<CR>"
+    end
+    if type == "symboltree" then
+        close_cmd = ":STClose<CR>"
+    end
     local opts = {silent=true}
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zo", ":CTExpand<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zc", ":CTCollapse<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<CR>", ":CTJump<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":CTJumpSplit<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "v", ":CTJumpVSplit<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "t", ":CTJumpTab<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "f", ":CTFocus<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "i", ":CTHover<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":CTDetails<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":CTSwitch<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "S", ":CTSwitch<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "?", ":lua require('calltree.ui').help(true)<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "h", ":lua require('calltree.ui')._smart_close()<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "x", close_cmd, opts)
     map_resize_keys(buffer_handle, opts)
-
     return buffer_handle
 end
 

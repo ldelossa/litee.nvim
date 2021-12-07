@@ -9,19 +9,16 @@ M.jump_higlight_ns = vim.api.nvim_create_namespace("calltree-jump")
 -- the buffer we highlighted last.
 M.last_highlighted_buffer = nil
 
--- jump_neighbor will jump to the symbol using the
--- closest left or right window.
+-- move_or_create will a attempt to move from the
+-- calltree ui window to the nearest editor window
 --
--- a window will be created if it does not exist.
+-- if the move fails, assumingly because no other window
+-- exists, a new window will be created.
 --
--- location : table - an LSP location object usable by
--- lsp.jump_to_location
---
--- layout : string - calltree's configured layout option
---
--- node : tree.Node - the node being highlighted
-function M.jump_neighbor(location, layout, node)
-    M.set_jump_hl(false, nil)
+-- layout : string - the current configured layout.
+-- returns
+--   bool : whether a new window was created or not
+local function move_or_create(layout) 
     local cur_win = vim.api.nvim_get_current_win()
     if layout == "left" then
         vim.cmd('wincmd l')
@@ -35,14 +32,54 @@ function M.jump_neighbor(location, layout, node)
     if cur_win == vim.api.nvim_get_current_win() then
         if layout == "left" then
             vim.cmd("botright vsplit")
+            return true
         elseif layout == "right" then
             vim.cmd("topleft vsplit")
+            return true
         elseif layout == "top" then
             vim.cmd("topleft split")
+            return true
         elseif layout == "bottom" then
             vim.cmd("topleft split")
+            return true
         end
     end
+    return false
+end
+
+-- jump_tab will open a new tab then jump to the symbol
+function M.jump_tab(location, node)
+    M.set_jump_hl(false, nil)
+    vim.cmd("tabedit " .. location.uri)
+    vim.cmd("set nocursorline")
+    vim.lsp.util.jump_to_location(location)
+    M.set_jump_hl(true, node)
+end
+
+-- jump_split will open a new split then jump to the symbol
+function M.jump_split(split, location, layout, node)
+    M.set_jump_hl(false, nil)
+    if not move_or_create(layout) then
+        vim.cmd(split)
+    end
+    vim.lsp.util.jump_to_location(location)
+    M.set_jump_hl(true, node)
+end
+
+-- jump_neighbor will jump to the symbol using the
+-- closest left or right window.
+--
+-- a window will be created if it does not exist.
+--
+-- location : table - an LSP location object usable by
+-- lsp.jump_to_location
+--
+-- layout : string - calltree's configured layout option
+--
+-- node : tree.Node - the node being highlighted
+function M.jump_neighbor(location, layout, node)
+    M.set_jump_hl(false, nil)
+    move_or_create(layout)
     vim.lsp.util.jump_to_location(location)
     M.set_jump_hl(true, node)
 end

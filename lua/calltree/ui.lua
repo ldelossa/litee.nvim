@@ -215,7 +215,7 @@ M._open_calltree = function()
     end
 
     ctx.state.calltree_buf =
-        ui_buf._setup_buffer(buf_name, ctx.state.calltree_buf, ctx.tab)
+        ui_buf._setup_buffer(buf_name, ctx.state.calltree_buf, ctx.tab, "calltree")
     if ctx.state.calltree_handle ~= nil then
         tree.write_tree(ctx.state.calltree_handle, ctx.state.calltree_buf)
     end
@@ -292,7 +292,7 @@ M._open_symboltree = function()
     end
 
     ctx.state.symboltree_buf =
-        ui_buf._setup_buffer("documentSymbols", ctx.state.symboltree_buf, ctx.tab)
+        ui_buf._setup_buffer("documentSymbols", ctx.state.symboltree_buf, ctx.tab, "symboltree")
     if ctx.state.symboltree_handle ~= nil then
         tree.write_tree(ctx.state.symboltree_handle, ctx.state.symboltree_buf)
     end
@@ -358,14 +358,14 @@ M.toggle_panel = function(keep_open)
     end
 
     ctx.state.calltree_buf =
-        ui_buf._setup_buffer(buf_name, ctx.state.calltree_buf, ctx.tab)
+        ui_buf._setup_buffer(buf_name, ctx.state.calltree_buf, ctx.tab, "calltree")
     if ctx.state.calltree_handle ~= nil then
         tree.write_tree(ctx.state.calltree_handle, ctx.state.calltree_buf)
     end
     ctx.state.calltree_tab = ctx.tab
 
     ctx.state.symboltree_buf =
-        ui_buf._setup_buffer("documentSymbols", ctx.state.symboltree_buf, ctx.tab)
+        ui_buf._setup_buffer("documentSymbols", ctx.state.symboltree_buf, ctx.tab, "symboltree")
     if ctx.state.symboltree_handle ~= nil then
         tree.write_tree(ctx.state.symboltree_handle, ctx.state.symboltree_buf)
     end
@@ -481,22 +481,32 @@ end
 
 -- jump will jump to the source code location of the
 -- symbol under the cursor.
-M.jump = function()
+M.jump = function(split)
     local ctx = ui_req_ctx()
     if ctx.node == nil then
         return
     end
 
-    ctx.state  = M.ui_state_registry[ctx.tab]
-
     local location = lsp_util.resolve_location(ctx.node)
     if location == nil or location.range.start.line == -1 then
         return
     end
+
+    if split == "tab" then
+        jumps.jump_tab(location, ctx.node)
+        return
+    end
+
+    if split == "split" or split == "vsplit" then
+        jumps.jump_split(split, location, ct.config.layout, ctx.node)
+        return
+    end
+
     if ct.config.jump_mode == "neighbor" then
         jumps.jump_neighbor(location, ct.config.layout, ctx.node)
         return
     end
+
     if ct.config.jump_mode == "invoking" then
         local invoking_win = nil
         if ctx.tree_type == "calltree" then
