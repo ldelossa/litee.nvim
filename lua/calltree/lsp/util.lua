@@ -2,7 +2,7 @@ local tree_node = require('calltree.tree.node')
 local notify = require('calltree.ui.notify')
 local M = {}
 
-M.multi_client_request = function(clients, method, params, handler, bufnr)
+function M.multi_client_request(clients, method, params, handler, bufnr)
     for _, client in ipairs(clients) do
         if not client.supports_method(method) then
             goto continue
@@ -24,20 +24,40 @@ function M.relative_path_from_uri(uri)
     return vim.fn.substitute(uri_path, cwd .. "/", "", ""), true
 end
 
-function M.resolve_file_path(node) 
+function M.absolute_path_from_uri(uri)
+    local uri_path = vim.fn.substitute(uri, "file://", "", "")
+    return uri_path
+end
+
+function M.resolve_relative_file_path(node)
     if node.symbol ~= nil then
-        uri = node.symbol.location.uri
+        local uri = node.symbol.location.uri
         return M.relative_path_from_uri(uri)
     elseif node.call_hierarchy_item ~= nil then
-        uri = node.call_hierarchy_item.uri
+        local uri = node.call_hierarchy_item.uri
         return M.relative_path_from_uri(uri)
     elseif node.document_symbol ~= nil then
-        uri = node.uri
+        local uri = node.uri
         return M.relative_path_from_uri(uri)
     else
         return nil
     end
 
+end
+
+function M.resolve_absolute_file_path(node)
+    if node.symbol ~= nil then
+        local uri = node.symbol.location.uri
+        return M.absolute_path_from_uri(uri)
+    elseif node.call_hierarchy_item ~= nil then
+        local uri = node.call_hierarchy_item.uri
+        return M.absolute_path_from_uri(uri)
+    elseif node.document_symbol ~= nil then
+        local uri = node.uri
+        return M.absolute_path_from_uri(uri)
+    else
+        return nil
+    end
 end
 
 function M.resolve_location(node)
@@ -194,7 +214,7 @@ end
 
 function M.gather_symbols_async(root, children, ui_state, callback)
     local co = nil
-    all_nodes = {}
+    local all_nodes = {}
     table.insert(all_nodes, root)
     for _, child in ipairs(children) do
         table.insert(all_nodes, child)

@@ -554,11 +554,11 @@ M.details = function()
 
     ctx.state  = M.ui_state_registry[ctx.tab]
 
-    local direction = "symboltree"
+    local direction = ""
     if ctx.tree_type == "calltree" then
         direction = ctx.state.calltree_dir
     end
-    deets.details_popup(ctx.node, direction)
+    deets.details_popup(ctx.node, ctx.tree_type, direction)
 end
 
 -- auto_highlight will automatically highlight
@@ -610,14 +610,17 @@ M.source_tracking = function ()
 
     ctx.tree_handle = ctx.state.symboltree_handle
 
+
     -- if there's a direct match for this line, use this
+    local cur_file = vim.fn.expand('%:p')
+
     local source_map = marshal.source_line_map[ctx.tree_handle]
     if source_map == nil then
         return
     end
-    local line = source_map[ctx.linenr[1]]
-    if line ~= nil then
-            vim.api.nvim_win_set_cursor(ctx.state.symboltree_win, {line, 0})
+    local source = source_map[ctx.linenr[1]]
+    if source ~= nil and source.uri == cur_file then
+            vim.api.nvim_win_set_cursor(ctx.state.symboltree_win, {source.line, 0})
             vim.cmd("redraw!")
             return
     end
@@ -632,6 +635,7 @@ M.source_tracking = function ()
     for line, node in pairs(buf_lines) do
         if ctx.linenr[1] >= node.document_symbol.range["start"].line
             and ctx.linenr[1] <= node.document_symbol.range["end"].line
+                and cur_file == lsp_util.resolve_absolute_file_path(node)
         then
             vim.api.nvim_win_set_cursor(ctx.state.symboltree_win, {line, 0})
             vim.cmd("redraw!")

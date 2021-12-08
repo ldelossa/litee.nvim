@@ -36,7 +36,10 @@ M.buf_line_map = {}
 -- the struture of this table is as follows:
 -- {
 --   tree_handle = {
---      source_file_line_number = calltree_buffer_line_number
+--      source_file_line_number = {
+--          uri = relative_path_to_file,
+--          line = calltree_buffer_line_number
+--      }
 --      ...
 --   }
 --   ...
@@ -193,7 +196,10 @@ function M.marshal_tree(buf_handle, lines, node, tree, virtual_text_lines, final
     local loc = lsp_util.resolve_location(node)
     if loc ~= nil then
         local start_line = loc["range"]["start"].line
-        M.source_line_map[tree][start_line+1] = #lines
+        M.source_line_map[tree][start_line+1] = {
+            uri = lsp_util.resolve_absolute_file_path(node),
+            line = #lines
+        }
     end
 
     -- if we are an expanded node or we are the root (always expand)

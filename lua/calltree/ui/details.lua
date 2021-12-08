@@ -26,9 +26,11 @@ end
 --
 -- node : tree.Node - the node to show details for
 --
+-- type : string - the type of tree (calltree|symboltree)
+--
 -- direction : string - the current direction of the call tree
 -- must be "to" or "from"
-function M.details_popup(node, direction)
+function M.details_popup(node, type, direction)
     local buf = vim.api.nvim_create_buf(false, true)
     if buf == 0 then
         vim.api.nvim_err_writeln("details_popup: could not create details buffer")
@@ -41,18 +43,14 @@ function M.details_popup(node, direction)
     local kind = lsp_util.resolve_symbol_kind(node)
     local calltree_children = nil; calltree_children = (function() if direction_map[direction] ~= nil then return #node.children end end)()
     local references = nil; references = (function() if node.references ~= nil then return #node.references end end)()
-    local file = lsp_util.resolve_file_path(node)
+    local file = lsp_util.resolve_relative_file_path(node)
     local detail = lsp_util.resolve_detail(node)
-
 
     local lines = {}
     table.insert(lines, "==Symbol Details==")
     table.insert(lines, "Name: " .. node.name)
     if kind ~= nil then
         table.insert(lines, "Kind: " .. kind)
-    end
-    if node.expanded and calltree_children ~= nil then
-        table.insert(lines, direction_map[direction] .. calltree_children)
     end
     if node.references ~= nil then
         table.insert(lines, "References: " .. references)
@@ -62,6 +60,18 @@ function M.details_popup(node, direction)
     end
     if detail ~= nil then
         table.insert(lines, "Details: " .. detail)
+    end
+    -- handle Children fields
+    if type == "calltree" then
+        -- calltrees are lazily loaded so we don't know children count until
+        -- the node is expanded.
+        if node.expanded and calltree_children ~= nil then
+            table.insert(lines, direction_map[direction] .. calltree_children)
+        end
+    elseif type == "symboltree" then
+        -- symboltrees are loaded all at once so we know children count
+        -- immediately.
+        table.insert(lines, "Children: " .. #node.children)
     end
 
     local width = 20
