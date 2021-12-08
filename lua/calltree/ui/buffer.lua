@@ -10,6 +10,18 @@ function M.close_all_popups()
     require('calltree.ui.details').close_details_popup()
 end
 
+-- set_scrolloff will enable a global scrolloff
+-- of 999 when set is true.
+--
+-- when set is false the scrolloff will be set back to 0.
+function M.set_scrolloff(set)
+    if set then
+        vim.cmd("set scrolloff=999")
+    else
+        vim.cmd("set scrolloff=0")
+    end
+end
+
 local function map_resize_keys(buffer_handle, opts)
     local l = config.layout
     if l == "top" or l == "bottom"  then
@@ -83,6 +95,11 @@ function M._setup_buffer(name, buffer_handle, tab, type)
     if config.auto_highlight then
         vim.cmd("au BufWinLeave,WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui').auto_highlight(false)")
         vim.cmd("au CursorHold <buffer=" .. buffer_handle .. "> lua require('calltree.ui').auto_highlight(true)")
+    end
+
+    if config.scrolloff then
+        vim.cmd("au WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.buffer').set_scrolloff(false)")
+        vim.cmd("au WinEnter <buffer=" .. buffer_handle .. "> lua require('calltree.ui.buffer').set_scrolloff(true)")
     end
 
     -- set buffer local keymaps

@@ -11,7 +11,8 @@ M.config = {
     icon_highlights = {},
     hls = {},
     resolve_symbols = true,
-    auto_highlight = true
+    auto_highlight = true,
+    scrolloff = false
 }
 
 function _setup_default_highlights() 
