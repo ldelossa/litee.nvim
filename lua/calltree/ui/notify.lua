@@ -35,7 +35,7 @@ function M.notify_popup(text)
     vim.api.nvim_buf_set_lines(buf, 0, #lines, false, lines)
     vim.api.nvim_buf_set_option(buf, 'modifiable', false)
     local popup_conf = {
-        relative = "win",
+        relative = "editor",
         anchor = "SE",
         width = width,
         height = 1,
@@ -43,7 +43,8 @@ function M.notify_popup(text)
         zindex = 99,
         style = "minimal",
         border = "rounded",
-        bufpos = {999999999, -1}
+        row = vim.opt.lines:get() - (vim.opt.cmdheight:get() + 1),
+        col = vim.opt.columns:get(),
     }
     table.insert(float_wins, vim.api.nvim_open_win(buf, false, popup_conf))
 end
