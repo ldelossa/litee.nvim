@@ -252,6 +252,13 @@ The config table is described below:
         -- automatic highlighting and window position updates when 
         -- navigating the symboltree UI. Set to false to disable.
         auto_highlight = true,
+        -- if set to true when navigating the symboltree outline 
+        -- the related symbol in the source code window will be placed
+        -- in the middle of the window.
+        --
+        -- the scrolloff is turned off once the cursor leaves the symboltree
+        -- outline.
+        scrolloff = false,
     }
 
 ====================================================================================
