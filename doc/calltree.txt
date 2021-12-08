@@ -249,8 +249,8 @@ The config table is described below:
         -- set this to false for large codebases to speed up opening
         -- the calltree.
         resolve_symbols = true,
-        -- automatic highlighting and window position updates when 
-        -- navigating the symboltree UI. Set to false to disable.
+        -- automatic highlighting and source code window position updates when 
+        -- navigating the symboltree or calltree UI. Set to false to disable.
         auto_highlight = true,
         -- if set to true when navigating the symboltree outline 
         -- the related symbol in the source code window will be placed

@@ -578,11 +578,12 @@ M.auto_highlight = function(set)
         return
     end
 
-    if ctx.tree_type ~= "symboltree" then
-        return
+    if ctx.tree_type == "symboltree" then
+        au_hl.highlight(ctx.node, set, ctx.state.invoking_symboltree_win)
     end
-    ctx.ui_state  = M.ui_state_registry[ctx.tab]
-    au_hl.highlight(ctx.node, set, ctx.state)
+    if ctx.tree_type == "calltree" then
+        au_hl.highlight(ctx.node, set, ctx.state.invoking_calltree_win)
+    end
 end
 
 -- source_tracking is a method for keeping the cursor position
