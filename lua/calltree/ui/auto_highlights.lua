@@ -6,23 +6,17 @@ local M = {}
 -- the current highlight used for auto-highlighting
 M.higlight_ns = vim.api.nvim_create_namespace("calltree-hl")
 
--- highlight is used specifically with the symboltree UI.
--- sets a highlight for the provided symboltree node and sets
--- the cursor to the start of the symbol.
---
--- this function always targets the "invoking_symboltree_win" in the ui
--- state. this is because the symboltree UI always follows the last focused
--- source code window in vim.
+-- higlight will set a highlight in the source code window when the symbol
+-- is hovered in a calltree window.
 --
 -- node : tree.tree.Node - the currently selected node in the symbol tree
 -- set : bool - whether to remove the highlight and immediately return
--- ui_state : table - the current calltree ui_state provided by the ui
--- module.
-function M.highlight(node, set, ui_state)
-    if not vim.api.nvim_win_is_valid(ui_state.invoking_symboltree_win) then
+-- invoking_win : the window which invoked the calltree or symboltree
+function M.highlight(node, set, invoking_win)
+    if not vim.api.nvim_win_is_valid(invoking_win) then
         return
     end
-    local buf = vim.api.nvim_win_get_buf(ui_state.invoking_symboltree_win)
+    local buf = vim.api.nvim_win_get_buf(invoking_win)
     if not vim.api.nvim_buf_is_valid(buf) then
         return
     end
@@ -46,6 +40,15 @@ function M.highlight(node, set, ui_state)
         return
     end
 
+    -- make sure URIs match before setting highlight
+    local invoking_buf = vim.api.nvim_win_get_buf(invoking_win)
+    local cur_file = vim.api.nvim_buf_get_name(invoking_buf)
+    print(cur_file)
+    local symbol_path = lsp_util.resolve_absolute_file_path(node)
+    if cur_file ~= symbol_path then
+        return
+    end
+
     vim.api.nvim_buf_add_highlight(
         buf,
         M.higlight_ns,
@@ -54,7 +57,7 @@ function M.highlight(node, set, ui_state)
         range["start"].character,
         range["end"].character
     )
-    vim.api.nvim_win_set_cursor(ui_state.invoking_symboltree_win, {range["start"].line+1, 0})
+    vim.api.nvim_win_set_cursor(invoking_win, {range["start"].line+1, 0})
 end
 
 return M
