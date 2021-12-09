@@ -97,6 +97,8 @@ How jumping occurs is controlled by the config, see (h: calltree-config)
 
 Jumping will set highlights in the source file, to clear these use ":CTClearHL".
 
+You can also jump to a split or new tab with ":CTJumpSplit", ":CTJumpVSplit", and ":CTJumpTab".
+
 ## Icons
 
 Nerd font icons along with Codicons are currently supported. 
