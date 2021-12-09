@@ -12,7 +12,8 @@ M.config = {
     hls = {},
     resolve_symbols = true,
     auto_highlight = true,
-    scrolloff = false
+    scrolloff = false,
+    map_resize_keys = true,
 }
 
 function _setup_default_highlights() 

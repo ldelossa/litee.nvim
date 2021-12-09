@@ -259,6 +259,8 @@ The config table is described below:
         -- the scrolloff is turned off once the cursor leaves the symboltree
         -- outline.
         scrolloff = false,
+        -- map <Left>, <Right>, <Up>, <Down> to resize calltree/symboltree
+        map_resize_keys = true,
     }
 
 ====================================================================================
