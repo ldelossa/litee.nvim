@@ -115,7 +115,11 @@ function M.marshal_node(node, final)
     -- compute guides or spaces dependent on configs.
     if config.indent_guides then
         for i=1, node.depth do
-            str = str .. M.glyphs.guide .. M.glyphs.space
+            if i == 1 then
+                str = str .. M.glyphs.space
+            else
+                str = str .. M.glyphs.guide .. M.glyphs.space
+            end
         end
     else
         for _=1, node.depth do
