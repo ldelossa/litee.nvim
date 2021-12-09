@@ -113,6 +113,7 @@ function M._setup_buffer(name, buffer_handle, tab, type)
     local opts = {silent=true}
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zo", ":CTExpand<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zc", ":CTCollapse<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zM", ":CTCollapseAll<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<CR>", ":CTJump<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":CTJumpSplit<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "v", ":CTJumpVSplit<CR>", opts)

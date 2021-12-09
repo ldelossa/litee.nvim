@@ -400,6 +400,18 @@ M.collapse = function()
     end
 end
 
+-- collapse all will collapse the entire tree if
+-- any nodes are expanded.
+M.collapse_all = function()
+    local ctx = ui_req_ctx()
+    if ctx.node == nil then
+        return
+    end
+    local t = tree.get_tree(ctx.tree_handle)
+    tree.collapse_subtree(t.root)
+    tree.write_tree(ctx.tree_handle, ctx.buf)
+end
+
 -- expand will expand a symbol at the current cursor position
 M.expand = function()
     local ctx = ui_req_ctx()
