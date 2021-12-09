@@ -11,6 +11,14 @@ function M.close_notify_popup()
     float_wins = nil
 end
 
+function M.notify_popup_with_timeout(text, ms)
+    M.notify_popup(text)
+    local timer = vim.loop.new_timer()
+    timer:start(ms, 0, vim.schedule_wrap(
+        M.close_notify_popup
+    ))
+end
+
 function M.notify_popup(text)
     if float_wins == nil then
         float_wins = {}

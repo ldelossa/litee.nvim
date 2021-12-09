@@ -348,6 +348,7 @@ end
 M.toggle_panel = function(keep_open)
     local ctx = ui_req_ctx()
     if ctx.state == nil then
+        notify.notify_popup_with_timeout("Cannot toggle panel until LSP method is called.", 1750)
         return
     end
 
@@ -382,6 +383,7 @@ end
 M.collapse = function()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
+        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window", 1750)
         return
     end
 
@@ -405,6 +407,7 @@ end
 M.collapse_all = function()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
+        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window", 1750)
         return
     end
     local t = tree.get_tree(ctx.tree_handle)
@@ -416,6 +419,7 @@ end
 M.expand = function()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
+        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window", 1750)
         return
     end
 
@@ -451,6 +455,7 @@ end
 M.focus = function()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
+        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window.", 1750)
         return
     end
 
@@ -458,6 +463,7 @@ M.focus = function()
 
     -- only valid for calltrees
     if ctx.tree_type ~= "calltree" then
+        notify.notify_popup_with_timeout("Only supported for call hierarchy trees.", 1750)
         return
     end
 
@@ -470,12 +476,14 @@ end
 M.switch_direction = function()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
+        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window.", 1750)
         return
     end
 
     ctx.state = M.ui_state_registry[ctx.tab]
 
     if ctx.tree_type ~= "calltree" then
+        notify.notify_popup_with_timeout("Only supported for call hierarchy trees.", 1750)
         return
     end
 
@@ -499,6 +507,7 @@ end
 M.jump = function(split)
     local ctx = ui_req_ctx()
     if ctx.node == nil then
+        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window.", 1750)
         return
     end
 
@@ -541,6 +550,7 @@ M.hover = function()
     ui_buf.close_all_popups()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
+        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window.", 1750)
         return
     end
 
@@ -565,6 +575,7 @@ M.details = function()
     ui_buf.close_all_popups()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
+        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window.", 1750)
         return
     end
 
