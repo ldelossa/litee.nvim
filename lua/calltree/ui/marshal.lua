@@ -185,6 +185,14 @@ function M.marshal_tree(buf_handle, lines, node, tree, virtual_text_lines, final
         M.buf_line_map[tree] = {}
         M.source_line_map[tree] = {}
     end
+
+    -- if node is a document_symbol and has no children expand it
+    -- ahead of time. symboltrees are not lazily loaded
+    -- like calltrees and we know this node is a leaf.
+    if node.document_symbol ~= nil and #node.children == 0 then
+        node.expanded = true
+    end
+
     local line, virtual_text = M.marshal_node(node, final)
     table.insert(lines, line)
     table.insert(virtual_text_lines, virtual_text)
