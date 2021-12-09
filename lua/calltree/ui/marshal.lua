@@ -5,12 +5,11 @@ local lsp_util = require('calltree.lsp.util')
 local M = {}
 
 M.glyphs = {
-    expanded= "▼",
-    collapsed= "▶",
+    expanded = (function() if ct.active_icon_set ~= nil then return ct.active_icon_set.Expanded else return "▼" end end)(),
+    collapsed = (function() if ct.active_icon_set ~= nil then return ct.active_icon_set.Collapsed else return "▶" end end)(),
     separator = "•",
     guide = "⎸",
     space = " "
-
 }
 
 -- buf_line_map keeps a mapping between marshaled
@@ -57,17 +56,9 @@ M.source_line_map = {}
 function M.marshal_node(node, final)
     local glyph = ""
     if node.expanded then
-        if ct.active_icon_set ~= nil then
-            glyph = ct.active_icon_set.Expanded
-        else
-            glyph = M.glyphs["expanded"]
-        end
+        glyph = M.glyphs["expanded"]
     else
-        if ct.active_icon_set ~= nil then
-            glyph = ct.active_icon_set.Collapsed
-        else
-            glyph = M.glyphs["collapsed"]
-        end
+        glyph = M.glyphs["collapsed"]
     end
 
     -- prefer using workspace symbol details if available.

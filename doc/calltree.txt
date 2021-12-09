@@ -400,7 +400,13 @@ M.hls = {
     -- the hight of the symbol being jumped to in it's source file.
     SymbolJumpHL        = "CTSymbolJump",
     -- the highlight of any references to the above symbol.
-    SymbolJumpRefsHL    = "CTSymbolJumpRefs"
+    SymbolJumpRefsHL    = "CTSymbolJumpRefs",
+    -- the highlight of indent guides if enabled
+    IndentGuideHL       = "CTIndentGuide",
+    -- the highlight for expanded guide 
+    ExpandedGuideHL     = "CTExpandedGuide",
+    -- the highlight for collapsed guide
+    CollapsedGuideHL    = "CTCollapsedGuide"
 }
 
 The usage is similar to the icon highlights but are specified by supplying a "hls" table within the config supplied to calltree's setup function.
@@ -411,6 +417,9 @@ List of all unique highlights:
     hi CTSymbolDetail         
     hi CTSymbolJump         
     hi CTSymbolJumpRefs     
+    hi CTIndentGuide
+    hi CTExpandedGuide
+    hi CTCollapsedGuide
     -- icons
     hi CTParameterReference 
     hi CTURI                

@@ -1,5 +1,6 @@
 local config = require("calltree").config
 local ct = require("calltree")
+local marshal = require('calltree.ui.marshal')
 local M = {}
 
 -- window.lua offers a declartive way to open new windows
@@ -217,6 +218,11 @@ function M._setup_window(current_layout, desired_layout, ui_state)
             end
             -- set configured symbol highlight
             vim.cmd(string.format("syn match %s /%s/", ct.hls.SymbolHL, [[\w]]))
+            -- set configured expanded indicator highlights
+            vim.cmd(string.format("syn match %s /%s/", ct.hls.ExpandedGuideHL, marshal.glyphs.expanded))
+            vim.cmd(string.format("syn match %s /%s/", ct.hls.CollapsedGuideHL, marshal.glyphs.collapsed))
+            -- set configured indent guide highlight
+            vim.cmd(string.format("syn match %s /%s/", ct.hls.IndentGuideHL, marshal.glyphs.guide))
         end
     end
 end
