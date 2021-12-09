@@ -1,4 +1,7 @@
 local config = require('calltree').config
+
+local original_guicursor = ""
+
 local M = {}
 
 -- close_all_popups is a convenience function to close any
@@ -20,6 +23,40 @@ function M.set_scrolloff(set)
     else
         vim.cmd("set scrolloff=0")
     end
+end
+
+-- hide_cursor will dynamically create the CTCursorHide hi and
+-- set the guicursor option to this hi group.
+--
+-- the CTCursorHide hi has the same bg/fg as the CursorLine hi which
+-- is used inside the Calltree.nvim windows.
+--
+-- this effectively hides the cursor by making it blend into the cursor
+-- line.
+--
+-- hide : bool - if true hides the cursor if false sets the guicursor
+-- option back to the value when Neovim started.
+function M.hide_cursor(hide)
+    if original_guicursor == "" then
+        for _, section in ipairs(vim.opt.guicursor:get()) do
+            original_guicursor = original_guicursor .. section .. ','
+        end
+    end
+    if not hide then
+        vim.cmd('set guicursor=' .. original_guicursor)
+        return
+    end
+    local colors_rgb = vim.api.nvim_get_hl_by_name("CursorLine", true)
+    local colors_256 = vim.api.nvim_get_hl_by_name("CursorLine", false)
+    local hi = string.format("hi CTCursorHide cterm=None ctermbg=%s ctermfg=%s gui=None guibg=%s guifg=%s",
+        colors_256.background,
+        colors_256.foreground,
+        string.format("#%x", colors_rgb.background),
+        string.format("#%x", colors_rgb.foreground)
+    )
+    vim.cmd(hi)
+    local cursorgui = "set guicursor=n:CTCursorHide"
+    vim.cmd(cursorgui)
 end
 
 local function map_resize_keys(buffer_handle, opts)
@@ -91,6 +128,12 @@ function M._setup_buffer(name, buffer_handle, tab, type)
     -- au to close popup with cursor moves or buffer is closed.
     vim.cmd("au CursorMoved,BufWinLeave,WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.buffer').close_all_popups()")
 
+    -- hide the cursor if possible since there's no need for it, resizing the panel should be used instead.
+    if config.hide_cursor then
+        vim.cmd("au WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.buffer').hide_cursor(false)")
+        vim.cmd("au WinEnter <buffer=" .. buffer_handle .. "> lua require('calltree.ui.buffer').hide_cursor(true)")
+    end
+
     -- au to (re)set source code highlights when a symboltree node is hovered.
     if config.auto_highlight then
         vim.cmd("au BufWinLeave,WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui').auto_highlight(false)")
@@ -123,7 +166,7 @@ function M._setup_buffer(name, buffer_handle, tab, type)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":CTDetails<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "S", ":CTSwitch<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "?", ":lua require('calltree.ui').help(true)<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "h", ":lua require('calltree.ui')._smart_close()<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "H", ":lua require('calltree.ui')._smart_close()<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "x", close_cmd, opts)
 	if config.map_resize_keys then
         map_resize_keys(buffer_handle, opts)

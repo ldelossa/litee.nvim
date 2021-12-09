@@ -61,7 +61,7 @@ function M._setup_help_buffer(help_buf_handle)
             "S                  - switch the symbol from incoming/outgoing calls (call hierarchies)",
             "i                  - show hover info for symbol",
             "d                  - show symbol details",
-            "h                  - hide this element from the panel, will appear again on toggle",
+            "H                  - hide this element from the panel, will appear again on toggle",
             "x                  - remove this element from the panel, will not appear until another LSP request",
             "Up,Down,Right,Left - resize the panel"
         }

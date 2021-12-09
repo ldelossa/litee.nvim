@@ -14,6 +14,7 @@ M.config = {
     auto_highlight = true,
     scrolloff = false,
     map_resize_keys = true,
+    hide_cursor = false,
 }
 
 function _setup_default_highlights() 

@@ -261,6 +261,14 @@ The config table is described below:
         scrolloff = false,
         -- map <Left>, <Right>, <Up>, <Down> to resize calltree/symboltree
         map_resize_keys = true,
+        -- if set to true the cursor will be hidden when inside a Calltree.nvim
+        -- window. 
+        --
+        -- this is done by setting guicursor to the same fg/bg as CursorLine hi
+        -- making it blend in with the CursorLine.
+        --
+        -- set your CursorLine hi correctly with cterm/gui values for this to work.
+        hide_cursor = false,
     }
 
 ====================================================================================
