@@ -224,7 +224,7 @@ function M.gather_symbols_async(root, children, ui_state, callback)
             local params = {
                 query = node.name,
             }
-            notify.notify_popup("gathering symbols [" .. i .. "/" .. #all_nodes .. "]")
+            notify.notify_popup("gathering symbols [" .. i .. "/" .. #all_nodes .. "]", "warning")
             M.multi_client_request(
                 ui_state.active_lsp_clients,
                 "workspace/symbol",

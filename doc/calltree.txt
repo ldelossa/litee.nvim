@@ -269,6 +269,11 @@ The config table is described below:
         --
         -- set your CursorLine hi correctly with cterm/gui values for this to work.
         hide_cursor = false,
+        -- if true Calltree.nvim will create popups at the bottom right of the screen
+        -- to notify the user of information and errors.
+        --
+        -- notifications use the "Error", "WarningMsg", and "NormalFloat" highlights
+        enable_notify = true,
     }
 
 ====================================================================================
