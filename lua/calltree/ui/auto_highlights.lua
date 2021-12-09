@@ -43,7 +43,6 @@ function M.highlight(node, set, invoking_win)
     -- make sure URIs match before setting highlight
     local invoking_buf = vim.api.nvim_win_get_buf(invoking_win)
     local cur_file = vim.api.nvim_buf_get_name(invoking_buf)
-    print(cur_file)
     local symbol_path = lsp_util.resolve_absolute_file_path(node)
     if cur_file ~= symbol_path then
         return
