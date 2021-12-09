@@ -24,7 +24,7 @@ end
 
 local function map_resize_keys(buffer_handle, opts)
     local l = config.layout
-    if l == "top" or l == "bottom"  then
+    if l == "top" then
         vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Right>", ":vert resize +5<cr>", opts)
         vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Left>", ":vert resize -5<cr>", opts)
         vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<Up>", ":resize +5<cr>", opts)
@@ -125,7 +125,9 @@ function M._setup_buffer(name, buffer_handle, tab, type)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "?", ":lua require('calltree.ui').help(true)<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "h", ":lua require('calltree.ui')._smart_close()<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "x", close_cmd, opts)
-    map_resize_keys(buffer_handle, opts)
+	if config.map_resize_keys then
+        map_resize_keys(buffer_handle, opts)
+    end
     return buffer_handle
 end
 
