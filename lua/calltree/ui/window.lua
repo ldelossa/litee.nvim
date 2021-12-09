@@ -207,6 +207,8 @@ function M._setup_window(current_layout, desired_layout, ui_state)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'number', false)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'cursorline', true)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'wrap', false)
+        vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'winfixwidth', true)
+        vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'winfixheight', true)
 
         ::continue::
         if not config.no_hls then
