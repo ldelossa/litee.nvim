@@ -15,6 +15,7 @@ M.config = {
     scrolloff = false,
     map_resize_keys = true,
     hide_cursor = false,
+    enable_notify = true,
 }
 
 function _setup_default_highlights() 

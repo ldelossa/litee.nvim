@@ -1,3 +1,4 @@
+local config = require('calltree').config
 local M = {}
 
 local float_wins = {}
@@ -11,15 +12,22 @@ function M.close_notify_popup()
     float_wins = nil
 end
 
-function M.notify_popup_with_timeout(text, ms)
-    M.notify_popup(text)
+function M.notify_popup_with_timeout(text, ms, sev)
+    if not config.enable_notify then
+        return
+    end
+    M.notify_popup(text, sev)
     local timer = vim.loop.new_timer()
     timer:start(ms, 0, vim.schedule_wrap(
         M.close_notify_popup
     ))
 end
 
-function M.notify_popup(text)
+function M.notify_popup(text, sev)
+    if not config.enable_notify then
+        return
+    end
+
     if float_wins == nil then
         float_wins = {}
     end
@@ -54,7 +62,17 @@ function M.notify_popup(text)
         row = vim.opt.lines:get() - (vim.opt.cmdheight:get() + 1),
         col = vim.opt.columns:get(),
     }
-    table.insert(float_wins, vim.api.nvim_open_win(buf, false, popup_conf))
+    local cur_win = vim.api.nvim_get_current_win()
+    table.insert(float_wins, vim.api.nvim_open_win(buf, true, popup_conf))
+    if sev == "error" then
+        vim.cmd(string.format("syn match %s /%s/", "Error", [[.]]))
+    elseif sev == "warning" then
+        vim.cmd(string.format("syn match %s /%s/", "WarningMsg", [[.]]))
+    else
+        vim.cmd(string.format("syn match %s /%s/", "NormalFloat", [[.]]))
+    end
+    vim.api.nvim_set_current_win(cur_win)
+
 end
 
 return M
