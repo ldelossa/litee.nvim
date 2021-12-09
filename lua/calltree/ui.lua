@@ -10,6 +10,7 @@ local hover = require('calltree.ui.hover')
 local tree  = require('calltree.tree.tree')
 local handlers = require('calltree.handlers')
 local au_hl = require('calltree.ui.auto_highlights')
+local notify = require('calltree.ui.notify')
 
 local M = {}
 
@@ -347,29 +348,32 @@ end
 M.toggle_panel = function(keep_open)
     local ctx = ui_req_ctx()
     if ctx.state == nil then
-        ctx.state = {}
-        M.ui_state_registry[ctx.tab] = ctx.state
+        return
     end
 
-    local buf_name = "calltree: empty"
-    if ctx.state.calltree_dir ~= nil then
-        buf_name = direction_map[ctx.state.calltree_dir].buf_name
-    end
-
-    ctx.state.calltree_buf =
-        ui_buf._setup_buffer(buf_name, ctx.state.calltree_buf, ctx.tab, "calltree")
     if ctx.state.calltree_handle ~= nil then
-        tree.write_tree(ctx.state.calltree_handle, ctx.state.calltree_buf)
-    end
-    ctx.state.calltree_tab = ctx.tab
+        local buf_name = "calltree: empty"
+        if ctx.state.calltree_dir ~= nil then
+            buf_name = direction_map[ctx.state.calltree_dir].buf_name
+        end
 
-    ctx.state.symboltree_buf =
-        ui_buf._setup_buffer("documentSymbols", ctx.state.symboltree_buf, ctx.tab, "symboltree")
+        ctx.state.calltree_buf =
+            ui_buf._setup_buffer(buf_name, ctx.state.calltree_buf, ctx.tab, "calltree")
+        if ctx.state.calltree_handle ~= nil then
+            tree.write_tree(ctx.state.calltree_handle, ctx.state.calltree_buf)
+        end
+        ctx.state.calltree_tab = ctx.tab
+    end
+
     if ctx.state.symboltree_handle ~= nil then
-        tree.write_tree(ctx.state.symboltree_handle, ctx.state.symboltree_buf)
+        ctx.state.symboltree_buf =
+            ui_buf._setup_buffer("documentSymbols", ctx.state.symboltree_buf, ctx.tab, "symboltree")
+        if ctx.state.symboltree_handle ~= nil then
+            tree.write_tree(ctx.state.symboltree_handle, ctx.state.symboltree_buf)
+        end
+        ctx.state.symboltree_tab = ctx.tab
     end
 
-    ctx.state.symboltree_tab = ctx.tab
     ui_win._toggle_panel(ctx.state, keep_open)
 end
 
