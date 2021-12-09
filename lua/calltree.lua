@@ -37,6 +37,9 @@ function _setup_default_highlights()
         CTSymbolJumpRefs       = 'hi CTSymbolJumpRefs         ctermfg=015 ctermbg=110 cterm=italic,bold,underline   guifg=#464646 guibg=#9b885c gui=italic,bold',
         CTType                 = 'hi CTType                   guifg=#9b885c guibg=None',
         CTURI                  = 'hi CTURI                    guifg=#988ACF guibg=None',
+        CTIndentGuide          = 'hi CTIndentGuide            guifg=None    guibg=None',
+        CTExpandedGuide        = 'hi CTExpandedGuide          guifg=None    guibg=None',
+        CTCollapsedGuide       = 'hi CTCollapsedGuide         guifg=None    guibg=None'
     }
     local light = {
         CTBoolean               = 'hi CTBoolean                guifg=#005f87 guibg=None',
@@ -57,6 +60,9 @@ function _setup_default_highlights()
         CTSymbolJumpRefs        = 'hi CTSymbolJumpRefs         ctermfg=015 ctermbg=110 cterm=italic,bold,underline   guifg=#464646 guibg=#9b885c gui=italic,bold',
         CTType                  = 'hi CTType                   guifg=#268889 guibg=None',
         CTURI                   = 'hi CTURI                    guifg=#806CCF guibg=None',
+        CTIndentGuide           = 'hi CTIndentGuide            guifg=None    guibg=None',
+        CTExpandedGuide         = 'hi CTExpandedGuide          guifg=None    guibg=None',
+        CTCollapsedGuide        = 'hi CTCollapsedGuide         guifg=None    guibg=None'
     }
     local bg = vim.api.nvim_get_option("background")
     if bg == "dark" then
@@ -298,7 +304,10 @@ M.hls = {
     SymbolDetailHL      = "CTSymbolDetail",
     SymbolHL            = "CTSymbol",
     SymbolJumpHL        = "CTSymbolJump",
-    SymbolJumpRefsHL    = "CTSymbolJumpRefs"
+    SymbolJumpRefsHL    = "CTSymbolJumpRefs",
+    IndentGuideHL       = "CTIndentGuide",
+    ExpandedGuideHL     = "CTExpandedGuide",
+    CollapsedGuideHL    = "CTCollapsedGuide"
 }
 
 return M
