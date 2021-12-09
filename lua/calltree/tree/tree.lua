@@ -179,6 +179,19 @@ function M.remove_subtree(tree, node, root)
     end
 end
 
+-- collapse subtree will recursively collapse the
+-- subtree starting at root and inclusive to root.
+--
+-- this function does not modify the tree structure.
+--
+-- root : Node - the node to recursively collapse.
+function M.collapse_subtree(root)
+    root.expanded = false
+    for _, child in ipairs(root.children) do
+        M.collapse_subtree(child)
+    end
+end
+
 -- reparent_node makes the provided node M.root_node,
 -- creating a new calltree rooted at node.
 --

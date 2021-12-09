@@ -52,6 +52,7 @@ function M._setup_help_buffer(help_buf_handle)
             "KEYMAP:",
             "zo                 - expand a symbol",
             "zc                 - collapse a symbol",
+            "zM                 - collapse all symbols",
             "return             - jump to symbol",
             "s                  - jump to symbol in a new split",
             "v                  - jump to symbol in a new vsplit",
