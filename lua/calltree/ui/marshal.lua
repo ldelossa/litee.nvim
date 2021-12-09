@@ -8,9 +8,7 @@ M.glyphs = {
     expanded= "▼",
     collapsed= "▶",
     separator = "•",
-    guide = "│",
-    end_guide = "╰",
-    t_guide = "├",
+    guide = "⎸",
     space = " "
 
 }
@@ -117,13 +115,7 @@ function M.marshal_node(node, final)
     -- compute guides or spaces dependent on configs.
     if config.indent_guides then
         for i=1, node.depth do
-            if final and i == node.depth and #node.children == 0 then
-                str = str .. M.glyphs.end_guide .. M.glyphs.space
-            elseif final and i == node.depth and #node.children > 0 then
-                str = str .. M.glyphs.t_guide .. M.glyphs.space
-            else
-                str = str .. M.glyphs.guide .. M.glyphs.space
-            end
+            str = str .. M.glyphs.guide .. M.glyphs.space
         end
     else
         for _=1, node.depth do
