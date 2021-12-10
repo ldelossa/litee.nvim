@@ -49,10 +49,10 @@ function M.hide_cursor(hide)
     local colors_rgb = vim.api.nvim_get_hl_by_name("CursorLine", true)
     local colors_256 = vim.api.nvim_get_hl_by_name("CursorLine", false)
     local hi = string.format("hi CTCursorHide cterm=None ctermbg=%s ctermfg=%s gui=None guibg=%s guifg=%s",
-        colors_256.background,
-        colors_256.foreground,
-        string.format("#%x", colors_rgb.background),
-        string.format("#%x", colors_rgb.foreground)
+        (function() if colors_256.background ~= nil then return colors_256.background else return "None" end end)(),
+        (function() if colors_256.foreground ~= nil then return colors_256.foreground else return "None" end end)(),
+        (function() if colors_rgb.background ~= nil then return string.format("#%x", colors_rgb.background) else return "None" end end)(),
+        (function() if colors_rgb.foreground ~= nil then return string.format("#%x", colors_rgb.foreground) else return "None" end end)()
     )
     vim.cmd(hi)
     local cursorgui = "set guicursor=n:CTCursorHide"
