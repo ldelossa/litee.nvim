@@ -99,6 +99,9 @@ end
 -- the panel is already open. Useful for LSP handlers
 -- which want to refresh the state of the UI but not
 -- close the panels.
+--
+-- returns:
+--  opened : bool - true if window is open after this call, false otherwise
 function M._toggle_panel(ui_state, keep_open)
     local cur_win = vim.api.nvim_get_current_win()
     local open = true
@@ -112,24 +115,21 @@ function M._toggle_panel(ui_state, keep_open)
             end
         end
         if not open then
-            return
+            return false
         end
     end
 
     -- we didn't find any open calltree windows, toggle
     -- the panel open
-    if 
-        ui_state.calltree_handle ~= nil
-    then
+    if ui_state.calltree_handle ~= nil then
         M._open_window("calltree", ui_state)
     end
-    if 
-        ui_state.symboltree_handle ~= nil
-    then
+    if ui_state.symboltree_handle ~= nil then
         M._open_window("symboltree", ui_state)
     end
 
     vim.api.nvim_set_current_win(cur_win)
+    return true
 end
 
 -- setup_window evaluates the current layout and the desired layout
