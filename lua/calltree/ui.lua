@@ -11,6 +11,7 @@ local tree  = require('calltree.tree.tree')
 local handlers = require('calltree.handlers')
 local au_hl = require('calltree.ui.auto_highlights')
 local notify = require('calltree.ui.notify')
+local nav = require('calltree.ui.navigation')
 
 local M = {}
 
@@ -673,6 +674,28 @@ M.source_tracking = function ()
             vim.cmd("redraw!")
             return
         end
+    end
+end
+
+M.navigation = function(tree_type, dir) 
+    local ctx = ui_req_ctx()
+    if ctx.state == nil then
+        return
+    end
+    if tree_type == 'calltree' and dir == "n" then
+        nav.calltree_n(ctx.state)
+    elseif tree_type == 'calltree' and dir == "p" then
+        nav.calltree_p(ctx.state)
+    elseif tree_type == 'symboltree' and dir == "n" then
+        vim.api.nvim_set_current_win(ctx.state.symboltree_win)
+        nav.symboltree_n(ctx.state)
+        M.auto_highlight(true)
+        vim.api.nvim_set_current_win(ctx.win)
+    elseif tree_type == 'symboltree' and dir == "p" then
+        vim.api.nvim_set_current_win(ctx.state.symboltree_win)
+        nav.symboltree_p(ctx.state)
+        M.auto_highlight(true)
+        vim.api.nvim_set_current_win(ctx.win)
     end
 end
 
