@@ -148,10 +148,10 @@ function M._setup_buffer(name, buffer_handle, tab, type)
     -- set buffer local keymaps
     local close_cmd = nil
     if type == "calltree" then
-        close_cmd = ":CTClose<CR>"
+        close_cmd = ":CTCloseCalltree<CR>"
     end
     if type == "symboltree" then
-        close_cmd = ":STClose<CR>"
+        close_cmd = ":CTCloseSymboltree<CR>"
     end
     local opts = {silent=true}
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zo", ":CTExpand<CR>", opts)
