@@ -56,7 +56,7 @@ To start a calltree or a symboltree use the LSP client just like you're used to:
 ```
 :lua vim.lsp.buf.incoming_calls()
 :lua vim.lsp.buf.outgoing_calls()
-:lua vim.slp.buf.document_symbol() (symboltree outline)
+:lua vim.lsp.buf.document_symbol() -- (symboltree outline)
 ```
 
 You most likely have key mappings set for this if you're using the lsp-config.
