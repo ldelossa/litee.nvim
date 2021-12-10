@@ -54,11 +54,11 @@ M.source_line_map = {}
 --    table  - a virt_text chunk that can be passed directly to
 -- vim.api.nvim_buf_set_extmark() via the virt_text option.
 function M.marshal_node(node, final)
-    local glyph = ""
+    local expand_guide = ""
     if node.expanded then
-        glyph = M.glyphs["expanded"]
+        expand_guide = M.glyphs["expanded"]
     else
-        glyph = M.glyphs["collapsed"]
+        expand_guide = M.glyphs["collapsed"]
     end
 
     -- prefer using workspace symbol details if available.
@@ -74,6 +74,13 @@ function M.marshal_node(node, final)
         elseif node.symbol.detail ~= nil then
             detail = node.symbol.detail
         end
+        if
+            #node.children == 0
+            and node.expanded == true
+        then
+        -- we are at a leaf, no guide necessary.
+            expand_guide = M.glyphs["space"]
+         end
     elseif node.document_symbol ~= nil then
         name = node.document_symbol.name
         kind = vim.lsp.protocol.SymbolKind[node.document_symbol.kind]
@@ -82,7 +89,7 @@ function M.marshal_node(node, final)
             detail = node.document_symbol.detail
         end
         if #node.children == 0 then
-            glyph = M.glyphs.space
+            expand_guide = M.glyphs.space
         end
     elseif node.call_hierarchy_item ~= nil then
         name = node.name
@@ -119,7 +126,7 @@ function M.marshal_node(node, final)
     end
 
     -- ▶ Func1
-    str = str .. glyph .. M.glyphs.space
+    str = str .. expand_guide .. M.glyphs.space
 
     if ct.config.icons ~= "none" then
         -- ▶   Func1
