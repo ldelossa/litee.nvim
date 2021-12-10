@@ -101,6 +101,19 @@ local function ui_req_ctx()
     local tree_handle = M.get_tree_from_buf(tab, buf)
     local node = marshal.marshal_line(linenr, tree_handle)
     local ui_state = M.ui_state_registry[tab]
+
+    local calltree_cursor, symboltree_cursor = nil, nil
+    if ui_state ~= nil then
+        if ui_state.calltree_win ~= nil and
+            vim.api.nvim_win_is_valid(ui_state.calltree_win) then
+            calltree_cursor = vim.api.nvim_win_get_cursor(ui_state.calltree_win)
+        end
+        if ui_state.symboltree_win ~= nil and
+            vim.api.nvim_win_is_valid(ui_state.symboltree_win) then
+            symboltree_cursor = vim.api.nvim_win_get_cursor(ui_state.symboltree_win)
+        end
+    end
+
     return {
         -- the buffer where the calltree method is being invoked
         buf = buf,
@@ -116,6 +129,10 @@ local function ui_req_ctx()
         tree_handle = tree_handle,
         -- if inside a calltree element, the node at the current line
         node = node,
+        -- if a calltree window exists, the current cursor position
+        calltree_cursor = calltree_cursor,
+        -- if a symboltree window exists, the current cursor position
+        symboltree_cursor = symboltree_cursor,
         -- the current ui state for the given tab
         state = ui_state
     }
@@ -158,8 +175,12 @@ end
 -- or "symboltree"
 M.open_to = function(ui)
     local ctx = ui_req_ctx()
+    if ctx.state == nil then
+        notify.notify_popup_with_timeout("Cannot toggle panel until LSP method is called.", 1750, "error")
+        return false
+    end
     if ui == "calltree" then
-        local ui_state = M.ui_state_registry[ctx.tab]
+        local ui_state = ctx.state
         if ui_state ~= nil then
             if ctx.win == ui_state.calltree_win then
                 vim.api.nvim_set_current_win(ui_state.invoking_calltree_win)
@@ -173,11 +194,11 @@ M.open_to = function(ui)
                 return
             end
         end
-        M.toggle_panel(true)
+        M.toggle_panel(ui_state, true)
         ui_state = M.ui_state_registry[ctx.tab]
         vim.api.nvim_set_current_win(ui_state.calltree_win)
     elseif ui == "symboltree" then
-        local ui_state = M.ui_state_registry[ctx.tab]
+        local ui_state = ctx.state
         if ui_state ~= nil then
             if ctx.win == ui_state.symboltree_win then
                 vim.api.nvim_set_current_win(ui_state.invoking_symboltree_win)
@@ -191,7 +212,7 @@ M.open_to = function(ui)
                 return
             end
         end
-        M.toggle_panel(true)
+        M.toggle_panel(ui_state, true)
         ui_state = M.ui_state_registry[ctx.tab]
         vim.api.nvim_set_current_win(ui_state.symboltree_win)
     end
@@ -204,7 +225,6 @@ end
 -- the window.
 M._open_calltree = function()
     local ctx = ui_req_ctx()
-    -- this allows for empty windows to be opened
     if ctx.state == nil then
         ctx.state = {}
         M.ui_state_registry[ctx.tab] = ctx.state
@@ -340,52 +360,50 @@ M.close_symboltree = function()
     end
 end
 
--- toggle_panel will open and close the unified panel
--- the unified panel treats all calltree ui elements as
--- a single panel similar to  other IDE's.
---
--- keep_open : bool - if true, and the panel is open,
--- the panel will be left open when this function terminates.
---
--- returns:
---  bool : true if panel is open after this call, false otherwise,
---  if panel could not be opened returns `(nil, err)` where `err` is
---  a string describing the failure reason
-M.toggle_panel = function(keep_open)
+function M.toggle_panel(ui_state, keep_open)
     local ctx = ui_req_ctx()
     if ctx.state == nil then
         notify.notify_popup_with_timeout("Cannot toggle panel until LSP method is called.", 1750, "error")
         return nil, "Cannot toggle panel until LSP method is called."
     end
 
-    if ctx.state.calltree_handle ~= nil then
-        local buf_name = "calltree: empty"
-        if ctx.state.calltree_dir ~= nil then
-            buf_name = direction_map[ctx.state.calltree_dir].buf_name
-        end
-
-        ctx.state.calltree_buf =
-            ui_buf._setup_buffer(buf_name, ctx.state.calltree_buf, ctx.tab, "calltree")
-        if ctx.state.calltree_handle ~= nil then
-            tree.write_tree(ctx.state.calltree_handle, ctx.state.calltree_buf)
-        end
-        ctx.state.calltree_tab = ctx.tab
+    if ui_state == nil then
+        ui_state = ctx.state
     end
 
-    if ctx.state.symboltree_handle ~= nil then
-        ctx.state.symboltree_buf =
-            ui_buf._setup_buffer("documentSymbols", ctx.state.symboltree_buf, ctx.tab, "symboltree")
-        if ctx.state.symboltree_handle ~= nil then
-            tree.write_tree(ctx.state.symboltree_handle, ctx.state.symboltree_buf)
-        end
-        ctx.state.symboltree_tab = ctx.tab
+    local calltree_open = (ui_state.calltree_win ~= nil and vim.api.nvim_win_is_valid(ui_state.calltree_win))
+    local symboltree_open = (ui_state.symboltree_win ~= nil and vim.api.nvim_win_is_valid(ui_state.symboltree_win))
+    if
+        keep_open ~= nil and
+        (calltree_open or symboltree_open)
+    then
+        -- a calltree or symboltree window is open, and caller requested we keep it open.
+        return
     end
 
-    return ui_win._toggle_panel(ctx.state, keep_open)
+    -- one of the windows are open, close them and return
+    if calltree_open or symboltree_open then
+        if calltree_open then
+            vim.api.nvim_win_close(ui_state.calltree_win, true)
+        end
+        if symboltree_open then
+            vim.api.nvim_win_close(ui_state.symboltree_win, true)
+        end
+        return
+    end
+
+    -- none of the windows are open, open any current or previous windows
+    if ui_state.calltree_win ~= nil then
+        M._open_calltree()
+    end
+    if ui_state.symboltree_win ~= nil then
+        M._open_symboltree()
+    end
+    vim.api.nvim_set_current_win(ctx.win)
 end
 
 -- collapse will collapse a symbol at the current cursor
--- position
+-- position inside a calltree window.
 M.collapse = function()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
@@ -408,6 +426,39 @@ M.collapse = function()
     end
 end
 
+M.collapse_symboltree = function()
+    local ctx = ui_req_ctx()
+    if
+        ctx.state == nil or
+        ctx.symboltree_cursor == nil or
+        ctx.state.symboltree_handle == nil
+    then
+        notify.notify_popup_with_timeout("Must perform a document symbol LSP request first", 1750, "error")
+        return
+    end
+    local node = marshal.marshal_line(ctx.symboltree_cursor, ctx.state.symboltree_handle)
+    node.expanded = false
+    tree.write_tree(ctx.state.symboltree_handle, ctx.state.symboltree_buf)
+    vim.api.nvim_win_set_cursor(ctx.state.symboltree_win, ctx.symboltree_cursor)
+end
+
+M.collapse_calltree = function()
+    local ctx = ui_req_ctx()
+    if
+        ctx.state == nil or
+        ctx.calltree_cursor == nil or
+        ctx.state.calltree_handle == nil
+    then
+        notify.notify_popup_with_timeout("Must perform an call hierarchy LSP request first", 1750, "error")
+        return
+    end
+    local node = marshal.marshal_line(ctx.calltree_cursor, ctx.state.calltree_handle)
+    node.expanded = false
+    tree.remove_subtree(ctx.state.calltree_handle, node, true)
+    tree.write_tree(ctx.state.calltree_handle, ctx.state.calltree_buf)
+    vim.api.nvim_win_set_cursor(ctx.state.calltree_win, ctx.calltree_cursor)
+end
+
 -- collapse all will collapse the entire tree if
 -- any nodes are expanded.
 M.collapse_all = function()
@@ -421,6 +472,36 @@ M.collapse_all = function()
     tree.write_tree(ctx.tree_handle, ctx.buf)
 end
 
+M.collapse_all_calltree = function()
+    local ctx = ui_req_ctx()
+    if
+        ctx.state == nil or
+        ctx.calltree_cursor == nil or
+        ctx.state.calltree_handle == nil
+    then
+        notify.notify_popup_with_timeout("Must perform an call hierarchy LSP request first", 1750, "error")
+        return
+    end
+    local t = tree.get_tree(ctx.state.calltree_handle)
+    tree.collapse_subtree(t.root)
+    tree.write_tree(ctx.state.calltree_handle, ctx.state.calltree_buf)
+end
+
+M.collapse_all_symboltree = function()
+    local ctx = ui_req_ctx()
+    if
+        ctx.state == nil or
+        ctx.symboltree_cursor == nil or
+        ctx.state.symboltree_handle == nil
+    then
+        notify.notify_popup_with_timeout("Must perform a document symbol LSP request first", 1750, "error")
+        return
+    end
+    local t = tree.get_tree(ctx.state.symboltree_handle)
+    tree.collapse_subtree(t.root)
+    tree.write_tree(ctx.state.symboltree_handle, ctx.state.symboltree_buf)
+end
+
 -- expand will expand a symbol at the current cursor position
 M.expand = function()
     local ctx = ui_req_ctx()
@@ -428,8 +509,6 @@ M.expand = function()
         notify.notify_popup_with_timeout("Must be in a Calltree.nvim window", 1750, "error")
         return
     end
-
-    ctx.state  = M.ui_state_registry[ctx.tab]
 
     if not ctx.node.expanded then
         ctx.node.expanded = true
@@ -451,6 +530,49 @@ M.expand = function()
             ctx.state.calltree_buf
         )
     end
+end
+
+M.expand_symboltree = function()
+    local ctx = ui_req_ctx()
+    if
+        ctx.state == nil or
+        ctx.symboltree_cursor == nil or
+        ctx.state.symboltree_handle == nil
+    then
+        notify.notify_popup_with_timeout("Must perform a document symbol LSP request first", 1750, "error")
+        return
+    end
+    local node = marshal.marshal_line(ctx.symboltree_cursor, ctx.state.symboltree_handle)
+    if not node.expanded then
+        node.expanded = true
+    end
+    tree.write_tree(ctx.state.symboltree_handle, ctx.state.symboltree_buf)
+    return
+    vim.api.nvim_win_set_cursor(ctx.state.symboltree_win, ctx.symboltree_cursor)
+end
+
+M.expand_calltree = function()
+    local ctx = ui_req_ctx()
+    if
+        ctx.state == nil or
+        ctx.calltree_cursor == nil or
+        ctx.state.calltree_handle == nil
+    then
+        notify.notify_popup_with_timeout("Must perform an call hierarchy LSP request first", 1750, "error")
+        return
+    end
+    local node = marshal.marshal_line(ctx.calltree_cursor, ctx.state.calltree_handle)
+    if not node.expanded then
+        node.expanded = true
+    end
+    lsp_util.multi_client_request(
+        ctx.state.active_lsp_clients,
+        direction_map[ctx.state.calltree_dir].method,
+        {item = node.call_hierarchy_item},
+        handlers.calltree_expand_handler(node, ctx.calltree_cursor, ctx.state.calltree_dir, ctx.state),
+        ctx.state.calltree_buf
+    )
+    vim.api.nvim_win_set_cursor(ctx.state.calltree_win, ctx.calltree_cursor)
 end
 
 -- focus will reparent the calltree to the symbol under
@@ -477,9 +599,23 @@ M.focus = function()
     tree.write_tree(ctx.state.calltree_handle, ctx.state.calltree_buf)
 end
 
--- switch_direction will focus the symbol under the
+M.focus_calltree = function()
+    local ctx = ui_req_ctx()
+    if
+        ctx.state == nil or
+        ctx.state.calltree_handle == nil or
+        ctx.calltree_cursor == nil
+    then
+        notify.notify_popup_with_timeout("Must perform an call hierarchy LSP request first", 1750, "error")
+        return
+    end
+    tree.reparent_node(ctx.state.calltree_handle, 0, ctx.node)
+    tree.write_tree(ctx.state.calltree_handle, ctx.state.calltree_buf)
+end
+
+-- switch will focus the symbol under the
 -- cursor and then invert the call hierarchy direction.
-M.switch_direction = function()
+M.switch = function()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
         notify.notify_popup_with_timeout("Must be in a Calltree.nvim window.", 1750, "error")
@@ -503,6 +639,33 @@ M.switch_direction = function()
         ctx.state.active_lsp_clients,
         direction_map[ctx.state.calltree_dir].method,
         {item = ctx.node.call_hierarchy_item},
+        handlers.calltree_switch_handler(ctx.state.calltree_dir, ctx.state),
+        ctx.state.calltree_buf
+    )
+end
+
+M.switch_calltree = function()
+    local ctx = ui_req_ctx()
+    if
+        ctx.state == nil or
+        ctx.state.calltree_handle == nil or
+        ctx.calltree_cursor == nil
+    then
+        notify.notify_popup_with_timeout("Must perform an call hierarchy LSP request first", 1750, "error")
+        return
+    end
+    local node = marshal.marshal_line(ctx.calltree_cursor, ctx.state.calltree_handle)
+
+    if ctx.state.calltree_dir == "from" then
+        ctx.state.calltree_dir = "to"
+    else
+        ctx.state.calltree_dir = "from"
+    end
+
+    lsp_util.multi_client_request(
+        ctx.state.active_lsp_clients,
+        direction_map[ctx.state.calltree_dir].method,
+        {item = node.call_hierarchy_item},
         handlers.calltree_switch_handler(ctx.state.calltree_dir, ctx.state),
         ctx.state.calltree_buf
     )
@@ -550,6 +713,84 @@ M.jump = function(split)
     end
 end
 
+M.jump_calltree = function(split)
+    local ctx = ui_req_ctx()
+    if
+        ctx.state == nil or
+        ctx.state.calltree_handle == nil or
+        ctx.calltree_cursor == nil
+    then
+        notify.notify_popup_with_timeout("Must perform an call hierarchy LSP request first", 1750, "error")
+        return
+    end
+    local node = marshal.marshal_line(ctx.calltree_cursor, ctx.state.calltree_handle)
+
+    local location = lsp_util.resolve_location(node)
+    if location == nil or location.range.start.line == -1 then
+        return
+    end
+
+    if split == "tab" then
+        jumps.jump_tab(location, node)
+        return
+    end
+
+    if split == "split" or split == "vsplit" then
+        jumps.jump_split(split, location, ct.config.layout, node)
+        return
+    end
+
+    if ct.config.jump_mode == "neighbor" then
+        jumps.jump_neighbor(location, ct.config.layout, node)
+        return
+    end
+
+    if ct.config.jump_mode == "invoking" then
+            local invoking_win = ctx.state.invoking_calltree_win
+            ctx.state.invoking_calltree_win = jumps.jump_invoking(location, invoking_win, node)
+        return
+    end
+end
+
+M.jump_symboltree = function(split)
+    local ctx = ui_req_ctx()
+    if
+        ctx.state == nil or
+        ctx.symboltree_cursor == nil or
+        ctx.state.symboltree_handle == nil
+    then
+        notify.notify_popup_with_timeout("Must perform a document symbol LSP request first", 1750, "error")
+        return
+    end
+    local node = marshal.marshal_line(ctx.symboltree_cursor, ctx.state.symboltree_handle)
+
+    local location = lsp_util.resolve_location(node)
+    if location == nil or location.range.start.line == -1 then
+        return
+    end
+
+    if split == "tab" then
+        jumps.jump_tab(location, node)
+        return
+    end
+
+    if split == "split" or split == "vsplit" then
+        jumps.jump_split(split, location, ct.config.layout, node)
+        return
+    end
+
+    if ct.config.jump_mode == "neighbor" then
+        jumps.jump_neighbor(location, ct.config.layout, node)
+        return
+    end
+
+    if ct.config.jump_mode == "invoking" then
+            local invoking_win = ctx.state.invoking_symboltree_win
+            ctx.state.invoking_calltree_win = jumps.jump_invoking(location, invoking_win, node)
+        return
+    end
+end
+
 -- hover will show LSP hover information for the symbol
 -- under the cursor.
 M.hover = function()
@@ -575,6 +816,54 @@ M.hover = function()
     )
 end
 
+M.hover_calltree = function()
+    local ctx = ui_req_ctx()
+    if
+        ctx.state == nil or
+        ctx.state.calltree_handle == nil or
+        ctx.calltree_cursor == nil
+    then
+        notify.notify_popup_with_timeout("Must perform an call hierarchy LSP request first", 1750, "error")
+        return
+    end
+    local node = marshal.marshal_line(ctx.calltree_cursor, ctx.state.calltree_handle)
+    local params = lsp_util.resolve_hover_params(node)
+    if params == nil then
+        return
+    end
+    lsp_util.multi_client_request(
+        ctx.state.active_lsp_clients,
+        "textDocument/hover",
+        params,
+        hover.hover_handler,
+        ctx.state.calltree_buf
+    )
+end
+
+M.hover_symboltree = function()
+    local ctx = ui_req_ctx()
+    if
+        ctx.state == nil or
+        ctx.state.symboltree_handle == nil or
+        ctx.symboltree_cursor == nil
+    then
+        notify.notify_popup_with_timeout("Must perform a document symbol LSP request first", 1750, "error")
+        return
+    end
+    local node = marshal.marshal_line(ctx.symboltree_cursor, ctx.state.symboltree_handle)
+    local params = lsp_util.resolve_hover_params(node)
+    if params == nil then
+        return
+    end
+    lsp_util.multi_client_request(
+        ctx.state.active_lsp_clients,
+        "textDocument/hover",
+        params,
+        hover.hover_handler,
+        ctx.state.symboltree_buf
+    )
+end
+
 -- details opens a popup window for the given symbol
 -- showing more information.
 M.details = function()
@@ -592,6 +881,36 @@ M.details = function()
         direction = ctx.state.calltree_dir
     end
     deets.details_popup(ctx.node, ctx.tree_type, direction)
+end
+
+M.details_calltree = function()
+    local ctx = ui_req_ctx()
+    if
+        ctx.state == nil or
+        ctx.state.calltree_handle == nil or
+        ctx.calltree_cursor == nil
+    then
+        notify.notify_popup_with_timeout("Must perform an call hierarchy LSP request first", 1750, "error")
+        return
+    end
+    local node = marshal.marshal_line(ctx.calltree_cursor, ctx.state.calltree_handle)
+    local direction = ctx.state.calltree_dir
+    deets.details_popup(node, 'calltree', direction)
+end
+
+M.details_symboltree = function()
+    local ctx = ui_req_ctx()
+    if
+        ctx.state == nil or
+        ctx.state.symboltree_handle == nil or
+        ctx.symboltree_cursor == nil
+    then
+        notify.notify_popup_with_timeout("Must perform a document symbol LSP request first", 1750, "error")
+        return
+    end
+    local node = marshal.marshal_line(ctx.symboltree_cursor, ctx.state.symboltree_handle)
+    local direction = ctx.state.symboltree_dir
+    deets.details_popup(node, 'symboltree', direction)
 end
 
 -- auto_highlight will automatically highlight
@@ -682,7 +1001,7 @@ M.source_tracking = function ()
     end
 end
 
-M.navigation = function(tree_type, dir) 
+M.navigation = function(tree_type, dir)
     local ctx = ui_req_ctx()
     if ctx.state == nil then
         return
@@ -692,11 +1011,19 @@ M.navigation = function(tree_type, dir)
     elseif tree_type == 'calltree' and dir == "p" then
         nav.calltree_p(ctx.state)
     elseif tree_type == 'symboltree' and dir == "n" then
+        if ctx.state.symboltree_win == nil or
+            not vim.api.nvim_win_is_valid(ctx.state.symboltree_win) then
+            return
+        end
         vim.api.nvim_set_current_win(ctx.state.symboltree_win)
         nav.symboltree_n(ctx.state)
         M.auto_highlight(true)
         vim.api.nvim_set_current_win(ctx.win)
     elseif tree_type == 'symboltree' and dir == "p" then
+        if ctx.state.symboltree_win == nil or
+            not vim.api.nvim_win_is_valid(ctx.state.symboltree_win) then
+            return
+        end
         vim.api.nvim_set_current_win(ctx.state.symboltree_win)
         nav.symboltree_p(ctx.state)
         M.auto_highlight(true)

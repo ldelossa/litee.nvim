@@ -168,6 +168,36 @@ Calltree exports several commands for manipulating the calltree UI.
     Same as CTDumpTree but dumps the current node and it's children to
     a buffer for debugging.
 
+Additionally, mirror commands exist to manipulate Calltree.nvim's windows when not 
+inside them. These are quickly outlined below and reflect the above commands. 
+
+-- calltree specific commands
+:CTNextCalltree
+:CTPrevCalltree        
+:CTExpandCalltree      
+:CTCollapseCalltree    
+:CTCollapseAllCalltree    
+:CTFocusCalltree       
+:CTSwitchCalltree      
+:CTJumpCalltree        
+:CTJumpCalltreeSplit   
+:CTJumpCalltreeVSplit  
+:CTJumpCalltreeTab     
+:CTHoverCalltree       
+:CTDetailsCalltree     
+-- symboltee specific commands
+:CTNextSymboltree          
+:CTPrevSymboltree          
+:CTExpandSymboltree        
+:CTCollapseSymboltree      
+:CTCollapseAllSymboltree      
+:CTJumpSymboltree          
+:CTJumpSymboltreeSplit     
+:CTJumpSymboltreeVSplit    
+:CTJumpSymboltreeTab       
+:CTHoverSymboltree         
+:CTDetailSymboltree        
+
 ====================================================================================
 MAPPINGS                                                         *calltree-mappings*
 
@@ -276,6 +306,9 @@ The config table is described below:
         -- notifications use the "Error", "WarningMsg", and "NormalFloat" highlights
         enable_notify = true,
     }
+
+For an example configuration with suggested keymaps refer to my dotfiles:
+https://github.com/ldelossa/dotfiles/blob/master/nvim/lua/configs/calltree.lua
 
 ====================================================================================
 HIGHLIGHTS                                                     *calltree-highlights*
