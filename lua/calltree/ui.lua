@@ -346,11 +346,16 @@ end
 --
 -- keep_open : bool - if true, and the panel is open,
 -- the panel will be left open when this function terminates.
+--
+-- returns:
+--  bool : true if panel is open after this call, false otherwise,
+--  if panel could not be opened returns `(nil, err)` where `err` is
+--  a string describing the failure reason
 M.toggle_panel = function(keep_open)
     local ctx = ui_req_ctx()
     if ctx.state == nil then
         notify.notify_popup_with_timeout("Cannot toggle panel until LSP method is called.", 1750, "error")
-        return
+        return nil, "Cannot toggle panel until LSP method is called."
     end
 
     if ctx.state.calltree_handle ~= nil then
@@ -376,7 +381,7 @@ M.toggle_panel = function(keep_open)
         ctx.state.symboltree_tab = ctx.tab
     end
 
-    ui_win._toggle_panel(ctx.state, keep_open)
+    return ui_win._toggle_panel(ctx.state, keep_open)
 end
 
 -- collapse will collapse a symbol at the current cursor
