@@ -78,12 +78,12 @@ M.ch_lsp_handler = function(direction)
         if config.resolve_symbols then
             lsp_util.gather_symbols_async(root, children, ui_state, function()
                 tree.add_node(ui_state.calltree_handle, root, children)
-                ui.toggle_panel(true)
+                ui._open_calltree()
             end)
             return
         end
         tree.add_node(ui_state.calltree_handle, root, children)
-        ui.toggle_panel(true)
+        ui._open_calltree()
    end
 end
 
@@ -154,7 +154,7 @@ M.ws_lsp_handler = function()
         -- popup.
         notify.close_notify_popup()
 
-        ui.toggle_panel(true)
+        ui._open_symboltree()
 
         -- restore cursor if possible
         if cursor ~= nil then
