@@ -655,17 +655,21 @@ M.source_tracking = function ()
 
     -- no direct match for the line, so search for symbols with a range
     -- interval overlapping our line number.
+    --
+    -- we search in reverse since code is written top down, allows
+    -- for source_tracking to handle nested elements correctly.
     local buf_lines = marshal.buf_line_map[ctx.tree_handle]
     if buf_lines == nil then
         return
     end
 ---@diagnostic disable-next-line: redefined-local
-    for line, node in pairs(buf_lines) do
+    for i=#buf_lines,1,-1 do
+        local node = buf_lines[i]
         if ctx.linenr[1] >= node.document_symbol.range["start"].line
             and ctx.linenr[1] <= node.document_symbol.range["end"].line
                 and cur_file == lsp_util.resolve_absolute_file_path(node)
         then
-            vim.api.nvim_win_set_cursor(ctx.state.symboltree_win, {line, 0})
+            vim.api.nvim_win_set_cursor(ctx.state.symboltree_win, {i, 0})
             vim.cmd("redraw!")
             return
         end
