@@ -25,6 +25,7 @@ CONTENTS                                                         *calltree-conte
   6     Highlights....................................|calltree-highlights|
   6.1    Icon Highlights..............................|calltree-icon-highlights|
   6.2    UI Highlights................................|calltree-ui-highlights|
+  7     LSP Wrappers..................................|calltree-lsp-wrappers|
 
 ====================================================================================
 INTRODUCTION                                                        *calltree-intro*
@@ -393,7 +394,7 @@ Individuals who are using tree-sitter highlights across the board (you're using 
         TypeParameter = "TSParameter",
     }
 
-                                                            *calltree-ui-highlights* 
+                                                            *calltree-ui-highlights*
 
 Other UI highlights are provided by the "calltree.hls" table.
  
@@ -414,7 +415,8 @@ M.hls = {
     CollapsedGuideHL    = "CTCollapsedGuide"
 }
 
-The usage is similar to the icon highlights but are specified by supplying a "hls" table within the config supplied to calltree's setup function.
+The usage is similar to the icon highlights but are specified by supplying a "hls" 
+table within the config supplied to calltree's setup function.
 
 List of all unique highlights:
     -- ui
@@ -441,3 +443,33 @@ List of all unique highlights:
     hi CTConstant           
     hi CTOperator           
     hi CTParameter          
+
+====================================================================================
+LSP Wrappers                                                 *calltree-lsp-wrappers*
+
+Calltree.nvim ships a set of LSP wrapper functions in `require('calltree.lsp.wrappers')`.
+
+These wrappers hook into `require('calltree.ui.notify')` providing notifications to
+the user when LSP requests are made.
+
+This is nice for large codebases or sluggish LSPs. It informs the users Calltree.nvim
+is indeed working on your request.
+
+You can map these functions in place of any mappings you have to the call hierarchy and
+document symbols endpoints.
+
+Function Mapping:
+
+vim.lsp.buf.document_symbols => require('calltree.lsp.wrappers').buf_document_symbols
+vim.lsp.buf.incoming_calls   => require('calltree.lsp.wrappers').buf_incoming_calls
+vim.lsp.buf.outgoing_calls   => require('calltree.lsp.wrappers').buf_outgoing_calls
+
+
+Example keymaps:
+
+vim.api.nvim_set_keymap("n", "<C-l>o", "<cmd>lua require('calltree.lsp.wrappers').buf_outgoing_calls()<CR>", opts)
+vim.api.nvim_set_keymap("n", "<C-l>i", "<cmd>lua require('calltree.lsp.wrappers').buf_incoming_calls()<CR>", opts)
+vim.api.nvim_set_keymap("n", "<C-l>do", "<cmd>lua require('calltree.lsp.wrappers').buf_document_symbol()<CR>", opts)
+vim.api.nvim_set_keymap("i", "<C-l>o", "<cmd>lua require('calltree.lsp.wrappers').buf_outgoing_calls()<CR>", opts)
+vim.api.nvim_set_keymap("i", "<C-l>i", "<cmd>lua require('calltree.lsp.wrappers').buf_incoming_calls()<CR>", opts)
+vim.api.nvim_set_keymap("i", "<C-l>do", "<cmd>lua require('calltree.lsp.wrappers').buf_document_symbol()<CR>", opts)

@@ -3,6 +3,7 @@ local tree = require('calltree.tree.tree')
 local ui = require('calltree.ui')
 local lsp_util = require('calltree.lsp.util')
 local config = require('calltree').config
+local notify = require('calltree.ui.notify')
 
 local M = {}
 
@@ -68,6 +69,10 @@ M.ch_lsp_handler = function(direction)
           )
           table.insert(children, child)
         end
+
+        -- if lsp.wrappers are being used this closes the notification
+        -- popup.
+        notify.close_notify_popup()
 
         -- gather symbols async
         if config.resolve_symbols then
@@ -144,6 +149,10 @@ M.ws_lsp_handler = function()
         if vim.api.nvim_win_is_valid(ui_state.symboltree_win) then
             cursor = vim.api.nvim_win_get_cursor(ui_state.symboltree_win)
         end
+
+        -- if lsp.wrappers are being used this closes the notification
+        -- popup.
+        notify.close_notify_popup()
 
         ui.toggle_panel(true)
 

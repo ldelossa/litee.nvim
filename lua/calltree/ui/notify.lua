@@ -4,6 +4,12 @@ local M = {}
 local float_wins = {}
 
 function M.close_notify_popup()
+    if not config.enable_notify then
+        return
+    end
+    if float_wins == nil then
+        return
+    end
     for _, float_win in ipairs(float_wins) do
         if vim.api.nvim_win_is_valid(float_win) then
             vim.api.nvim_win_close(float_win, true)
