@@ -99,14 +99,21 @@ function M._setup_window(current_layout, desired_layout, ui_state)
     for i, kind in ipairs(desired_layout) do
         local buffer_to_set = nil
         local win_handle_to_set = nil
+        local dimensions_to_set = nil
 
         if kind == "calltree" then
             buffer_to_set = ui_state.calltree_buf
             win_handle_to_set = "calltree_win"
+            if ui_state.calltree_win_dimensions ~= nil then
+                dimensions_to_set = ui_state.calltree_win_dimensions
+            end 
         end
         if kind == "symboltree" then
             buffer_to_set = ui_state.symboltree_buf
             win_handle_to_set = "symboltree_win"
+            if ui_state.symboltree_win_dimensions ~= nil then
+                dimensions_to_set = ui_state.symboltree_win_dimensions
+            end 
         end
 
         -- we can reuse the current layout windows
@@ -153,13 +160,28 @@ function M._setup_window(current_layout, desired_layout, ui_state)
         end
 
         ::set::
-        ui_state[win_handle_to_set] = vim.api.nvim_get_current_win()
+        cur_win = vim.api.nvim_get_current_win()
+        ui_state[win_handle_to_set] = cur_win 
         vim.api.nvim_win_set_buf(ui_state[win_handle_to_set], buffer_to_set)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'number', false)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'cursorline', true)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'wrap', false)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'winfixwidth', true)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'winfixheight', true)
+        if dimensions_to_set ~= nil then
+            if (config.layout == "left" or config.layout == "right") then
+                vim.api.nvim_win_set_width(cur_win, dimensions_to_set.width)
+            else
+                vim.api.nvim_win_set_height(cur_win, dimensions_to_set.height)
+            end
+        else
+            dimensions_to_set = {}
+            dimensions_to_set.height = vim.api.nvim_win_get_height(cur_win)
+            dimensions_to_set.wdith  = vim.api.nvim_win_get_width(cur_win)
+            d = string.format("%s_%s", win_handle_to_set, "dimensions")
+            ui_state[d] = dimensions_to_set
+        end
+
 
         ::continue::
         if not config.no_hls then

@@ -31,12 +31,14 @@ local direction_map = {
     --     calltree_buf = nil
     --     calltree_handle = nil
     --     calltree_win = nil
+    --     calltree_win_dimensions = nil
     --     calltree_tab = nil
     --     calltree_dir = "empty"
     --     invoking_calltree_win = nil
     --     symboltree_buf = nil
     --     symboltree_handle = nil
     --     symboltree_win = nil
+    --     symboltree_win_dimensions = nil
     --     symboltree_tab = nil
     --     invoking_symboltree_win = nil
     --     the active lsp clients which invoked the calltree
@@ -384,9 +386,17 @@ function M.toggle_panel(ui_state, keep_open)
     -- one of the windows are open, close them and return
     if calltree_open or symboltree_open then
         if calltree_open then
+            ui_state.calltree_win_dimensions = {
+                height = vim.api.nvim_win_get_height(ui_state.calltree_win),
+                width = vim.api.nvim_win_get_width(ui_state.calltree_win)
+            }
             vim.api.nvim_win_close(ui_state.calltree_win, true)
         end
         if symboltree_open then
+            ui_state.symboltree_win_dimensions = {
+                height = vim.api.nvim_win_get_height(ui_state.symboltree_win),
+                width = vim.api.nvim_win_get_width(ui_state.symboltree_win)
+            }
             vim.api.nvim_win_close(ui_state.symboltree_win, true)
         end
         return
