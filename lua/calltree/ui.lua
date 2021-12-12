@@ -1000,8 +1000,8 @@ M.source_tracking = function ()
 ---@diagnostic disable-next-line: redefined-local
     for i=#buf_lines,1,-1 do
         local node = buf_lines[i]
-        if ctx.linenr[1] >= node.document_symbol.range["start"].line
-            and ctx.linenr[1] <= node.document_symbol.range["end"].line
+        if (ctx.linenr[1] - 1) >= node.document_symbol.range["start"].line
+            and (ctx.linenr[1] - 1) <= node.document_symbol.range["end"].line
                 and cur_file == lsp_util.resolve_absolute_file_path(node)
         then
             vim.api.nvim_win_set_cursor(ctx.state.symboltree_win, {i, 0})

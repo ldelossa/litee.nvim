@@ -190,7 +190,7 @@ function M.setup(user_config)
     vim.cmd("command! CTJumpSymboltreeVSplit    lua require('calltree.ui').jump_symboltree('vsplit')")
     vim.cmd("command! CTJumpSymboltreeTab       lua require('calltree.ui').jump_symboltree('tab')")
     vim.cmd("command! CTHoverSymboltree         lua require('calltree.ui').hover_symboltree()")
-    vim.cmd("command! CTDetailSymboltree        lua require('calltree.ui').details_symboltree()")
+    vim.cmd("command! CTDetailsSymboltree        lua require('calltree.ui').details_symboltree()")
 
     -- in-window commands
     vim.cmd("command! CTPanel       lua require('calltree.ui').toggle_panel()")
