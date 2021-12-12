@@ -125,8 +125,6 @@ function M._setup_buffer(name, buffer_handle, tab, type)
     -- au to clear jump highlights on window close
     vim.cmd("au BufWinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.jumps').set_jump_hl(false)")
 
-    -- au to close popup with cursor moves or buffer is closed.
-    vim.cmd("au CursorMoved,BufWinLeave,WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.buffer').close_all_popups()")
 
     -- hide the cursor if possible since there's no need for it, resizing the panel should be used instead.
     if config.hide_cursor then

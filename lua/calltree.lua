@@ -160,6 +160,9 @@ function M.setup(user_config)
     -- when CTClose or STClose is not issued before a tab is closed.
     vim.cmd([[au TabClosed * lua require('calltree.ui').on_tab_closed(vim.fn.expand('<afile>'))]])
 
+    -- au to close popup with cursor moves or buffer is closed.
+    vim.cmd("au CursorMoved,BufWinLeave,WinLeave * lua require('calltree.ui.buffer').close_all_popups()")
+
     -- calltree specific commands
     vim.cmd("command! CTOpenToCalltree      lua require('calltree.ui').open_to('calltree')")
     vim.cmd("command! CTCloseCalltree       lua require('calltree.ui').close_calltree()")
