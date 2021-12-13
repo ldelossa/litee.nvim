@@ -50,6 +50,7 @@ function M._setup_help_buffer(help_buf_handle)
             "press '?' to close",
             "",
             "KEYMAP:",
+            "Global---------------------------------------------------------------------------------------------",
             "zo                 - expand a symbol",
             "zc                 - collapse a symbol",
             "zM                 - collapse all symbols",
@@ -57,13 +58,23 @@ function M._setup_help_buffer(help_buf_handle)
             "s                  - jump to symbol in a new split",
             "v                  - jump to symbol in a new vsplit",
             "t                  - jump to symbol in a new tab",
-            "f                  - focus the tree on this symbol (call hierarchies)",
-            "S                  - switch the symbol from incoming/outgoing calls (call hierarchies)",
-            "i                  - show hover info for symbol",
             "d                  - show symbol details",
             "H                  - hide this element from the panel, will appear again on toggle",
             "x                  - remove this element from the panel, will not appear until another LSP request",
-            "Up,Down,Right,Left - resize the panel"
+            "Up,Down,Right,Left - resize the panel",
+            "i                  - show hover info for symbol",
+            "Call Hierarchy--------------------------------------------------------------------------------------",
+            "f                  - focus the tree on this symbol",
+            "S                  - switch the symbol from incoming/outgoing calls",
+            "File Explorer.......................................................................................",
+            "n                  - create a new file",
+            "D                  - delete a new file or directory",
+            "d                  - create a directory",
+            "r                  - rename a file or directory",
+            "m                  - move a file or directory",
+            "p                  - copy a file or directory",
+            "s                  - select a file to perform an above action on",
+            "S                  - deselect a selected file"
         }
         vim.api.nvim_buf_set_lines(help_buf_handle, 0, #lines, false, lines)
     end

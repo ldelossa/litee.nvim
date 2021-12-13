@@ -151,6 +151,9 @@ function M._setup_buffer(name, buffer_handle, tab, type)
     if type == "symboltree" then
         close_cmd = ":CTCloseSymboltree<CR>"
     end
+    if type == "filetree" then
+        close_cmd = ":CTCloseFiletree<CR>"
+    end
     local opts = {silent=true}
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zo", ":CTExpand<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zc", ":CTCollapse<CR>", opts)
@@ -166,6 +169,14 @@ function M._setup_buffer(name, buffer_handle, tab, type)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "?", ":lua require('calltree.ui').help(true)<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "H", ":lua require('calltree.ui')._smart_close()<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "x", close_cmd, opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "n", ":CTTouchFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "D", ":CTRemoveFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":CTMkdirFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "r", ":CTRenameFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "m", ":CTMoveFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "p", ":CTCopyFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":CTSelectFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "S", ":CTDeSelectFiletree<CR>", opts)
 	if config.map_resize_keys then
         map_resize_keys(buffer_handle, opts)
     end

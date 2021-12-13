@@ -27,6 +27,10 @@ function M.keyify(node)
                     node.call_hierarchy_item.range.start.line
         return key
     end
+    if node.filetree_item ~= nil then
+        key = node.filetree_item.uri
+        return key
+    end
 end
 
 -- new construct a new Node.
@@ -45,7 +49,7 @@ end
 -- field of a call_hierarchy response datastructure hoisted up to the top level of he node.
 --
 -- document_symbol : table 
-function M.new(name, depth, call_hierarchy_item, references, document_symbol)
+function M.new(name, depth, call_hierarchy_item, references, document_symbol, filetree_item)
     local node = {
         name=name,
         depth=depth,
@@ -55,6 +59,7 @@ function M.new(name, depth, call_hierarchy_item, references, document_symbol)
         expanded=false,
         symbol=nil,
         document_symbol=document_symbol,
+        filetree_item=filetree_item,
         -- if the node is a document_symbol this field will be present
         -- containing the document uri the symbol belongs to.
         --

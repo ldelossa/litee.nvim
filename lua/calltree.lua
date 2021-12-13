@@ -1,3 +1,4 @@
+local webicons = require('calltree.nvim-web-devicons')
 local M = {}
 
 -- config is explained via ":help calltree-config"
@@ -16,9 +17,10 @@ M.config = {
     map_resize_keys = true,
     hide_cursor = false,
     enable_notify = true,
+    relative_filetree_entries = false
 }
 
-function _setup_default_highlights() 
+function _setup_default_highlights()
     local dark = {
         CTBoolean              = 'hi CTBoolean                guifg=#0087af guibg=None',
         CTConstant             = 'hi CTConstant               guifg=#0087af guibg=None',
@@ -40,7 +42,8 @@ function _setup_default_highlights()
         CTURI                  = 'hi CTURI                    guifg=#988ACF guibg=None',
         CTIndentGuide          = 'hi CTIndentGuide            guifg=None    guibg=None',
         CTExpandedGuide        = 'hi CTExpandedGuide          guifg=None    guibg=None',
-        CTCollapsedGuide       = 'hi CTCollapsedGuide         guifg=None    guibg=None'
+        CTCollapsedGuide       = 'hi CTCollapsedGuide         guifg=None    guibg=None',
+        CTSelectFiletree       = 'hi CTSelectFiletree ctermbg=131  ctermfg=246 cterm=None guibg=#af5f5f guifg=#e4e4e4 gui=None'
     }
     local light = {
         CTBoolean               = 'hi CTBoolean                guifg=#005f87 guibg=None',
@@ -63,7 +66,8 @@ function _setup_default_highlights()
         CTURI                   = 'hi CTURI                    guifg=#806CCF guibg=None',
         CTIndentGuide           = 'hi CTIndentGuide            guifg=None    guibg=None',
         CTExpandedGuide         = 'hi CTExpandedGuide          guifg=None    guibg=None',
-        CTCollapsedGuide        = 'hi CTCollapsedGuide         guifg=None    guibg=None'
+        CTCollapsedGuide        = 'hi CTCollapsedGuide         guifg=None    guibg=None',
+        CTSelectFiletree        = 'hi ErrorMsg ctermbg=131 ctermfg=246 cterm=None guibg=#af5f5f guifg=#e4e4e4 gui=None'
     }
     local bg = vim.api.nvim_get_option("background")
     if bg == "dark" then
@@ -148,6 +152,7 @@ function M.setup(user_config)
     -- setup default highlights
     if not M.config.no_hls then
         _setup_default_highlights()
+        webicons.set_up_highlights()
     end
 
     -- will keep the outline view up to date when moving around buffers.
@@ -156,12 +161,18 @@ function M.setup(user_config)
     -- will enable symboltree ui tracking with source code lines.
     vim.cmd([[au CursorHold * lua require('calltree.ui').source_tracking()]])
 
+    -- will enable filetree file tracking with source code buffers.
+    vim.cmd([[au BufWinEnter,WinEnter * lua require('calltree.ui').file_tracking()]])
+
     -- will clean out any tree data for a tab when closed. only necessary
     -- when CTClose or STClose is not issued before a tab is closed.
     vim.cmd([[au TabClosed * lua require('calltree.ui').on_tab_closed(vim.fn.expand('<afile>'))]])
 
     -- au to close popup with cursor moves or buffer is closed.
     vim.cmd("au CursorMoved,BufWinLeave,WinLeave * lua require('calltree.ui.buffer').close_all_popups()")
+
+    -- on resize cycle the panel to re-adjust window sizes.
+    vim.cmd("au VimResized * lua require('calltree.ui').toggle_panel(nil, false, true)")
 
     -- calltree specific commands
     vim.cmd("command! CTOpenToCalltree      lua require('calltree.ui').open_to('calltree')")
@@ -193,7 +204,31 @@ function M.setup(user_config)
     vim.cmd("command! CTJumpSymboltreeVSplit    lua require('calltree.ui').jump_symboltree('vsplit')")
     vim.cmd("command! CTJumpSymboltreeTab       lua require('calltree.ui').jump_symboltree('tab')")
     vim.cmd("command! CTHoverSymboltree         lua require('calltree.ui').hover_symboltree()")
-    vim.cmd("command! CTDetailsSymboltree        lua require('calltree.ui').details_symboltree()")
+    vim.cmd("command! CTDetailsSymboltree       lua require('calltree.ui').details_symboltree()")
+
+    -- filetree specific commands
+    vim.cmd("command! CTOpenFiletree          lua require('calltree.filetree.handlers').filetree_handler()")
+    vim.cmd("command! CTOpenToFiletree        lua require('calltree.ui').open_to('filetree')")
+    vim.cmd("command! CTCloseFiletree         lua require('calltree.ui').close_filetree()")
+    vim.cmd("command! CTNextFiletree          lua require('calltree.ui').navigation('filetree', 'n')")
+    vim.cmd("command! CTPrevFiletree          lua require('calltree.ui').navigation('filetree', 'p')")
+    vim.cmd("command! CTExpandFiletree        lua require('calltree.ui').expand_filetree()")
+    vim.cmd("command! CTCollapseFiletree      lua require('calltree.ui').collapse_filetree()")
+    vim.cmd("command! CTCollapseAllFiletree   lua require('calltree.ui').collapse_all_filetree()")
+    vim.cmd("command! CTJumpFiletree          lua require('calltree.ui').jump_filetree()")
+    vim.cmd("command! CTJumpFiletreeSplit     lua require('calltree.ui').jump_filetree('split')")
+    vim.cmd("command! CTJumpFiletreeVSplit    lua require('calltree.ui').jump_filetree('vsplit')")
+    vim.cmd("command! CTJumpFiletreeTab       lua require('calltree.ui').jump_filetree('tab')")
+    vim.cmd("command! CTHoverFiletree         lua require('calltree.ui').hover_filetree()")
+    vim.cmd("command! CTDetailsFiletree       lua require('calltree.ui').details_filetree()")
+    vim.cmd("command! CTSelectFiletree        lua require('calltree.ui').filetree_ops('select')")
+    vim.cmd("command! CTDeSelectFiletree      lua require('calltree.ui').filetree_ops('deselect')")
+    vim.cmd("command! CTTouchFiletree         lua require('calltree.ui').filetree_ops('touch')")
+    vim.cmd("command! CTRemoveFiletree        lua require('calltree.ui').filetree_ops('rm')")
+    vim.cmd("command! CTCopyFiletree          lua require('calltree.ui').filetree_ops('cp')")
+    vim.cmd("command! CTMoveFiletree          lua require('calltree.ui').filetree_ops('mv')")
+    vim.cmd("command! CTMkdirFiletree         lua require('calltree.ui').filetree_ops('mkdir')")
+    vim.cmd("command! CTRenameFiletree       lua require('calltree.ui').filetree_ops('rename')")
 
     -- in-window commands
     vim.cmd("command! CTPanel       lua require('calltree.ui').toggle_panel()")
@@ -339,7 +374,8 @@ M.hls = {
     SymbolJumpRefsHL    = "CTSymbolJumpRefs",
     IndentGuideHL       = "CTIndentGuide",
     ExpandedGuideHL     = "CTExpandedGuide",
-    CollapsedGuideHL    = "CTCollapsedGuide"
+    CollapsedGuideHL    = "CTCollapsedGuide",
+    SelectFiletreeHL    = "CTSelectFiletree"
 }
 
 return M
