@@ -1,5 +1,8 @@
 local M = {}
 
+-- navigation methods for moving he cursor in a calltree.nvim window
+-- n(next), p(previous)
+
 function M.calltree_n(ui_state)
     if ui_state.calltree_win == nil
         or not vim.api.nvim_win_is_valid(ui_state.calltree_win) then
@@ -13,7 +16,6 @@ function M.calltree_n(ui_state)
     cur_cursor[1] = cur_cursor[1] + 1
     vim.api.nvim_win_set_cursor(ui_state.calltree_win, cur_cursor)
 end
-
 function M.calltree_p(ui_state)
     if ui_state.calltree_win == nil
         or not vim.api.nvim_win_is_valid(ui_state.calltree_win) then
@@ -51,6 +53,32 @@ function M.symboltree_p(ui_state)
     end
     cur_cursor[1] = cur_cursor[1] - 1
     vim.api.nvim_win_set_cursor(ui_state.symboltree_win, cur_cursor)
+end
+
+function M.filetree_n(ui_state)
+    if ui_state.filetree_win == nil
+        or not vim.api.nvim_win_is_valid(ui_state.filetree_win) then
+        return
+    end
+    local cur_cursor = vim.api.nvim_win_get_cursor(ui_state.filetree_win)
+    local lines_nr = vim.api.nvim_buf_line_count(ui_state.filetree_buf)
+    if cur_cursor[1] + 1 > lines_nr then
+        return
+    end
+    cur_cursor[1] = cur_cursor[1] + 1
+    vim.api.nvim_win_set_cursor(ui_state.filetree_win, cur_cursor)
+end
+function M.filetree_p(ui_state)
+    if ui_state.filetree_win == nil
+        or not vim.api.nvim_win_is_valid(ui_state.filetree_win) then
+        return
+    end
+    local cur_cursor = vim.api.nvim_win_get_cursor(ui_state.filetree_win)
+    if cur_cursor[1] - 1 < 1 then
+        return
+    end
+    cur_cursor[1] = cur_cursor[1] - 1
+    vim.api.nvim_win_set_cursor(ui_state.filetree_win, cur_cursor)
 end
 
 return M

@@ -446,6 +446,9 @@ M.hls = {
     ExpandedGuideHL     = "CTExpandedGuide",
     -- the highlight for collapsed guide
     CollapsedGuideHL    = "CTCollapsedGuide"
+    -- the highlight used for cursorline in the file explorer when
+    -- a file is selected.
+    CTSelectFiletree    = "CTSelectFiletree"
 }
 
 The usage is similar to the icon highlights but are specified by supplying a "hls" 

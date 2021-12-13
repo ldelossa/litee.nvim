@@ -74,6 +74,14 @@ function M.resolve_location(node)
             uri = node.uri,
             range = node.document_symbol.selectionRange
         }
+    elseif node.filetree_item ~= nil then
+        local range = {}
+        range["start"] = { line = 0, character = 0}
+        range["end"] = { line = 0, character = 0}
+        location = {
+            uri = "file://" .. node.filetree_item.uri,
+            range = range
+        }
     end
     return location
 end

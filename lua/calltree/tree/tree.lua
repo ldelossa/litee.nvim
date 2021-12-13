@@ -50,6 +50,21 @@ function M.remove_tree(handle)
     reg[handle] = nil
 end
 
+-- search_dpt will search the dpt at the given
+-- depth for the given key.
+function M.search_dpt(dpt, depth, key)
+    local nodes = dpt[depth]
+    if nodes == nil then
+        return nil
+    end
+    for _, node in ipairs(nodes) do
+        if node.key == key then
+            return node
+        end
+    end
+    return nil
+end
+
 -- recursive_dpt_compute traverses the tree
 -- and flattens it into out depth_table
 --
@@ -96,7 +111,12 @@ end
 -- external : bool - if true an entire tree has been built externally
 -- and the root will be added to the tree without any modifications.
 -- the children param has no significance in this scenario.
+-- note: when using external the calling code must set the all parent
+-- and children depth fields correctly.
 function M.add_node(tree, parent, children, external)
+    if reg[tree] == nil then
+        return
+    end
     -- external nodes are roots of trees built externally
     -- if this is true set the tree's root to the incoming parent
     -- and immediately return

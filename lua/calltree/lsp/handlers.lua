@@ -87,6 +87,8 @@ M.ch_lsp_handler = function(direction)
    end
 end
 
+-- ws_lsp_handler handles the initial request for building
+-- a document symbols outline.
 M.ws_lsp_handler = function()
     return function(err, result, ctx, _)
         if err ~= nil then

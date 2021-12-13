@@ -1,6 +1,7 @@
 local config = require("calltree").config
 local ct = require("calltree")
 local marshal = require('calltree.ui.marshal')
+local webicons = require('calltree.nvim-web-devicons')
 local M = {}
 
 -- window.lua offers a declartive way to open new windows
@@ -8,13 +9,14 @@ local M = {}
 
 -- static_layout defines the order of calltree windows in
 -- the ui.
-local static_layout = {symboltree=1, calltree=2}
+local static_layout = {symboltree=1, calltree=2, filetree=3}
 
 -- type_to_ui_state_win is a helper map which maps the
 -- window type being opened to the win field on the ui_state.
 local type_to_ui_state_win = {
     calltree = "calltree_win",
-    symboltree = "symboltree_win"
+    symboltree = "symboltree_win",
+    filetree = "filetree_win"
 }
 
 -- realize_current_and_desired will determine the current and desired layouts
@@ -115,6 +117,13 @@ function M._setup_window(current_layout, desired_layout, ui_state)
                 dimensions_to_set = ui_state.symboltree_win_dimensions
             end 
         end
+        if kind == "filetree" then
+            buffer_to_set = ui_state.filetree_buf
+            win_handle_to_set = "filetree_win"
+            if ui_state.filetree_win_dimensions ~= nil then
+                dimensions_to_set = ui_state.filetree_win_dimensions
+            end 
+        end
 
         -- we can reuse the current layout windows
         if i <= #current_layout then
@@ -198,6 +207,10 @@ function M._setup_window(current_layout, desired_layout, ui_state)
             vim.cmd(string.format("syn match %s /%s/", ct.hls.CollapsedGuideHL, marshal.glyphs.collapsed))
             -- set configured indent guide highlight
             vim.cmd(string.format("syn match %s /%s/", ct.hls.IndentGuideHL, marshal.glyphs.guide))
+            for _, icon_data in pairs(webicons.icons) do 
+                local hl = "DevIcon" .. icon_data.name
+                vim.cmd(string.format("syn match %s /%s/", hl, icon_data.icon))
+            end
         end
     end
 end

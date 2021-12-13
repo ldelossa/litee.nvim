@@ -1,8 +1,17 @@
 local ct = require('calltree')
 local config = require('calltree').config
 local lsp_util = require('calltree.lsp.util')
+local webicons = require('calltree.nvim-web-devicons')
 
 local M = {}
+
+-- provides the filename with no path details for
+-- the provided uri.
+local function resolve_file_name(uri)
+    local final_sep = vim.fn.strridx(uri, "/")
+    local dir = vim.fn.strpart(uri, final_sep+1, vim.fn.strlen(uri))
+    return dir
+end
 
 M.glyphs = {
     expanded = (function() if ct.active_icon_set ~= nil then return ct.active_icon_set.Expanded else return "▼" end end)(),
@@ -63,10 +72,15 @@ function M.marshal_node(node, final)
 
     -- prefer using workspace symbol details if available.
     -- fallback to callhierarchy object details.
-    local name, kind, detail, str = "", "", "", ""
+    local name, kind, detail, str, icon = "", "", "", "", ""
     if node.symbol ~= nil then
         name = node.symbol.name
         kind = vim.lsp.protocol.SymbolKind[node.symbol.kind]
+        if kind ~= "" then
+            if ct.active_icon_set ~= nil then
+                icon = ct.active_icon_set[kind]
+            end
+        end
 
         local file, relative = lsp_util.relative_path_from_uri(node.symbol.location.uri)
         if relative then
@@ -84,6 +98,11 @@ function M.marshal_node(node, final)
     elseif node.document_symbol ~= nil then
         name = node.document_symbol.name
         kind = vim.lsp.protocol.SymbolKind[node.document_symbol.kind]
+        if kind ~= "" then
+            if ct.active_icon_set ~= nil then
+                icon = ct.active_icon_set[kind]
+            end
+        end
 
         if node.document_symbol.detail ~= nil then
             detail = node.document_symbol.detail
@@ -94,6 +113,11 @@ function M.marshal_node(node, final)
     elseif node.call_hierarchy_item ~= nil then
         name = node.name
         kind = vim.lsp.protocol.SymbolKind[node.call_hierarchy_item.kind]
+        if kind ~= "" then
+            if ct.active_icon_set ~= nil then
+                icon = ct.active_icon_set[kind]
+            end
+        end
 
         local file, relative = lsp_util.relative_path_from_uri(node.call_hierarchy_item.uri)
         if relative then
@@ -101,12 +125,27 @@ function M.marshal_node(node, final)
         elseif node.call_hierarchy_item.detail ~= nil then
             detail = node.call_hierarchy_item.detail
         end
-    end
+    elseif node.filetree_item ~= nil then
+        name = node.name
 
-    local icon = ""
-    if kind ~= "" then
+        -- this option will make all filetree entries show their relative paths
+        -- from root. usefule for bottom/top layouts.
+        if config.relative_filetree_entries then
+            local file, relative = lsp_util.relative_path_from_uri(node.filetree_item.uri)
+            if relative then
+                name = file
+            end
+        end
+
+        if node.depth == 0 then
+            name = resolve_file_name(node.filetree_item.uri)
+        end
+
+        if not node.filetree_item.is_dir then
+            expand_guide = M.glyphs.space
+        end
         if ct.active_icon_set ~= nil then
-            icon = ct.active_icon_set[kind]
+            icon = webicons.get_icon(node.name, nil, { default = true, is_dir = node.filetree_item.is_dir})
         end
     end
 
