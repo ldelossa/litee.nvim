@@ -1,4 +1,4 @@
-local lsp_util = require('calltree.lsp.util')
+local lsp_util = require('litee.lsp.util')
 
 local M = {}
 

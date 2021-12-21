@@ -1,4 +1,4 @@
-local config = require('calltree').config
+local config = require('litee').config
 local M = {}
 
 local float_wins = {}

@@ -1,5 +1,5 @@
-local tree_node = require('calltree.tree.node')
-local notify = require('calltree.ui.notify')
+local tree_node = require('litee.tree.node')
+local notify = require('litee.ui.notify')
 local M = {}
 
 function M.multi_client_request(clients, method, params, handler, bufnr)

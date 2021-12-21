@@ -1,8 +1,8 @@
-local tree_node = require('calltree.tree.node')
-local tree = require('calltree.tree.tree')
-local notify = require('calltree.ui.notify')
-local ct = require('calltree')
-local lsp_util = require('calltree.lsp.util')
+local tree_node = require('litee.tree.node')
+local tree = require('litee.tree.tree')
+local notify = require('litee.ui.notify')
+local ct = require('litee')
+local lsp_util = require('litee.lsp.util')
 
 local M = {}
 

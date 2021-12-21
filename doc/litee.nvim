@@ -1,0 +1,600 @@
+*LITEE.nvim* LITEE.nvim
+*LITEE.nvim*
+
+Author:   Louis DeLosSantos <louis.delos@gmail.com>
+Homepage: <https://github.com/ldelossa/litee.nvim>
+License:  MIT license
+
+██╗     ██╗████████╗███████╗███████╗   ███╗   ██╗██╗   ██╗██╗███╗   ███╗
+██║     ██║╚══██╔══╝██╔════╝██╔════╝   ████╗  ██║██║   ██║██║████╗ ████║ Lightweight
+██║     ██║   ██║   █████╗  █████╗     ██╔██╗ ██║██║   ██║██║██╔████╔██║ Integrated
+██║     ██║   ██║   ██╔══╝  ██╔══╝     ██║╚██╗██║╚██╗ ██╔╝██║██║╚██╔╝██║ Text
+███████╗██║   ██║   ███████╗███████╗██╗██║ ╚████║ ╚████╔╝ ██║██║ ╚═╝ ██║ Editing
+╚══════╝╚═╝   ╚═╝   ╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝  ╚═══╝  ╚═╝╚═╝     ╚═╝ Environment
+====================================================================================
+CONTENTS                                                         *litee-contents*
+
+  1     Intro.........................................|litee-intro|
+  2     Usage.........................................|litee-usage|
+  2.1    Unified Panel................................|litee-unified-panel|  
+  3     Commands......................................|litee-commands|
+  4     Mappings......................................|litee-mappings|
+  5     Config........................................|litee-config|
+  6     Highlights....................................|litee-highlights|
+  6.1    Icon Highlights..............................|litee-icon-highlights|
+  6.2    UI Highlights................................|litee-ui-highlights|
+  7     LSP Wrappers..................................|litee-lsp-wrappers|
+  8     Calltree......................................|litee-lsp-calltree|
+  9     Symboltree....................................|litee-lsp-calltree|
+  10    Filetree......................................|litee-lsp-calltree|
+
+====================================================================================
+INTRODUCTION                                                        *litee-intro*
+
+LITEE.nvim (pronounced lite) provides an "IDE-lite" experience for Neovim. 
+
+LITEE implements several missing features seen in other popular IDEs such as VSCode
+and JetBrain IDEs while keeping a "native-vim" feel. 
+
+LITEE is an acronym standing for "Lightweight Integrated Text Editing Environment"
+Dubbed so to emphasize the goal of LITEE, implement some loved IDE features while
+keeping the lightweight text editing experience of Neovim.
+
+The currently implemented features are:
+
+- Calltree
+Analogous to VSCode's "Call Hierarchy" tool, this feature exposes an explorable tree
+of incoming or outgoing calls for a given symbol. 
+
+Unlike other Neovim plugins, the tree can be expanded and collapsed to discover 
+"callers-of-callers" and "callees-of-callees" until you hit a leaf.
+
+- Symboltree
+Analogous to VSCode's "Outline" tool, this feature exposes a live tree of document
+symbols for the current file. 
+
+The tree is updated as you move around and change files.
+
+- Filetree
+Analogous to VSCode's "Explorer", this feature exposes a full feature file explorer 
+which supports recursive copies, recursive moves, and proper renaming of a file 
+(more on this in the appropriate section).
+
+====================================================================================
+Usage                                                               *litee-usage*
+
+LITEE.nvim hooks directly into the LSP infrastructure by hijacking the necessary
+handlers like so:
+
+    vim.lsp.handlers['callHierarchy/incomingCalls'] = vim.lsp.with(
+                require('litee.lsp.handlers').ch_lsp_handler("from"), {}
+    )
+    vim.lsp.handlers['callHierarchy/outgoingCalls'] = vim.lsp.with(
+                require('litee.lsp.handlers').ch_lsp_handler("to"), {}
+    )
+    vim.lsp.handlers['textDocument/documentSymbol'] = vim.lsp.with(
+                require('litee.lsp.handlers').ws_lsp_handler(), {}
+    )
+
+This occurs when `require('litee').setup()` is called.
+
+Once the handlers are in place issuing the normal "vim.lsp.buf.incoming_calls", 
+"vim.lsp.buf.outgoing_calls", and "vim.lsp.buf.document_symbol" functions will open 
+the appropriate UI.
+
+The Filetree can be opened with the command "LTOpenFiletree"
+
+
+                                                            *litee-unified-panel*
+
+LITEE.nvim works as a unified panel that can be toggled open and closed.
+
+By setting the correct configuration the panel will open on the left, bottom,
+top, or right.
+
+Various commands exist for jumping into and out of the panel which are covered 
+below. 
+
+All actions that can take place when inside a LITEE.nvim panel window can also 
+be triggered via commands. 
+
+This means you never actually need to jump into the panel is you do not want to
+and can instead, for example, map a key binding for moving to the next and previous
+file in the explorer view.
+
+From there check out litee-commands to manipulate the UI.
+
+====================================================================================
+COMMANDS                                                         *litee-commands*
+
+LITEE.nvim exports commands for manipulating each feature. 
+
+    -- in-window commands
+
+    -- Toggle LITEE.nvim open or close.
+    -- When toggled the relative window sizes are reset but the major 
+    -- size (width for left/right, height for top/bottom) are remembered.
+    vim.cmd("command! LTPanel       lua require('litee.ui').toggle_panel()")
+    -- Expand the current node under the cursor
+    vim.cmd("command! LTExpand      lua require('litee.ui').expand()")
+    -- Collapse the current node under the cursor
+    vim.cmd("command! LTCollapse    lua require('litee.ui').collapse()")
+    -- Collapse all nodes
+    vim.cmd("command! LTCollapseAll lua require('litee.ui').collapse_all()")
+    -- Call Hierarchy Only: Switch incoming to outgoing or vice versa
+    vim.cmd("command! LTSwitch      lua require('litee.ui').switch()")
+    -- Call Hierarchy Only: Focus the call hierarchy tree on the node under
+    -- the cursor.
+    vim.cmd("command! LTFocus       lua require('litee.ui').focus()")
+    -- Jump to the item under the cursor. 
+    -- See configuration to control how this jumping occurs.
+    vim.cmd("command! LTJump        lua require('litee.ui').jump()")
+    -- Jump to the item under the cursor in a new tab.
+    vim.cmd("command! LTJumpTab     lua require('litee.ui').jump('tab')")
+    -- Jump to the item under the cursor in a new split.
+    vim.cmd("command! LTJumpSplit   lua require('litee.ui').jump('split')")
+    -- Jump to the item under the cursor in a new vsplit.
+    vim.cmd("command! LTJumpVSplit  lua require('litee.ui').jump('vsplit')")
+    -- Show hover details for the item under the cursor, if possible.
+    vim.cmd("command! LTHover       lua require('litee.ui').hover()")
+    -- Show LITEE.nvim details for the item under the cursor
+    vim.cmd("command! LTDetails     lua require('litee.ui').details()")
+    -- Clear any highlights after a jump
+    vim.cmd("command! LTClearHL     lua require('litee.ui.jumps').set_jump_hl(false)")
+    -- Debugging tool which dumps the current tree to a buffer for analysis 
+    vim.cmd("command! LTDumpTree    lua require('litee.ui').dump_tree()")
+    -- Debugging tool which dumps the node under the cursor to a buffer for analysis 
+    vim.cmd("command! LTDumpNode    lua require('litee.ui').dump_node()")
+
+    -- Following commands are mirror commands above but do not require you to
+    -- be within the LITEE.nvim window.
+
+    -- call hierarchy specific commands
+    vim.cmd("command! LTOpenTolitee      lua require('litee.ui').open_to('calltree')")
+    vim.cmd("command! LTCloselitee       lua require('litee.ui').close_calltree()")
+    vim.cmd("command! LTNextlitee        lua require('litee.ui').navigation('calltree', 'n')")
+    vim.cmd("command! LTPrevlitee        lua require('litee.ui').navigation('calltree', 'p')")
+    vim.cmd("command! LTExpandlitee      lua require('litee.ui').expand_calltree()")
+    vim.cmd("command! LTCollapselitee    lua require('litee.ui').collapse_calltree()")
+    vim.cmd("command! LTCollapseAlllitee lua require('litee.ui').collapse_all_calltree()")
+    vim.cmd("command! LTFocuslitee       lua require('litee.ui').focus_calltree()")
+    vim.cmd("command! LTSwitchlitee      lua require('litee.ui').switch_calltree()")
+    vim.cmd("command! LTJumplitee        lua require('litee.ui').jump_calltree()")
+    vim.cmd("command! LTJumpliteeSplit   lua require('litee.ui').jump_calltree('split')")
+    vim.cmd("command! LTJumpliteeVSplit  lua require('litee.ui').jump_calltree('vsplit')")
+    vim.cmd("command! LTJumpliteeTab     lua require('litee.ui').jump_calltree('tab')")
+    vim.cmd("command! LTHoverlitee       lua require('litee.ui').hover_calltree()")
+    vim.cmd("command! LTDetailslitee     lua require('litee.ui').details_calltree()")
+
+    -- document outline specific commands
+    vim.cmd("command! LTOpenToSymboltree        lua require('litee.ui').open_to('symboltree')")
+    vim.cmd("command! LTCloseSymboltree         lua require('litee.ui').close_symboltree()")
+    vim.cmd("command! LTNextSymboltree          lua require('litee.ui').navigation('symboltree', 'n')")
+    vim.cmd("command! LTPrevSymboltree          lua require('litee.ui').navigation('symboltree', 'p')")
+    vim.cmd("command! LTExpandSymboltree        lua require('litee.ui').expand_symboltree()")
+    vim.cmd("command! LTCollapseSymboltree      lua require('litee.ui').collapse_symboltree()")
+    vim.cmd("command! LTCollapseAllSymboltree   lua require('litee.ui').collapse_all_symboltree()")
+    vim.cmd("command! LTJumpSymboltree          lua require('litee.ui').jump_symboltree()")
+    vim.cmd("command! LTJumpSymboltreeSplit     lua require('litee.ui').jump_symboltree('split')")
+    vim.cmd("command! LTJumpSymboltreeVSplit    lua require('litee.ui').jump_symboltree('vsplit')")
+    vim.cmd("command! LTJumpSymboltreeTab       lua require('litee.ui').jump_symboltree('tab')")
+    vim.cmd("command! LTHoverSymboltree         lua require('litee.ui').hover_symboltree()")
+    vim.cmd("command! LTDetailsSymboltree       lua require('litee.ui').details_symboltree()")
+
+    -- filetree specific commands
+    vim.cmd("command! LTOpenFiletree          lua require('litee.filetree.handlers').filetree_handler()")
+    vim.cmd("command! LTOpenToFiletree        lua require('litee.ui').open_to('filetree')")
+    vim.cmd("command! LTCloseFiletree         lua require('litee.ui').close_filetree()")
+    vim.cmd("command! LTNextFiletree          lua require('litee.ui').navigation('filetree', 'n')")
+    vim.cmd("command! LTPrevFiletree          lua require('litee.ui').navigation('filetree', 'p')")
+    vim.cmd("command! LTExpandFiletree        lua require('litee.ui').expand_filetree()")
+    vim.cmd("command! LTCollapseFiletree      lua require('litee.ui').collapse_filetree()")
+    vim.cmd("command! LTCollapseAllFiletree   lua require('litee.ui').collapse_all_filetree()")
+    vim.cmd("command! LTJumpFiletree          lua require('litee.ui').jump_filetree()")
+    vim.cmd("command! LTJumpFiletreeSplit     lua require('litee.ui').jump_filetree('split')")
+    vim.cmd("command! LTJumpFiletreeVSplit    lua require('litee.ui').jump_filetree('vsplit')")
+    vim.cmd("command! LTJumpFiletreeTab       lua require('litee.ui').jump_filetree('tab')")
+    vim.cmd("command! LTHoverFiletree         lua require('litee.ui').hover_filetree()")
+    vim.cmd("command! LTDetailsFiletree       lua require('litee.ui').details_filetree()")
+    vim.cmd("command! LTSelectFiletree        lua require('litee.ui').filetree_ops('select')")
+    vim.cmd("command! LTDeSelectFiletree      lua require('litee.ui').filetree_ops('deselect')")
+    vim.cmd("command! LTTouchFiletree         lua require('litee.ui').filetree_ops('touch')")
+    vim.cmd("command! LTRemoveFiletree        lua require('litee.ui').filetree_ops('rm')")
+    vim.cmd("command! LTCopyFiletree          lua require('litee.ui').filetree_ops('cp')")
+    vim.cmd("command! LTMoveFiletree          lua require('litee.ui').filetree_ops('mv')")
+    vim.cmd("command! LTMkdirFiletree         lua require('litee.ui').filetree_ops('mkdir')")
+    vim.cmd("command! LTRenameFiletree        lua require('litee.ui').filetree_ops('rename')")
+
+====================================================================================
+MAPPINGS                                                         *litee-mappings*
+
+LITEE.nvim creates its own buffers for usage and creates buffer local key maps
+for these windows. 
+
+The following key maps are defined and can be reviewed anytime by pressing "?" in
+a LITEE.nvim window.
+
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zo", ":LTExpand<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zc", ":LTCollapse<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zM", ":LTCollapseAll<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<CR>", ":LTJump<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":LTJumpSplit<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "v", ":LTJumpVSplit<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "t", ":LTJumpTab<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "f", ":LTFocus<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "i", ":LTHover<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":LTDetails<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "S", ":LTSwitch<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "?", ":lua require('litee.ui').help(true)<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "H", ":lua require('litee.ui')._smart_close()<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "x", close_cmd, opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "n", ":LTTouchFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "D", ":LTRemoveFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":LTMkdirFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "r", ":LTRenameFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "m", ":LTMoveFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "p", ":LTCopyFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":LTSelectFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "S", ":LTDeSelectFiletree<CR>", opts)
+
+
+====================================================================================
+CONFIG                                                             *litee-config*
+
+To configure LITEE.nvim you can pass a config table to "require('litee').setup(config)".
+You only need to specify the fields you wish to override.
+
+The config table is described below:
+
+    M.config = {
+        -- where the panel will open.
+        -- "left", "right", "bottom", "top"
+        layout = "left",
+        -- the initial size of the panel
+        -- int              - An integer used in the initial "resize" command for
+        --                    the ui. 
+        layout_size = 30,
+        -- the method used when jumping to a symbol
+        -- "invoking"       - Jumping to a symbol will use the window which LITEE.nvim
+        --                    was initially invoked from.
+        --                    If the invoking window has been removed a new botright split
+        --                    will be created and take on the invoking window identity from there.
+        -- "neighbor"       - Jumping to a symbol will use the neighbor on the opposite side of
+        --                    the call tree. 
+        --                    If no neighbor exists a split will be created for the jump. 
+        jump_mode = "invoking",
+        -- the icon to represent the symbol type
+        -- "none"           - No icons for symbol types will just use text
+        -- "nerd"           - Use Nerd font icon set for symbol types (requires patched font)
+        -- "codicon"        - Use VSCode codicon icon set for symbol types (requires patched font)
+        icons = "none",
+        -- disables highlights completely.
+        no_hls = false,
+        -- user provided icon highlight overrides. 
+        -- see *litee-icon-highlights*
+        icon_highlights = {},
+        -- bool which enables or diables indentation guides in the UI.
+        -- defaults to true.
+        indent_guides = true,
+        -- user provided UI highlights.
+        -- see *litee-ui-highlights*
+        hls = {},
+        -- some LSP's will provide symbols with different names depending on
+        -- the method called. 
+        --
+        -- if resolve_symbols is set to true a workspace symbol request will
+        -- be made for each LSP response, providing clearer information 
+        -- for symbols in LITEE.nvim's UI.
+        --
+        -- this will cause the UI to open slower, tho the symbol requests are 
+        -- async so it will not block the editor.
+        -- for full context see: 
+        -- https://github.com/golang/go/issues/49690#issuecomment-975902067
+        --
+        -- set this to false for large codebases to speed up opening
+        -- LITEE.nvim windows.
+        resolve_symbols = true,
+        -- automatic highlighting and source code window position updates when 
+        -- navigating LITEE.nvim windows. Set to false to disable.
+        auto_highlight = true,
+        -- if set to true when navigating the outline view
+        -- the related symbol in the source code window will be placed
+        -- in the middle of the window.
+        --
+        -- the scrolloff is turned off once the cursor leaves the outline view.
+        scrolloff = false,
+        -- map <Left>, <Right>, <Up>, <Down> to resize the panel.
+        map_resize_keys = true,
+        -- if set to true the cursor will be hidden when inside a LITEE.nvim
+        -- window. 
+        --
+        -- this is done by setting guicursor to the same fg/bg as CursorLine hi
+        -- making it blend in with the CursorLine.
+        --
+        -- set your CursorLine hi correctly with cterm/gui values for this to work.
+        hide_cursor = false,
+        -- if true LITEE.nvim will create popups at the bottom right of the screen
+        -- to notify the user of information and errors.
+        --
+        -- notifications use the "Error", "WarningMsg", and "NormalFloat" highlights
+        enable_notify = true,
+        -- whether to display relative paths for each item in the explorer view.
+        -- this can be helpful for top/bottom layouts where you have more width
+        -- then height.
+        relative_filetree_entries = false,
+    }
+
+For an example configuration with suggested keymaps refer to my dotfiles:
+https://github.com/ldelossa/dotfiles/blob/master/nvim/lua/configs/litee.lua
+
+====================================================================================
+HIGHLIGHTS                                                     *litee-highlights*
+
+A default set of highlights will be applied as long as "no_hls=false" is provided 
+in the config (this is the default setting). 
+
+Flipping this settings to true will disable all highlights (accept for jumps).
+
+The default set of highlights may not work for your color scheme, therefore its
+possible to theme LITEE.nvim further. 
+
+The default highlights will stay in sync with "https://github.com/ldelossa/vimdark"
+
+See *litee-icon-highlights* and *litee-ui-highlights* for more info.
+
+                                                          *litee-icon-highlights*
+Each icon in the UI can have its own highlight applied to it. 
+
+By default the following highlight groups will be used for each icon type:
+
+    M.icon_hls = {
+        Folder = "LTNamespace",
+        Reference = "LTParameterReference",
+        Color = "LTType",
+        Snippet = "LTType",
+        Keyword = "LTType",
+        Value = "LTType",
+        Unit = "LTType",
+        Text = "LTString",
+        File = "LTURI",
+        Module = "LTNamespace",
+        Namespace = "LTNamespace",
+        Package = "LTNamespace",
+        Class = "LTType",
+        Method = "LTMethod",
+        Property = "LTMethod",
+        Field = "LTField",
+        Constructor = "LTConstructor",
+        Enum = "LTType",
+        Interface = "LTType",
+        Function = "LTFunction",
+        Variable = "LTConstant",
+        Constant = "LTConstant",
+        String = "LTString",
+        Number = "LTNumber",
+        Boolean = "LTBoolean",
+        Array = "LTConstant",
+        Object = "LTType",
+        Key = "LTType",
+        Struct = "LTType",
+        Null = "LTType",
+        EnumMember = "LTField",
+        Struct = "LTType",
+        Event = "LTType",
+        Operator = "LTOperator",
+        TypeParameter = "LTParameter",
+    }
+
+If you maintain your own color scheme then feel free to add or link these highlight groups
+accordingly. 
+
+If you don't want to define these highlight groups yourself and have a set of highlight groups
+you'd like to use instead you can provide them via the setup function. 
+
+Any provided highlight groups will be merged with the table above. 
+
+For example:
+
+    litee.setup({
+        icon_hls = {
+            File = MyFileIconHL
+        }
+    })
+
+Will highlight "File" icons in the UI using "MyFileIconHL" and highlight all others with the
+default "LT*" highlight group defined above.
+
+Individuals who are using tree-sitter highlights across the board (you're using a tree-sitter color scheme) should provide this table to the setup function:
+
+    M.icon_hls = {
+        Folder = "TSNamespace",
+        Reference = "TSParameterReference",
+        Color = "TSType",
+        Snippet = "TSType",
+        Keyword = "TSType",
+        Value = "TSType",
+        Unit = "TSType",
+        Text = "TSString",
+        File = "TSURI",
+        Module = "TSNamespace",
+        Namespace = "TSNamespace",
+        Package = "TSNamespace",
+        Class = "TSType",
+        Method = "TSMethod",
+        Property = "TSMethod",
+        Field = "TSField",
+        Constructor = "TSConstructor",
+        Enum = "TSType",
+        Interface = "TSType",
+        Function = "TSFunction",
+        Variable = "TSConstant",
+        Constant = "TSConstant",
+        String = "TSString",
+        Number = "TSNumber",
+        Boolean = "TSBoolean",
+        Array = "TSConstant",
+        Object = "TSType",
+        Key = "TSType",
+        Struct = "TSType",
+        Null = "TSType",
+        EnumMember = "TSField",
+        Struct = "TSType",
+        Event = "TSType",
+        Operator = "TSOperator",
+        TypeParameter = "TSParameter",
+    }
+
+                                                            *litee-ui-highlights*
+
+Other UI highlights are provided by the "litee.hls" table.
+ 
+M.hls = {
+    -- highlight of the virtual text positioned next to the symbol name in the call hierarchy UI.
+    SymbolDetailHL        = "LTSymbolDetail",
+    -- highlight of the symbol itself in the call hierarchy UI, e.g. "Func1"
+    SymbolHL            = "LTSymbol",
+    -- the hight of the symbol being jumped to in it's source file.
+    SymbolJumpHL        = "LTSymbolJump",
+    -- the highlight of any references to the above symbol.
+    SymbolJumpRefsHL    = "LTSymbolJumpRefs",
+    -- the highlight of indent guides if enabled
+    IndentGuideHL       = "LTIndentGuide",
+    -- the highlight for expanded guide 
+    ExpandedGuideHL     = "LTExpandedGuide",
+    -- the highlight for collapsed guide
+    CollapsedGuideHL    = "LTCollapsedGuide"
+    -- the highlight used for cursorline in the file explorer when
+    -- a file is selected.
+    LTSelectFiletree    = "LTSelectFiletree"
+}
+
+The usage is similar to the icon highlights but are specified by supplying a "hls" 
+table within the config supplied to the setup function.
+
+List of all unique highlights:
+    -- ui
+    hi LTSymbol             
+    hi LTSymbolDetail         
+    hi LTSymbolJump         
+    hi LTSymbolJumpRefs     
+    hi LTIndentGuide
+    hi LTExpandedGuide
+    hi LTCollapsedGuide
+    -- icons
+    hi LTParameterReference 
+    hi LTURI                
+    hi LTNamespace          
+    hi LTMethod             
+    hi LTField              
+    hi LTConstructor        
+    hi LTType               
+    hi LTFunction           
+    hi LTConstant           
+    hi LTString             
+    hi LTNumber             
+    hi LTBoolean            
+    hi LTConstant           
+    hi LTOperator           
+    hi LTParameter          
+
+====================================================================================
+LSP Wrappers                                                 *litee-lsp-wrappers*
+
+LITEE.nvim ships a set of LSP wrapper functions in `require('litee.lsp.wrappers')`.
+
+These wrappers hook into `require('litee.ui.notify')` providing notifications to
+the user when LSP requests are made.
+
+This is nice for large codebases or sluggish LSPs. It informs the users of LITEE.nvim
+is indeed working on your request.
+
+You can map these functions in place of any mappings you have to the call hierarchy and
+document symbols endpoints.
+
+Function Mapping:
+
+vim.lsp.buf.document_symbols => require('litee.lsp.wrappers').buf_document_symbols
+vim.lsp.buf.incoming_calls   => require('litee.lsp.wrappers').buf_incoming_calls
+vim.lsp.buf.outgoing_calls   => require('litee.lsp.wrappers').buf_outgoing_calls
+
+
+Example keymaps:
+
+vim.api.nvim_set_keymap("n", "<C-l>o", "<cmd>lua require('litee.lsp.wrappers').buf_outgoing_calls()<CR>", opts)
+vim.api.nvim_set_keymap("n", "<C-l>i", "<cmd>lua require('litee.lsp.wrappers').buf_incoming_calls()<CR>", opts)
+vim.api.nvim_set_keymap("n", "<C-l>do", "<cmd>lua require('litee.lsp.wrappers').buf_document_symbol()<CR>", opts)
+vim.api.nvim_set_keymap("i", "<C-l>o", "<cmd>lua require('litee.lsp.wrappers').buf_outgoing_calls()<CR>", opts)
+vim.api.nvim_set_keymap("i", "<C-l>i", "<cmd>lua require('litee.lsp.wrappers').buf_incoming_calls()<CR>", opts)
+vim.api.nvim_set_keymap("i", "<C-l>do", "<cmd>lua require('litee.lsp.wrappers').buf_document_symbol()<CR>", opts)
+
+====================================================================================
+Calltree                                                        *litee-calltree*
+
+The Calltree feature is analogous to VSCode's "Call Hierarchy" tool. 
+
+When issuing a "incoming_calls" or "outgoing_calls" LSP request LITEE.nvim will 
+intercept the response and open a tree UI containing the first level of incoming
+or outgoing calls for the requested symbol.
+
+You can then begin expanding symbols to find the "callers-of-callers" and 
+"callees-of-callees". 
+
+This tree view allows you to dig into the call hierarchy until you get to 
+the leafs and is very handy for grokking call paths of large code bases. 
+
+The Calltree feature supports the following:
+
+- Switching Directions
+You can place your cursor on any symbol and issue a "LTSwitchCalltree" (or "LTSwitch" if you're inside the Calltree window).
+This will focus the symbol and then switch the direction of the call hierarchy.
+
+- Focus 
+When your cursor is over a symbol and you issue a "LTFocusCalltree/LTFocus" command you make that symbol the new root
+off the tree. 
+
+- Jumps with references
+When jumping to a symbol from the Calltree, references to the incoming/outgoing calls are highlighted as well
+as the symbol name you're jumping to. This helps you quickly understand where the call sites for the symbol
+you've jumped to are in the source file.
+
+====================================================================================
+Symboltree                                                     *litee-symboltree*
+
+The Symboltree feature is analogous to VSCode's "Outline" tool.
+
+When issuing a "document_symbol" LSP request LITEE.nvim will intercept the response
+and open a tree UI containing the first level of symbols in the currently focused
+source file. 
+
+The Symboltree will update as you navigate the source file and jump to other files,
+allowing you to keep track of where you are in the file easily. 
+
+The Symboltree doesn't have any special features as it's largely a navigational tool.
+
+====================================================================================
+Filetree                                                         *litee-filetree*
+
+The Filetree is analogous to VSCode's "Explorer" tool. 
+
+The Filetree is a full-featured file explorer which supports:
+- (Recursive) Moving of directory and files
+- (Recursive) Copying of directory and files
+- Advanced renaming*
+- Creation of files and directories
+- Deletions of files and directories
+- Live tracking of the current source file*
+
+Check out litee-commands for Filetree specific commands.
+
+* Advanced renaming solves an annoyance I frequently encounter with file explorers.
+LITEE.nvim will properly search for any open windows where the buffer being renamed exists,
+save it's content, perform the rename, open the renamed file in a new buffer, then swap
+all the windows to this new buffer. 
+
+This avoids having the old named buffer sitting around after the rename occurs. Often, if
+the old named buffer sticks around and "wqall" is performed the old file is written back 
+to disk. LITEE.nvim ensures this won't happen.
+
+* Live tracking is a handy feature which snaps the Filetree into the right place when you 
+navigate to a file, but lazily so to only load the data that's necessary to display the current
+file location.

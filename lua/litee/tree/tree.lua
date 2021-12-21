@@ -1,4 +1,4 @@
-local marshal = require('calltree.ui.marshal')
+local marshal = require('litee.ui.marshal')
 
 local M = {}
 

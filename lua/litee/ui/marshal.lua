@@ -1,7 +1,7 @@
-local ct = require('calltree')
-local config = require('calltree').config
-local lsp_util = require('calltree.lsp.util')
-local webicons = require('calltree.nvim-web-devicons')
+local lt = require('litee')
+local config = require('litee').config
+local lsp_util = require('litee.lsp.util')
+local webicons = require('litee.nvim-web-devicons')
 
 local M = {}
 
@@ -14,8 +14,8 @@ local function resolve_file_name(uri)
 end
 
 M.glyphs = {
-    expanded = (function() if ct.active_icon_set ~= nil then return ct.active_icon_set.Expanded else return "▼" end end)(),
-    collapsed = (function() if ct.active_icon_set ~= nil then return ct.active_icon_set.Collapsed else return "▶" end end)(),
+    expanded = (function() if lt.active_icon_set ~= nil then return lt.active_icon_set.Expanded else return "▼" end end)(),
+    collapsed = (function() if lt.active_icon_set ~= nil then return lt.active_icon_set.Collapsed else return "▶" end end)(),
     separator = "•",
     guide = "⎸",
     space = " "
@@ -77,8 +77,8 @@ function M.marshal_node(node, final)
         name = node.symbol.name
         kind = vim.lsp.protocol.SymbolKind[node.symbol.kind]
         if kind ~= "" then
-            if ct.active_icon_set ~= nil then
-                icon = ct.active_icon_set[kind]
+            if lt.active_icon_set ~= nil then
+                icon = lt.active_icon_set[kind]
             end
         end
 
@@ -99,8 +99,8 @@ function M.marshal_node(node, final)
         name = node.document_symbol.name
         kind = vim.lsp.protocol.SymbolKind[node.document_symbol.kind]
         if kind ~= "" then
-            if ct.active_icon_set ~= nil then
-                icon = ct.active_icon_set[kind]
+            if lt.active_icon_set ~= nil then
+                icon = lt.active_icon_set[kind]
             end
         end
 
@@ -114,8 +114,8 @@ function M.marshal_node(node, final)
         name = node.name
         kind = vim.lsp.protocol.SymbolKind[node.call_hierarchy_item.kind]
         if kind ~= "" then
-            if ct.active_icon_set ~= nil then
-                icon = ct.active_icon_set[kind]
+            if lt.active_icon_set ~= nil then
+                icon = lt.active_icon_set[kind]
             end
         end
 
@@ -144,7 +144,7 @@ function M.marshal_node(node, final)
         if not node.filetree_item.is_dir then
             expand_guide = M.glyphs.space
         end
-        if ct.active_icon_set ~= nil then
+        if lt.active_icon_set ~= nil then
             icon = webicons.get_icon(node.name, nil, { default = true, is_dir = node.filetree_item.is_dir})
         end
     end
@@ -167,7 +167,7 @@ function M.marshal_node(node, final)
     -- ▶ Func1
     str = str .. expand_guide .. M.glyphs.space
 
-    if ct.config.icons ~= "none" then
+    if lt.config.icons ~= "none" then
         -- ▶   Func1
         str = str .. icon .. M.glyphs.space  .. M.glyphs.space .. name
     else
@@ -176,7 +176,7 @@ function M.marshal_node(node, final)
     end
 
     -- return detail as virtual text chunk.
-    return str, {{detail, ct.hls.SymbolDetailHL}}
+    return str, {{detail, lt.hls.SymbolDetailHL}}
 end
 
 -- marshal_line takes a UI buffer line and

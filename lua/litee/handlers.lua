@@ -1,13 +1,13 @@
-local tree  = require('calltree.tree.tree')
-local tree_node  = require('calltree.tree.node')
-local lsp_util = require('calltree.lsp.util')
-local config = require('calltree').config
+local tree  = require('litee.tree.tree')
+local tree_node  = require('litee.tree.node')
+local lsp_util = require('litee.lsp.util')
+local config = require('litee').config
 local M = {}
 
 local direction_map = {
     from = {method ="callHierarchy/incomingCalls", buf_name="incomingCalls"},
     to   = {method="callHierarchy/outgoingCalls", buf_name="outgoingCalls"},
-    empty = {method="callHierarchy/outgoingCalls", buf_name="calltree: empty"}
+    empty = {method="callHierarchy/outgoingCalls", buf_name="hierarchy: empty"}
 }
 
 -- calltree_expand_handler is the call_hierarchy request handler

@@ -1,4 +1,4 @@
-local notify = require('calltree.ui.notify')
+local notify = require('litee.ui.notify')
 local M = {}
 
 function M.buf_document_symbol()
