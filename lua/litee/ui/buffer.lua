@@ -1,4 +1,4 @@
-local config = require('calltree').config
+local config = require('litee').config
 
 local original_guicursor = ""
 
@@ -9,8 +9,8 @@ local M = {}
 --
 -- used as an autocommand on cursor move.
 function M.close_all_popups()
-    require('calltree.ui.hover').close_hover_popup()
-    require('calltree.ui.details').close_details_popup()
+    require('litee.ui.hover').close_hover_popup()
+    require('litee.ui.details').close_details_popup()
 end
 
 -- set_scrolloff will enable a global scrolloff
@@ -25,11 +25,11 @@ function M.set_scrolloff(set)
     end
 end
 
--- hide_cursor will dynamically create the CTCursorHide hi and
+-- hide_cursor will dynamically create the LTCursorHide hi and
 -- set the guicursor option to this hi group.
 --
 -- the CTCursorHide hi has the same bg/fg as the CursorLine hi which
--- is used inside the Calltree.nvim windows.
+-- is used inside the LITEE.nvim windows.
 --
 -- this effectively hides the cursor by making it blend into the cursor
 -- line.
@@ -123,60 +123,62 @@ function M._setup_buffer(name, buffer_handle, tab, type)
     vim.api.nvim_buf_set_option(buffer_handle, 'wrapmargin', 0)
 
     -- au to clear jump highlights on window close
-    vim.cmd("au BufWinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.jumps').set_jump_hl(false)")
+    vim.cmd("au BufWinLeave <buffer=" .. buffer_handle .. "> lua require('litee.ui.jumps').set_jump_hl(false)")
 
 
     -- hide the cursor if possible since there's no need for it, resizing the panel should be used instead.
     if config.hide_cursor then
-        vim.cmd("au WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.buffer').hide_cursor(false)")
-        vim.cmd("au WinEnter <buffer=" .. buffer_handle .. "> lua require('calltree.ui.buffer').hide_cursor(true)")
+        vim.cmd("au WinLeave <buffer=" .. buffer_handle .. "> lua require('litee.ui.buffer').hide_cursor(false)")
+        vim.cmd("au WinEnter <buffer=" .. buffer_handle .. "> lua require('litee.ui.buffer').hide_cursor(true)")
     end
 
     -- au to (re)set source code highlights when a symboltree node is hovered.
     if config.auto_highlight then
-        vim.cmd("au BufWinLeave,WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui').auto_highlight(false)")
-        vim.cmd("au CursorHold <buffer=" .. buffer_handle .. "> lua require('calltree.ui').auto_highlight(true)")
+        vim.cmd("au BufWinLeave,WinLeave <buffer=" .. buffer_handle .. "> lua require('litee.ui').auto_highlight(false)")
+        vim.cmd("au CursorHold <buffer=" .. buffer_handle .. "> lua require('litee.ui').auto_highlight(true)")
     end
 
     if config.scrolloff then
-        vim.cmd("au WinLeave <buffer=" .. buffer_handle .. "> lua require('calltree.ui.buffer').set_scrolloff(false)")
-        vim.cmd("au WinEnter <buffer=" .. buffer_handle .. "> lua require('calltree.ui.buffer').set_scrolloff(true)")
+        vim.cmd("au WinLeave <buffer=" .. buffer_handle .. "> lua require('litee.ui.buffer').set_scrolloff(false)")
+        vim.cmd("au WinEnter <buffer=" .. buffer_handle .. "> lua require('litee.ui.buffer').set_scrolloff(true)")
     end
 
     -- set buffer local keymaps
     local close_cmd = nil
     if type == "calltree" then
-        close_cmd = ":CTCloseCalltree<CR>"
+        close_cmd = ":LTCloseCalltree<CR>"
     end
     if type == "symboltree" then
-        close_cmd = ":CTCloseSymboltree<CR>"
+        close_cmd = ":LTCloseSymboltree<CR>"
     end
     if type == "filetree" then
-        close_cmd = ":CTCloseFiletree<CR>"
+        close_cmd = ":LTCloseFiletree<CR>"
     end
     local opts = {silent=true}
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zo", ":CTExpand<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zc", ":CTCollapse<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zM", ":CTCollapseAll<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<CR>", ":CTJump<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":CTJumpSplit<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "v", ":CTJumpVSplit<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "t", ":CTJumpTab<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "f", ":CTFocus<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "i", ":CTHover<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":CTDetails<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "S", ":CTSwitch<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "?", ":lua require('calltree.ui').help(true)<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "H", ":lua require('calltree.ui')._smart_close()<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "x", close_cmd, opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "n", ":CTTouchFiletree<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "D", ":CTRemoveFiletree<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":CTMkdirFiletree<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "r", ":CTRenameFiletree<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "m", ":CTMoveFiletree<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "p", ":CTCopyFiletree<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":CTSelectFiletree<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "S", ":CTDeSelectFiletree<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zo", ":LTExpand<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zc", ":LTCollapse<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zM", ":LTCollapseAll<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<CR>", ":LTJump<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":LTJumpSplit<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "v", ":LTJumpVSplit<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "t", ":LTJumpTab<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "f", ":LTFocus<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "i", ":LTHover<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":LTDetails<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "S", ":LTSwitch<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "?", ":lua require('litee.ui').help(true)<CR>", opts)
+    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "H", ":lua require('litee.ui')._smart_close()<CR>", opts)
+    if type == "filetree" then
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "x", close_cmd, opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "n", ":LTTouchFiletree<CR>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "D", ":LTRemoveFiletree<CR>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":LTMkdirFiletree<CR>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "r", ":LTRenameFiletree<CR>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "m", ":LTMoveFiletree<CR>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "p", ":LTCopyFiletree<CR>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":LTSelectFiletree<CR>", opts)
+        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "S", ":LTDeSelectFiletree<CR>", opts)
+    end
 	if config.map_resize_keys then
         map_resize_keys(buffer_handle, opts)
     end

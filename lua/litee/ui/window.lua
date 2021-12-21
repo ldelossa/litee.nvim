@@ -1,7 +1,7 @@
-local config = require("calltree").config
-local ct = require("calltree")
-local marshal = require('calltree.ui.marshal')
-local webicons = require('calltree.nvim-web-devicons')
+local config = require("litee").config
+local lt = require("litee")
+local marshal = require('litee.ui.marshal')
+local webicons = require('litee.nvim-web-devicons')
 local M = {}
 
 -- window.lua offers a declartive way to open new windows
@@ -108,21 +108,21 @@ function M._setup_window(current_layout, desired_layout, ui_state)
             win_handle_to_set = "calltree_win"
             if ui_state.calltree_win_dimensions ~= nil then
                 dimensions_to_set = ui_state.calltree_win_dimensions
-            end 
+            end
         end
         if kind == "symboltree" then
             buffer_to_set = ui_state.symboltree_buf
             win_handle_to_set = "symboltree_win"
             if ui_state.symboltree_win_dimensions ~= nil then
                 dimensions_to_set = ui_state.symboltree_win_dimensions
-            end 
+            end
         end
         if kind == "filetree" then
             buffer_to_set = ui_state.filetree_buf
             win_handle_to_set = "filetree_win"
             if ui_state.filetree_win_dimensions ~= nil then
                 dimensions_to_set = ui_state.filetree_win_dimensions
-            end 
+            end
         end
 
         -- we can reuse the current layout windows
@@ -170,14 +170,18 @@ function M._setup_window(current_layout, desired_layout, ui_state)
 
         ::set::
         cur_win = vim.api.nvim_get_current_win()
-        ui_state[win_handle_to_set] = cur_win 
+        ui_state[win_handle_to_set] = cur_win
         vim.api.nvim_win_set_buf(ui_state[win_handle_to_set], buffer_to_set)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'number', false)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'cursorline', true)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'wrap', false)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'winfixwidth', true)
         vim.api.nvim_win_set_option(ui_state[win_handle_to_set], 'winfixheight', true)
-        if dimensions_to_set ~= nil then
+        if
+            dimensions_to_set ~= nil and
+            dimensions_to_set.width ~= nil and
+            dimensions_to_set.height ~= nil
+        then
             if (config.layout == "left" or config.layout == "right") then
                 vim.api.nvim_win_set_width(cur_win, dimensions_to_set.width)
             else
@@ -195,19 +199,19 @@ function M._setup_window(current_layout, desired_layout, ui_state)
         ::continue::
         if not config.no_hls then
             -- set configured icon highlights
-            if ct.active_icon_set ~= nil then
-                for icon, hl in pairs(ct.icon_hls) do
-                    vim.cmd(string.format("syn match %s /%s/", hl, ct.active_icon_set[icon]))
+            if lt.active_icon_set ~= nil then
+                for icon, hl in pairs(lt.icon_hls) do
+                    vim.cmd(string.format("syn match %s /%s/", hl, lt.active_icon_set[icon]))
                 end
             end
             -- set configured symbol highlight
-            vim.cmd(string.format("syn match %s /%s/", ct.hls.SymbolHL, [[\w]]))
+            vim.cmd(string.format("syn match %s /%s/", lt.hls.SymbolHL, [[\w]]))
             -- set configured expanded indicator highlights
-            vim.cmd(string.format("syn match %s /%s/", ct.hls.ExpandedGuideHL, marshal.glyphs.expanded))
-            vim.cmd(string.format("syn match %s /%s/", ct.hls.CollapsedGuideHL, marshal.glyphs.collapsed))
+            vim.cmd(string.format("syn match %s /%s/", lt.hls.ExpandedGuideHL, marshal.glyphs.expanded))
+            vim.cmd(string.format("syn match %s /%s/", lt.hls.CollapsedGuideHL, marshal.glyphs.collapsed))
             -- set configured indent guide highlight
-            vim.cmd(string.format("syn match %s /%s/", ct.hls.IndentGuideHL, marshal.glyphs.guide))
-            for _, icon_data in pairs(webicons.icons) do 
+            vim.cmd(string.format("syn match %s /%s/", lt.hls.IndentGuideHL, marshal.glyphs.guide))
+            for _, icon_data in pairs(webicons.icons) do
                 local hl = "DevIcon" .. icon_data.name
                 vim.cmd(string.format("syn match %s /%s/", hl, icon_data.icon))
             end

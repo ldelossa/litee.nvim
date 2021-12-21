@@ -1,22 +1,22 @@
-local ct = require('calltree')
-local lsp_util = require('calltree.lsp.util')
-local ui_buf = require('calltree.ui.buffer')
-local ui_win = require('calltree.ui.window')
-local help_buf = require('calltree.ui.help_buffer')
-local marshal = require('calltree.ui.marshal')
-local jumps = require('calltree.ui.jumps')
-local deets = require('calltree.ui.details')
-local hover = require('calltree.ui.hover')
-local tree  = require('calltree.tree.tree')
-local handlers = require('calltree.handlers')
-local au_hl = require('calltree.ui.auto_highlights')
-local notify = require('calltree.ui.notify')
-local nav = require('calltree.ui.navigation')
-local filetree = require('calltree.filetree')
-local lib = require('calltree.lib')
+local ct = require('litee')
+local lsp_util = require('litee.lsp.util')
+local ui_buf = require('litee.ui.buffer')
+local ui_win = require('litee.ui.window')
+local help_buf = require('litee.ui.help_buffer')
+local marshal = require('litee.ui.marshal')
+local jumps = require('litee.ui.jumps')
+local deets = require('litee.ui.details')
+local hover = require('litee.ui.hover')
+local tree  = require('litee.tree.tree')
+local handlers = require('litee.handlers')
+local au_hl = require('litee.ui.auto_highlights')
+local notify = require('litee.ui.notify')
+local nav = require('litee.ui.navigation')
+local filetree = require('litee.filetree')
+local lib = require('litee.lib')
 
 -- ui.lua is the primary interface between Neovim's TUI
--- and Calltree.nvim features.
+-- and LITEE.nvim features.
 --
 -- all functions invoked from Neovim land here and route
 -- to the appropriate internal counterparts.
@@ -529,7 +529,7 @@ end
 M.collapse = function()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
-        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window", 1750, "error")
+        notify.notify_popup_with_timeout("Must be in a LITEE.nvim window", 1750, "error")
         return
     end
 
@@ -611,7 +611,7 @@ end
 M.collapse_all = function()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
-        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window", 1750, "error")
+        notify.notify_popup_with_timeout("Must be in a LITEE.nvim window", 1750, "error")
         return
     end
     local t = tree.get_tree(ctx.tree_handle)
@@ -668,7 +668,7 @@ end
 M.expand = function()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
-        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window", 1750, "error")
+        notify.notify_popup_with_timeout("Must be in a LITEE.nvim window", 1750, "error")
         return
     end
 
@@ -772,7 +772,7 @@ end
 M.focus = function()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
-        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window.", 1750, "error")
+        notify.notify_popup_with_timeout("Must be in a LITEE.nvim window.", 1750, "error")
         return
     end
 
@@ -807,7 +807,7 @@ end
 M.switch = function()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
-        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window.", 1750, "error")
+        notify.notify_popup_with_timeout("Must be in a LITEE.nvim window.", 1750, "error")
         return
     end
 
@@ -865,7 +865,7 @@ end
 M.jump = function(split)
     local ctx = ui_req_ctx()
     if ctx.node == nil then
-        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window.", 1750, "error")
+        notify.notify_popup_with_timeout("Must be in a LITEE.nvim window.", 1750, "error")
         return
     end
 
@@ -1032,7 +1032,7 @@ M.hover = function()
     ui_buf.close_all_popups()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
-        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window.", 1750, "error")
+        notify.notify_popup_with_timeout("Must be in a LITEE.nvim window.", 1750, "error")
         return
     end
 
@@ -1129,7 +1129,7 @@ M.details = function()
     ui_buf.close_all_popups()
     local ctx = ui_req_ctx()
     if ctx.node == nil then
-        notify.notify_popup_with_timeout("Must be in a Calltree.nvim window.", 1750, "error")
+        notify.notify_popup_with_timeout("Must be in a LITEE.nvim window.", 1750, "error")
         return
     end
 

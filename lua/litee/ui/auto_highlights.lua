@@ -1,5 +1,5 @@
-local lsp_util = require('calltree.lsp.util')
-local ct = require('calltree')
+local lsp_util = require('litee.lsp.util')
+local lt = require('litee')
 
 local M = {}
 
@@ -51,7 +51,7 @@ function M.highlight(node, set, invoking_win)
     vim.api.nvim_buf_add_highlight(
         buf,
         M.higlight_ns,
-        ct.hls.SymbolJumpHL,
+        lt.hls.SymbolJumpHL,
         range["start"].line,
         range["start"].character,
         range["end"].character

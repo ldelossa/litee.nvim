@@ -1,4 +1,4 @@
-local config = require('calltree').config
+local config = require('litee').config
 local M = {}
 
 local function map_resize_keys(buffer_handle, opts)
@@ -88,7 +88,7 @@ function M._setup_help_buffer(help_buf_handle)
 
     -- set buffer local keymaps
     local opts = {silent=true}
-    vim.api.nvim_buf_set_keymap(help_buf_handle, "n", "?", ":lua require('calltree.ui').help(false)<CR>", opts)
+    vim.api.nvim_buf_set_keymap(help_buf_handle, "n", "?", ":lua require('litee.ui').help(false)<CR>", opts)
     map_resize_keys(help_buf_handle, opts)
 
     return help_buf_handle

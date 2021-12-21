@@ -1,32 +1,46 @@
 ```
-    /_____/\ /_______/\ /_/\     /_/\   /________/\/_____/\  /_____/\ /_____/\     
-    \:::__\/ \::: _  \ \\:\ \    \:\ \  \__.::.__\/\:::_ \ \ \::::_\/_\::::_\/_    
-     \:\ \  __\::(_)  \ \\:\ \    \:\ \    \::\ \   \:(_) ) )_\:\/___/\\:\/___/\   
-      \:\ \/_/\\:: __  \ \\:\ \____\:\ \____\::\ \   \: __ `\ \\::___\/_\::___\/_  
-       \:\_\ \ \\:.\ \  \ \\:\/___/\\:\/___/\\::\ \   \ \ `\ \ \\:\____/\\:\____/\ 
-        \_____\/ \__\/\__\/ \_____\/ \_____\/ \__\/    \_\/ \_\/ \_____\/ \_____\/ 
-                                                                                   
-    ==============================================================================
-                          Neovim's missing call-hierarchy UI
+██╗     ██╗████████╗███████╗███████╗   ███╗   ██╗██╗   ██╗██╗███╗   ███╗
+██║     ██║╚══██╔══╝██╔════╝██╔════╝   ████╗  ██║██║   ██║██║████╗ ████║ Lightweight
+██║     ██║   ██║   █████╗  █████╗     ██╔██╗ ██║██║   ██║██║██╔████╔██║ Integrated
+██║     ██║   ██║   ██╔══╝  ██╔══╝     ██║╚██╗██║╚██╗ ██╔╝██║██║╚██╔╝██║ Text
+███████╗██║   ██║   ███████╗███████╗██╗██║ ╚████║ ╚████╔╝ ██║██║ ╚═╝ ██║ Editing
+╚══════╝╚═╝   ╚═╝   ╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝  ╚═══╝  ╚═╝╚═╝     ╚═╝ Environment
+====================================================================================
 ```
 
-![calltree screenshot](./contrib/calltree-screenshot.png)
+![litee screenshot](./contrib/litee-screenshot.png)
 
-# Calltree.nvim
+# LITEE.nvim
 
-Calltree.nvim implements the missing "call-hierarchy" tree UI seen in other popular IDEs
-such as Pycharm and VSCode.
+LITEE.nvim (pronounced lite) provides an "IDE-lite" experience for Neovim. 
 
-Calltree.nvim allows you to start at a root symbol and discover the callers or callee's of it.
+LITEE implements several missing features seen in other popular IDEs such as VSCode
+and JetBrain IDEs while keeping a "native-vim" feel. 
 
-Subsequently, you can drill down the tree further to discover the "callers-of-caller" or 
-the "callee's-of-callee". 
+LITEE is an acronym standing for "Lightweight Integrated Text Editing Environment".
 
-This relationship forms a tree and this is exactly how Calltree.nvim works, keeping an in
-memory representation of the call tree and writing the tree out to an outline form when
-requested.
+Dubbed so to emphasize the goal of LITEE, implement some loved IDE features while
+keeping the lightweight text editing experience of Neovim.
 
-Additionally, Calltree.nvim provides a live document outline UI to further help the navigation of a codebase.
+The currently implemented features are:
+
+#### Calltree
+Analogous to VSCode's "Call Hierarchy" tool, this feature exposes an explorable tree
+of incoming or outgoing calls for a given symbol. 
+
+Unlike other Neovim plugins, the tree can be expanded and collapsed to discover 
+"callers-of-callers" and "callees-of-callees" until you hit a leaf.
+
+#### Symboltree
+Analogous to VSCode's "Outline" tool, this feature exposes a live tree of document
+symbols for the current file. 
+
+The tree is updated as you move around and change files.
+
+#### Filetree
+Analogous to VSCode's "Explorer", this feature exposes a full feature file explorer 
+which supports recursive copies, recursive moves, and proper renaming of a file 
+(more on this in `h: litee.nvim`).
 
 # Usage
 
@@ -34,96 +48,43 @@ Additionally, Calltree.nvim provides a live document outline UI to further help 
 
 Plug:
 ```
- Plug 'ldelossa/calltree.nvim'
+ Plug 'ldelossa/litee.nvim'
 ```
 
 ## Set it
 
 Call the setup function from anywhere you configure your plugins from.
 
-Configuration dictionary is explained in ./doc/calltree.txt (:h calltree-config)
+Configuration dictionary is explained in ./doc/litee.txt (:h litee-config)
 
 ```
-require('calltree').setup({})
+require('litee').setup({})
 ```
 
 ## Use it
 
-The setup function hooks directly into the "textDocument/incomingCalls", "textDocument/outgoingCalls" (calltress), and "textDocument/documentSymbol" (symboltree) LSP handlers. 
+LITEE.nvim hooks directly into the LSP infrastructure by hijacking the necessary
+handlers like so:
 
-To start a calltree or a symboltree use the LSP client just like you're used to:
+    vim.lsp.handlers['callHierarchy/incomingCalls'] = vim.lsp.with(
+                require('litee.lsp.handlers').ch_lsp_handler("from"), {}
+    )
+    vim.lsp.handlers['callHierarchy/outgoingCalls'] = vim.lsp.with(
+                require('litee.lsp.handlers').ch_lsp_handler("to"), {}
+    )
+    vim.lsp.handlers['textDocument/documentSymbol'] = vim.lsp.with(
+                require('litee.lsp.handlers').ws_lsp_handler(), {}
+    )
 
-```
-:lua vim.lsp.buf.incoming_calls()
-:lua vim.lsp.buf.outgoing_calls()
-:lua vim.lsp.buf.document_symbol() (symboltree outline)
-```
+This occurs when `require('litee').setup()` is called.
 
-You most likely have key mappings set for this if you're using the lsp-config.
+Once the handlers are in place issuing the normal "vim.lsp.buf.incoming_calls", 
+"vim.lsp.buf.outgoing_calls", and "vim.lsp.buf.document_symbol" functions will open 
+the Calltree and Symboltree UI, respectively.
 
-Once the calltree or symboltree is open you can expand and collapse symbols to discover a total call hierarchy or document outline in an intuitative way.
+The Filetree can be opened with the command "LTOpenFiletree"
 
-Use ":CTExpand" and ":CTCollapse" to achieve this.
+All of LITEE.nvim can be controlled via commands making it possible to navigate
+the Calltree, Symboltree, and Filetree via key bindings. 
 
-Check out (:h calltree) for all the details.
-
-# Features
-
-This plugin aims to be super simple and do one thing very well. 
-
-There are a few features which add a bit more to the basic usage. 
-
-## Switching Directions (calltree)
-
-The ":CTSwitch" command will focus and inverse the call tree (move from outgoing to incoming for example) for the symbol under the cursor. 
-
-## Focusing (calltree)
-
-The ":CTFocus" command will re-parent the symbol under the cursor, making it root. 
-
-From there you can continue down the call tree.
-
-## Hover
-
-The ":CTHover" will show hover info for the given symbol.
-
-## Jump
-
-Calltree.nvim supports jumping to the symbol. 
-
-The ":CTJump" command will do this. 
-
-How jumping occurs is controlled by the config, see (h: calltree-config)
-
-Jumping will set highlights in the source file, to clear these use ":CTClearHL".
-
-You can also jump to a split or new tab with ":CTJumpSplit", ":CTJumpVSplit", and ":CTJumpTab".
-
-## Icons
-
-Nerd font icons along with Codicons are currently supported. 
-
-You'll need a patched font for them to work correctly. see (h: calltree-config)
-
-## Symbol Outline
-
-Because the tree module can be used for symbols as well Calltree.nvim implements a live symbol outline of the focused buffer.
-
-Expanding and collapsing nodes is done with the same commands as the call hierarchy tree. 
-
-The UI works together and will always ensure a static layout with call hierarchy on top/left and symbols on bottom/right.
-
-## Unified Panel
-
-Calltree.nvim works as a unified panel on the left (or top/right/bottom when configured) of the editor windows. 
-
-The unified panel will consist of the most recently created symboltree and/or calltree. 
-The panel can be toggled closed and open, once a LSP request has been made, with ":CTPanel".
-
-When inside the panel you can use the keybinding "h" to temporarily hide the Calltree.nvim UI element the cursor is inside. When you toggle the panel the hidden element will return. 
-
-If you'd like to permanently close a Calltree.nvim UI element (until another LSP request) from the panel use the ":CTClose" or ":STClose" commands. This closes and **removes** the tree from Calltree.nvim's memory. 
-
-## Demo
-
-[![Calltree Demonstration]()](https://user-images.githubusercontent.com/5642902/142293639-aa0d97a1-e3b0-4fc4-942e-108bfaa18793.mp4)
+Check out the help file for full details.

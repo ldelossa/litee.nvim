@@ -1,6 +1,6 @@
-local ct = require('calltree')
-local config = require('calltree').config
-local lsp_util = require('calltree.lsp.util')
+local ct = require('litee')
+local config = require('litee').config
+local lsp_util = require('litee.lsp.util')
 
 local M = {}
 

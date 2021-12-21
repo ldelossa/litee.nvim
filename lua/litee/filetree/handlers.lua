@@ -1,7 +1,7 @@
-local tree_node = require('calltree.tree.node')
-local tree = require('calltree.tree.tree')
-local ui = require('calltree.ui')
-local filetree = require('calltree.filetree')
+local tree_node = require('litee.tree.node')
+local tree = require('litee.tree.tree')
+local ui = require('litee.ui')
+local filetree = require('litee.filetree')
 
 local M = {}
 
