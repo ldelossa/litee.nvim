@@ -67,7 +67,7 @@ local function _setup_default_highlights()
         LTIndentGuide           = 'hi LTIndentGuide            guifg=None    guibg=None',
         LTExpandedGuide         = 'hi LTExpandedGuide          guifg=None    guibg=None',
         LTCollapsedGuide        = 'hi LTCollapsedGuide         guifg=None    guibg=None',
-        LTSelectFiletree        = 'hi ErrorMsg ctermbg=131 ctermfg=246 cterm=None guibg=#af5f5f guifg=#e4e4e4 gui=None'
+        LTSelectFiletree       = 'hi LTSelectFiletree ctermbg=131  ctermfg=246 cterm=None guibg=#af5f5f guifg=#e4e4e4 gui=None'
     }
     local bg = vim.api.nvim_get_option("background")
     if bg == "dark" then
