@@ -250,6 +250,13 @@ M.open_to = function(ui)
         end
         local ui_state = ctx.state
         if ui_state ~= nil then
+            -- unlike the other trees, we want invoked jumps
+            -- to open the file in the last focused window.
+            -- this updates the invoking window when the
+            -- filetree is jumped into.
+            if ctx.win ~= ui_state.filetree_win then
+                ui_state.invoking_filetree_win = ctx.win
+            end
             if ctx.win == ui_state.filetree_win then
                 vim.api.nvim_set_current_win(ui_state.invoking_filetree_win)
                 return
@@ -322,6 +329,13 @@ M._open_filetree = function()
     if ctx.state == nil then
         ctx.state = {}
         M.ui_state_registry[ctx.tab] = ctx.state
+    end
+    -- unlike the other trees, we want invoked jumps
+    -- to open the file in the last focused window.
+    -- this updates the invoking window when the
+    -- filetree is first opened.
+    if ctx.win ~= ctx.state.filetree_win then
+        ctx.state.invoking_filetree_win = ctx.win
     end
     local target_uri = vim.fn.expand('%:p')
 
