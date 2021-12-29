@@ -237,6 +237,15 @@ a LITEE.nvim window.
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":LTSelectFiletree<CR>", opts)
     vim.api.nvim_buf_set_keymap(buffer_handle, "n", "S", ":LTDeSelectFiletree<CR>", opts)
 
+To disable the above default mappings, you can set config.disable_default_keymaps to true.
+
+To add your own keymaps, you can use the filetype "litee" to narrow the bindings to 
+be mapped solely on Litee side buffers:
+
+  vim.cmd(([[
+  autocmd Filetype calltree lua vim.api.nvim_set_keymap("n", "<Tab>", ":LTExpand<CR>", {})
+  autocmd Filetype calltree lua vim.api.nvim_set_keymap("n", ...)
+  ]]))
 
 ====================================================================================
 CONFIG                                                             *litee-config*
@@ -322,10 +331,10 @@ The config table is described below:
         -- this can be helpful for top/bottom layouts where you have more width
         -- then height.
         relative_filetree_entries = false,
+        --
+        -- disable all default keymaps.
+        disable_default_keymaps = false
     }
-
-For an example configuration with suggested keymaps refer to my dotfiles:
-https://github.com/ldelossa/dotfiles/blob/master/nvim/lua/configs/litee.lua
 
 ====================================================================================
 HIGHLIGHTS                                                     *litee-highlights*
