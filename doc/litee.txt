@@ -1,4 +1,4 @@
-*LITEE.nvim* LITEE.nvim
+*LITEE.txt* LITEE.nvim
 *LITEE.nvim*
 
 Author:   Louis DeLosSantos <louis.delos@gmail.com>
