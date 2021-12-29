@@ -115,7 +115,7 @@ function M._setup_buffer(name, buffer_handle, tab, type)
     -- set buf options
     vim.api.nvim_buf_set_name(buffer_handle, name .. ":" .. tab)
     vim.api.nvim_buf_set_option(buffer_handle, 'bufhidden', 'hide')
-    vim.api.nvim_buf_set_option(buffer_handle, 'filetype', 'Calltree')
+    vim.api.nvim_buf_set_option(buffer_handle, 'filetype', 'litee')
     vim.api.nvim_buf_set_option(buffer_handle, 'buftype', 'nofile')
     vim.api.nvim_buf_set_option(buffer_handle, 'modifiable', false)
     vim.api.nvim_buf_set_option(buffer_handle, 'swapfile', false)
