@@ -155,32 +155,34 @@ function M._setup_buffer(name, buffer_handle, tab, type)
         close_cmd = ":LTCloseFiletree<CR>"
     end
     local opts = {silent=true}
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zo", ":LTExpand<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zc", ":LTCollapse<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zM", ":LTCollapseAll<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<CR>", ":LTJump<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":LTJumpSplit<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "v", ":LTJumpVSplit<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "t", ":LTJumpTab<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "f", ":LTFocus<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "i", ":LTHover<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":LTDetails<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "S", ":LTSwitch<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "?", ":lua require('litee.ui').help(true)<CR>", opts)
-    vim.api.nvim_buf_set_keymap(buffer_handle, "n", "H", ":lua require('litee.ui')._smart_close()<CR>", opts)
-    if type == "filetree" then
-        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "x", close_cmd, opts)
-        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "n", ":LTTouchFiletree<CR>", opts)
-        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "D", ":LTRemoveFiletree<CR>", opts)
-        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":LTMkdirFiletree<CR>", opts)
-        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "r", ":LTRenameFiletree<CR>", opts)
-        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "m", ":LTMoveFiletree<CR>", opts)
-        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "p", ":LTCopyFiletree<CR>", opts)
-        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":LTSelectFiletree<CR>", opts)
-        vim.api.nvim_buf_set_keymap(buffer_handle, "n", "S", ":LTDeSelectFiletree<CR>", opts)
-    end
-	if config.map_resize_keys then
+    if config.disable_default_bindings then
+      vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zo", ":LTExpand<CR>", opts)
+      vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zc", ":LTCollapse<CR>", opts)
+      vim.api.nvim_buf_set_keymap(buffer_handle, "n", "zM", ":LTCollapseAll<CR>", opts)
+      vim.api.nvim_buf_set_keymap(buffer_handle, "n", "<CR>", ":LTJump<CR>", opts)
+      vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":LTJumpSplit<CR>", opts)
+      vim.api.nvim_buf_set_keymap(buffer_handle, "n", "v", ":LTJumpVSplit<CR>", opts)
+      vim.api.nvim_buf_set_keymap(buffer_handle, "n", "t", ":LTJumpTab<CR>", opts)
+      vim.api.nvim_buf_set_keymap(buffer_handle, "n", "f", ":LTFocus<CR>", opts)
+      vim.api.nvim_buf_set_keymap(buffer_handle, "n", "i", ":LTHover<CR>", opts)
+      vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":LTDetails<CR>", opts)
+      vim.api.nvim_buf_set_keymap(buffer_handle, "n", "S", ":LTSwitch<CR>", opts)
+      vim.api.nvim_buf_set_keymap(buffer_handle, "n", "?", ":lua require('litee.ui').help(true)<CR>", opts)
+      vim.api.nvim_buf_set_keymap(buffer_handle, "n", "H", ":lua require('litee.ui')._smart_close()<CR>", opts)
+      if type == "filetree" then
+          vim.api.nvim_buf_set_keymap(buffer_handle, "n", "x", close_cmd, opts)
+          vim.api.nvim_buf_set_keymap(buffer_handle, "n", "n", ":LTTouchFiletree<CR>", opts)
+          vim.api.nvim_buf_set_keymap(buffer_handle, "n", "D", ":LTRemoveFiletree<CR>", opts)
+          vim.api.nvim_buf_set_keymap(buffer_handle, "n", "d", ":LTMkdirFiletree<CR>", opts)
+          vim.api.nvim_buf_set_keymap(buffer_handle, "n", "r", ":LTRenameFiletree<CR>", opts)
+          vim.api.nvim_buf_set_keymap(buffer_handle, "n", "m", ":LTMoveFiletree<CR>", opts)
+          vim.api.nvim_buf_set_keymap(buffer_handle, "n", "p", ":LTCopyFiletree<CR>", opts)
+          vim.api.nvim_buf_set_keymap(buffer_handle, "n", "s", ":LTSelectFiletree<CR>", opts)
+          vim.api.nvim_buf_set_keymap(buffer_handle, "n", "S", ":LTDeSelectFiletree<CR>", opts)
+      end
+      if config.map_resize_keys then
         map_resize_keys(buffer_handle, opts)
+      end
     end
     return buffer_handle
 end

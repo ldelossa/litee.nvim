@@ -17,7 +17,8 @@ M.config = {
     map_resize_keys = true,
     hide_cursor = false,
     enable_notify = true,
-    relative_filetree_entries = false
+    relative_filetree_entries = false,
+    disable_default_bindings = false
 }
 
 local function _setup_default_highlights()
