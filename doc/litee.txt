@@ -1,5 +1,4 @@
-*LITEE.txt* LITEE.nvim
-*LITEE.nvim*
+*litee.nvim* litee.nvim
 
 Author:   Louis DeLosSantos <louis.delos@gmail.com>
 Homepage: <https://github.com/ldelossa/litee.nvim>
@@ -36,7 +35,7 @@ Litee.nvim (pronounced lite) is a library for building "IDE-lite" experience in 
 By utilizing the "litee" library plugin authors can achieve a consistent experience
 across separate plugins.
 
-There are several official litee plugins which can ask as a reference for implementing
+There are several official litee plugins which can act as a reference for implementing
 additional.
 
 - Calltree
@@ -138,6 +137,19 @@ The `highlights` library defines the highlights used within the `litee` library,
 methods for setting up the default highlights, and a sub-module for the 
 auto-highlights features.
 
+The following highlights are exported and can be defined for theme overriding.
+
+    M.hls = {
+        SymbolDetailHL      = "LTSymbolDetail",
+        SymbolHL            = "LTSymbol",
+        SymbolJumpHL        = "LTSymbolJump",
+        SymbolJumpRefsHL    = "LTSymbolJumpRefs",
+        IndentGuideHL       = "LTIndentGuide",
+        ExpandedGuideHL     = "LTExpandedGuide",
+        CollapsedGuideHL    = "LTCollapsedGuide",
+        SelectFiletreeHL    = "LTSelectFiletree"
+    }
+
 The `auto` module provides a facility for highlighting areas of a source file
 given a node and a window. 
 
@@ -158,6 +170,10 @@ litee's UI such as indent guides and tree symbols.
 
 Users of this library can override the exported icon libraries during runtime to
 change an icon from its default.
+
+This library also exports a list of icon highlights which can be overriden.
+
+Check out the source file `lib/icons/init.lua` for full details.
 
 ====================================================================================
 lib/jumps                                                          *litee-lib-jumps*
