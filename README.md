@@ -10,81 +10,57 @@
 
 ![litee screenshot](./contrib/litee-screenshot.png)
 
-# LITEE.nvim
+# litee.nvim
 
-LITEE.nvim (pronounced lite) provides an "IDE-lite" experience for Neovim. 
+Litee.nvim (pronounced lite) is a library for building "IDE-lite" experience in Neovim. 
 
-LITEE implements several missing features seen in other popular IDEs such as VSCode
-and JetBrain IDEs while keeping a "native-vim" feel. 
+By utilizing the "litee" library plugin authors can achieve a consistent experience
+across separate plugins.
 
-LITEE is an acronym standing for "Lightweight Integrated Text Editing Environment".
+There are several official litee plugins which can act as a reference for implementing
+additional.
 
-Dubbed so to emphasize the goal of LITEE, implement some loved IDE features while
-keeping the lightweight text editing experience of Neovim.
+## Calltree
+https://github.com/ldelossa/litee-calltree.nvim
 
-The currently implemented features are:
-
-#### Calltree
 Analogous to VSCode's "Call Hierarchy" tool, this feature exposes an explorable tree
 of incoming or outgoing calls for a given symbol. 
 
 Unlike other Neovim plugins, the tree can be expanded and collapsed to discover 
 "callers-of-callers" and "callees-of-callees" until you hit a leaf.
 
-#### Symboltree
+## Symboltree
+https://github.com/ldelossa/litee-symboltree.nvim
+
 Analogous to VSCode's "Outline" tool, this feature exposes a live tree of document
 symbols for the current file. 
 
 The tree is updated as you move around and change files.
 
-#### Filetree
+## Filetree
+https://github.com/ldelossa/litee-filetree.nvim
+
 Analogous to VSCode's "Explorer", this feature exposes a full feature file explorer 
 which supports recursive copies, recursive moves, and proper renaming of a file 
-(more on this in `h: litee.nvim`).
+(more on this in the appropriate section).
 
 # Usage
 
-## Get it
+litee.nvim is a library which other plugins can important and use. 
 
-Plug:
-```
- Plug 'ldelossa/litee.nvim'
-```
+The library has it's own configuration and setup function which can be
+viewed in the `doc.txt`.
 
-## Set it
-
-Call the setup function from anywhere you configure your plugins from.
-
-Configuration dictionary is explained in ./doc/litee.txt (:h litee-config)
+An example of configuring the library is below:
 
 ```
-require('litee').setup({})
+require('litee.lib').setup({
+    tree = {
+        icon_set = "codicons"
+    },
+    panel = {
+        orientation = "left",
+        panel_size  = 30
+    }
+})
 ```
-
-## Use it
-
-LITEE.nvim hooks directly into the LSP infrastructure by hijacking the necessary
-handlers like so:
-
-    vim.lsp.handlers['callHierarchy/incomingCalls'] = vim.lsp.with(
-                require('litee.lsp.handlers').ch_lsp_handler("from"), {}
-    )
-    vim.lsp.handlers['callHierarchy/outgoingCalls'] = vim.lsp.with(
-                require('litee.lsp.handlers').ch_lsp_handler("to"), {}
-    )
-    vim.lsp.handlers['textDocument/documentSymbol'] = vim.lsp.with(
-                require('litee.lsp.handlers').ws_lsp_handler(), {}
-    )
-
-This occurs when `require('litee').setup()` is called.
-
-Once the handlers are in place issuing the normal "vim.lsp.buf.incoming_calls", 
-"vim.lsp.buf.outgoing_calls", and "vim.lsp.buf.document_symbol" functions will open 
-the Calltree and Symboltree UI, respectively.
-
-The Filetree can be opened with the command "LTOpenFiletree"
-
-All of LITEE.nvim can be controlled via commands making it possible to navigate
-the Calltree, Symboltree, and Filetree via key bindings. 
-
-Check out the help file for full details.
