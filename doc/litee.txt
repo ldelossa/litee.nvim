@@ -16,16 +16,16 @@ CONTENTS                                                            *litee-conte
   1     Intro..............................................|litee-intro|
   2     Usage..............................................|litee-usage|
   3     Library Modules................................|litee-libraries|  
-  3.1   lib/details..................................|litee-lib-details|  
-  3.1   lib/highlights............................|litee-lib-highlights|  
-  3.1   lib/icons......................................|litee-lib-icons|  
-  3.1   lib/jumps......................................|litee-lib-jumps|  
-  3.1   lib/lsp..........................................|litee-lib-lsp|  
-  3.1   lib/navi........................................|litee-lib-navi|  
-  3.1   lib/panel......................................|litee-lib-panel|  
-  3.1   lib/state......................................|litee-lib-state|  
-  3.1   lib/tree........................................|litee-lib-tree|  
-  3.1   lib/util........................................|litee-lib-util|  
+  4     lib/details..................................|litee-lib-details|  
+  5     lib/highlights............................|litee-lib-highlights|  
+  6     lib/icons......................................|litee-lib-icons|  
+  7     lib/jumps......................................|litee-lib-jumps|  
+  8     lib/lsp..........................................|litee-lib-lsp|  
+  9     lib/navi........................................|litee-lib-navi|  
+  10    lib/panel......................................|litee-lib-panel|  
+  11    lib/state......................................|litee-lib-state|  
+  12    lib/tree........................................|litee-lib-tree|  
+  13    lib/util........................................|litee-lib-util|  
 
 ====================================================================================
 INTRODUCTION                                                           *litee-intro*
