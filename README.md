@@ -12,7 +12,7 @@
 
 # litee.nvim
 
-Litee.nvim (pronounced lite) is a library for building "IDE-lite" experience in Neovim. 
+Litee.nvim (pronounced lite) is a library for building "IDE-lite" experiences in Neovim. 
 
 By utilizing the "litee" library plugin authors can achieve a consistent experience
 across separate plugins.
