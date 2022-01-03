@@ -9,6 +9,8 @@ local M = {}
 -- the tree it will belong in.
 --
 -- see function definition for node field documentation.
+-- only the requird fields are present in the constructor
+-- optional fields can be added on to the node by the caller.
 --
 -- @param name (string) a non-unique display name
 -- for the node.
@@ -32,6 +34,16 @@ function M.new_node(name, key, depth)
         key = key,
         -- a list of children nodes with recursive definitions.
         children = {},
+        -- a "Location" object as defined by the LSP which
+        -- associates this node with a source code file and line range.
+        -- see:
+        -- https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#location
+        location = {},
+        -- a list of "Range" objects, relative to the above location object,
+        -- which relate in a domain specific way to this node.
+        -- see:
+        -- https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#range
+        references = {},
         -- whether this node is expanded in its containing
         -- tree.
         expanded = false,

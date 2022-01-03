@@ -36,7 +36,7 @@ function M.highlight(node, set, win)
         return
     end
 
-    local location = lib_util.resolve_location(node)
+    local location = node.location
     if location == nil then
         return
     end
@@ -49,7 +49,7 @@ function M.highlight(node, set, win)
     -- make sure URIs match before setting highlight
     local invoking_buf = vim.api.nvim_win_get_buf(win)
     local cur_file = vim.api.nvim_buf_get_name(invoking_buf)
-    local symbol_path = lib_util.resolve_absolute_file_path(node)
+    local symbol_path = lib_util.absolute_path_from_uri(location.uri)
     if cur_file ~= symbol_path then
         return
     end

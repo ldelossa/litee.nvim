@@ -1,5 +1,4 @@
 local config    = require('litee.lib.config').config
-local lib_util  = require('litee.lib.util')
 local lib_hi    = require('litee.lib.highlights')
 
 local M = {}
@@ -138,8 +137,10 @@ end
 -- jump highlights will be removed.
 --
 -- @param node (table) An element which is being jumped to,
--- if this element has a high level "references" field with
--- more "Location" objects, they will be highlighted as well.
+-- the node must have a high level ".location" field.
+-- if this element has a high level ".references" field with
+-- an array of "Range" objects (specified by LSP), 
+-- they will be highlighted as well.
 function M.set_jump_hl(set, node)
     if not set then
         if M.last_highlighted_buffer ~= nil then
@@ -156,7 +157,7 @@ function M.set_jump_hl(set, node)
     M.last_highlighted_buffer = vim.api.nvim_get_current_buf()
 
     -- set highlght for function itself
-    local location = lib_util.resolve_location(node)
+    local location = node.location
     if location == nil then
         return
     end
