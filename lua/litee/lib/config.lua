@@ -4,7 +4,7 @@ local M = {}
 -- for each module in the litee library.
 --
 -- config for a particular module is keyed
--- by the module's directory.
+-- by the module's directory name.
 M.config = {
     icons = {},
     jumps = {},

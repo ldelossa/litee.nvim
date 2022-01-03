@@ -1,5 +1,14 @@
 local M = {}
 
+-- next moves the cursor in the window of the provided
+-- component_state forward
+--
+-- @param component_state (table) A state table as defined
+-- in lib/state.
+-- @param pre_cb function() A callback which fires just before
+-- the cursor move.
+-- @param post_cb function() A callback which fires just after
+-- the cursor move.
 function M.next(component_state, pre_cb, post_cb)
     if component_state.win == nil
         or not vim.api.nvim_win_is_valid(component_state.win) then
@@ -16,6 +25,15 @@ function M.next(component_state, pre_cb, post_cb)
     if post_cb ~= nil then pre_cb() end
 end
 
+-- next moves the cursor in the window of the provided
+-- component_state backwards
+--
+-- @param component_state (table) A state table as defined
+-- in lib/state.
+-- @param pre_cb function() A callback which fires just before
+-- the cursor move.
+-- @param post_cb function() A callback which fires just after
+-- the cursor move.
 function M.previous(component_state, pre_cb, post_cb)
     if component_state.win == nil
         or not vim.api.nvim_win_is_valid(component_state.win) then

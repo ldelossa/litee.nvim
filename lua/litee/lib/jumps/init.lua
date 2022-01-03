@@ -15,10 +15,11 @@ M.last_highlighted_buffer = nil
 -- if the move fails, assumingly because no other window
 -- exists, a new window will be created.
 --
--- layout : string - the current configured layout.
--- returns
---   bool : whether a new window was created or not
-local function move_or_create(orientation) 
+-- @param orientation (string) The orientation of the
+-- surrouning plugin UI to make jumps intuitive.
+-- This is typically the orientation of the litee.nvim
+-- panel. Valid arguments are "left, right, top, bottom".
+local function move_or_create(orientation)
     local cur_win = vim.api.nvim_get_current_win()
     if orientation == "left" then
         vim.cmd('wincmd l')
@@ -48,6 +49,12 @@ local function move_or_create(orientation)
 end
 
 -- jump_tab will open a new tab then jump to the symbol
+--
+-- @param location (table) A location object as defined by
+-- the LSP.
+-- @param node (table) An element which is being jumped to,
+-- if this element has a high level "references" field with
+-- more "Location" objects, they will be highlighted as well.
 function M.jump_tab(location, node)
     M.set_jump_hl(false, nil)
     vim.cmd("tabedit " .. location.uri)
@@ -57,6 +64,14 @@ function M.jump_tab(location, node)
 end
 
 -- jump_split will open a new split then jump to the symbol
+--
+-- @param split (string) The type of split, valid arguments
+-- are "split" or "vsplit".
+-- @param location (table) A location object as defined by
+-- the LSP.
+-- @param node (table) An element which is being jumped to,
+-- if this element has a high level "references" field with
+-- more "Location" objects, they will be highlighted as well.
 function M.jump_split(split, location, node)
     M.set_jump_hl(false, nil)
     if not move_or_create(config["panel"].orientation) then
@@ -71,12 +86,11 @@ end
 --
 -- a window will be created if it does not exist.
 --
--- location : table - an LSP location object usable by
--- lsp.jump_to_location
---
--- layout : string - calltree's configured layout option
---
--- node : tree.Node - the node being highlighted
+-- @param location (table) A location object as defined by
+-- the LSP.
+-- @param node (table) An element which is being jumped to,
+-- if this element has a high level "references" field with
+-- more "Location" objects, they will be highlighted as well.
 function M.jump_neighbor(location, node)
     M.set_jump_hl(false, nil)
     move_or_create(config["panel"].orientation)
@@ -90,19 +104,16 @@ end
 -- a window is created and seen as the new invoking window
 -- if the original invoking window has been closed.
 --
--- location : table - an LSP location object usable by
--- lsp.jump_to_location
---
--- win_handle : window_handle - the previous invoking window
--- handle.
---
--- node : tree.Node - the node being highlighted
--- returns:
---  wind_handle : window_handle - a valid window_handle
---  for the invoking window.
-function M.jump_invoking(location, win_handle, node)
+-- @param location (table) A location object as defined by
+-- the LSP.
+-- @param win (int) A window handle of the invoking window
+-- to jump to.
+-- @param node (table) An element which is being jumped to,
+-- if this element has a high level "references" field with
+-- more "Location" objects, they will be highlighted as well.
+function M.jump_invoking(location, win, node)
     M.set_jump_hl(false, nil)
-    if not vim.api.nvim_win_is_valid(win_handle) then
+    if not vim.api.nvim_win_is_valid(win) then
         if config["panel"].orientation == "left" then
             vim.cmd("botright vsplit")
         elseif config["panel"].orientation == "right" then
@@ -112,21 +123,23 @@ function M.jump_invoking(location, win_handle, node)
         elseif config["panel"].orientation == "bottom" then
             vim.cmd("topleft split")
         end
-        win_handle = vim.api.nvim_get_current_win()
+        win = vim.api.nvim_get_current_win()
     end
-    vim.api.nvim_set_current_win(win_handle)
+    vim.api.nvim_set_current_win(win)
     vim.lsp.util.jump_to_location(location)
     M.set_jump_hl(true, node)
-    return win_handle
+    return win
 end
 
 -- set_jump_hl will highlight the symbol and
 -- any references to the symbol if set == true.
 --
--- set : bool - if false highlights any previously created
+-- @param set (bool) If false highlights any previously created
 -- jump highlights will be removed.
 --
--- node : tree.Node - the node being highlighted
+-- @param node (table) An element which is being jumped to,
+-- if this element has a high level "references" field with
+-- more "Location" objects, they will be highlighted as well.
 function M.set_jump_hl(set, node)
     if not set then
         if M.last_highlighted_buffer ~= nil then

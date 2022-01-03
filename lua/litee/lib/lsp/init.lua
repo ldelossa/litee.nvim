@@ -3,6 +3,10 @@ local lib_tree_node = require('litee.lib.tree.node')
 
 local M = {}
 
+-- multi_client_request makes an LSP request to multiple clients.
+--
+-- the signature is the same as an individual LSP client request method
+-- but takes a list of clients as the first argument.
 function M.multi_client_request(clients, method, params, handler, bufnr)
     for _, client in ipairs(clients) do
         if not client.supports_method(method) then
@@ -13,6 +17,10 @@ function M.multi_client_request(clients, method, params, handler, bufnr)
     end
 end
 
+-- gather_sybmbols_async_handler is the async handler
+-- for gather_symbols_async method and incrementally
+-- builds a tree of symbols from a workspace symbols
+-- request.
 function M.gather_symbols_async_handler(node, co)
     return function(err, result, _, _)
         if err ~= nil then
@@ -47,6 +55,8 @@ function M.gather_symbols_async_handler(node, co)
     end
 end
 
+-- gather_symbols_async will acquire a list of workspace symbols given
+-- a tree of call_hierarchy items.
 function M.gather_symbols_async(root, children, component_state, callback)
     local co = nil
     local all_nodes = {}
@@ -79,16 +89,13 @@ end
 -- symbol_from_node attempts to extract the workspace
 -- symbol the node represents.
 --
--- clients : table - all active lsp clients
---
--- node : tree.Node - the node which we are resolving
--- a symbol for.
---
--- bufnr : buffer_handle - the calltree buffer handle
---
--- returns:
---  table - the SymbolInformation LSP structure
---  https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#symbolInformation
+-- @param clients (table) All active lsp clients
+-- @param node (table) A node with a "call_hierarhcy_item" 
+-- field we are acquiring workspace symbols for.
+-- @param bufnr (int) An window handle to the buffer
+-- containing the node.
+-- @returns (table) the SymbolInformation LSP structure, see:
+-- https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#symbolInformation
 function M.symbol_from_node(clients, node, bufnr)
     local params = {
         query = node.name,
@@ -118,49 +125,6 @@ function M.symbol_from_node(clients, node, bufnr)
         ::continue::
     end
     return nil
-end
-
-local function keyify_document_symbol(document_symbol)
-    if document_symbol ~= nil then
-        local key = document_symbol.name .. ":" ..
-                    document_symbol.kind .. ":" ..
-                    document_symbol.range.start.line
-        return key
-    end
-end
-
-function M.build_recursive_symbol_tree(depth, document_symbol, parent, prev_depth_table)
-        local node = lib_tree_node.new_node(
-            document_symbol.name,
-            keyify_document_symbol(document_symbol),
-            depth
-        )
-        node.document_symbol = document_symbol
-        if parent == nil then
-            -- if no parent the document_symbol is our synthetic one and carries the uri
-            -- which will be recursively added to all children nodes in the document symboltree.
-            node.uri = document_symbol.uri
-        end
-        -- if we have a previous depth table search it for an old reference of self
-        -- and set expanded state correctly.
-        if prev_depth_table ~= nil and prev_depth_table[depth] ~= nil then
-            for _, child in ipairs(prev_depth_table[depth]) do
-                if child.key == node.key then
-                    node.expanded = child.expanded
-                end
-            end
-        end
-        if parent ~= nil then
-            -- the parent will be carrying the uri for the document symbol tree we are building.
-            node.uri = parent.uri
-            table.insert(parent.children, node)
-        end
-        if document_symbol.children ~= nil then
-            for _, child_document_symbol in ipairs(document_symbol.children) do
-            M.build_recursive_symbol_tree(depth+1, child_document_symbol, node, prev_depth_table)
-            end
-        end
-        return node
 end
 
 return M

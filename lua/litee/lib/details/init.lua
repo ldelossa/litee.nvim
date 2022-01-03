@@ -16,6 +16,14 @@ end
 -- details_popup creates a popup window showing futher details
 -- about a symbol.
 --
+-- @param state (table) The global state as defined by
+-- the lib/state library.
+-- @param node (table) A node passed to `detail_func` representing
+-- the item being described.
+-- @param detail_func function(state, node) A function called with the
+-- provided state and node that returns a list of buffer lines.
+-- The function must evaluate both arguments and return a list of buffer
+-- lines which describe any details about the node the caller defines.
 function M.details_popup(state, node, detail_func)
     local buf = vim.api.nvim_create_buf(false, true)
     if buf == 0 then

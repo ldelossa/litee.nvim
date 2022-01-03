@@ -22,10 +22,11 @@ CONTENTS                                                            *litee-conte
   7     lib/jumps......................................|litee-lib-jumps|  
   8     lib/lsp..........................................|litee-lib-lsp|  
   9     lib/navi........................................|litee-lib-navi|  
-  10    lib/panel......................................|litee-lib-panel|  
-  11    lib/state......................................|litee-lib-state|  
-  12    lib/tree........................................|litee-lib-tree|  
-  13    lib/util........................................|litee-lib-util|  
+  10    lib/notify......................................|litee-lib-navi|  
+  11    lib/panel......................................|litee-lib-panel|  
+  12    lib/state......................................|litee-lib-state|  
+  13    lib/tree........................................|litee-lib-tree|  
+  14   lib/util........................................|litee-lib-util|  
 
 ====================================================================================
 INTRODUCTION                                                           *litee-intro*
@@ -212,6 +213,15 @@ Two callbacks exist to perform actions before and after the cursor move.
 See source file for details.
 
 See `litee-lib-panel` for information on registration.
+
+====================================================================================
+lib/notify                                                          *litee-lib-notify*
+
+The `notify` library produces pop-up notifications at the bottom right corner
+of the editor.
+
+Methods exist to create both persistent notifications and ones with configurable
+timeouts, along with methods to close all notifications.
 
 ====================================================================================
 lib/panel                                                          *litee-lib-panel*

@@ -1,5 +1,7 @@
 local M = {}
 
+-- hls is a map of UI specific highlights used
+-- by the litee.nvim library.
 M.hls = {
     SymbolDetailHL      = "LTSymbolDetail",
     SymbolHL            = "LTSymbol",
@@ -11,6 +13,8 @@ M.hls = {
     SelectFiletreeHL    = "LTSelectFiletree"
 }
 
+-- setup_default_highlights configures a list of default
+-- highlights for the litee.nvim library.
 function M.setup_default_highlights()
     local dark = {
         LTBoolean              = 'hi LTBoolean                guifg=#0087af guibg=None',

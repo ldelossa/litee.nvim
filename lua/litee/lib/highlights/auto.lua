@@ -6,11 +6,23 @@ local M = {}
 -- the current highlight used for auto-highlighting
 M.higlight_ns = vim.api.nvim_create_namespace("calltree-hl")
 
-function M.highlight(node, set, invoking_win)
-    if not vim.api.nvim_win_is_valid(invoking_win) then
+-- highlight will set a highlight on the source code
+-- lines the provided node represents if the invoking_win
+-- holds a buffer to said file.
+--
+-- @param node (table) The element representing a source
+-- code symbol or element. This function requires the node
+-- to have a top level ".location" field.
+-- @param set (bool) If false any highlights which were
+-- previously set are cleared. If true, highlights will
+-- be created.
+-- @param win (int) A window handle to the window
+-- being evaluated for highlighting.
+function M.highlight(node, set, win)
+    if not vim.api.nvim_win_is_valid(win) then
         return
     end
-    local buf = vim.api.nvim_win_get_buf(invoking_win)
+    local buf = vim.api.nvim_win_get_buf(win)
     if not vim.api.nvim_buf_is_valid(buf) then
         return
     end
@@ -35,7 +47,7 @@ function M.highlight(node, set, invoking_win)
     end
 
     -- make sure URIs match before setting highlight
-    local invoking_buf = vim.api.nvim_win_get_buf(invoking_win)
+    local invoking_buf = vim.api.nvim_win_get_buf(win)
     local cur_file = vim.api.nvim_buf_get_name(invoking_buf)
     local symbol_path = lib_util.resolve_absolute_file_path(node)
     if cur_file ~= symbol_path then
@@ -50,7 +62,7 @@ function M.highlight(node, set, invoking_win)
         range["start"].character,
         range["end"].character
     )
-    vim.api.nvim_win_set_cursor(invoking_win, {range["start"].line+1, 0})
+    vim.api.nvim_win_set_cursor(win, {range["start"].line+1, 0})
 end
 
 return M
