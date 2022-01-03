@@ -11,7 +11,7 @@ local M = {}
 --
 -- see lib.tree.register_component for more details.
 function M.set_tree_highlights()
-    local icon_set = nil 
+    local icon_set = nil
     if lib_tree_config.icon_set == nil then
         icon_set = lib_icons["default"]
     else
@@ -50,6 +50,25 @@ function M.inside_component_win()
     end
 
     return in_litee_panel
+end
+
+-- is_component_win takes a tab and a window and returns
+-- true if the provided window is a registered litee panel
+-- window and false if not.
+--
+-- @param tab (int) A tab ID.
+-- @param win (int) A window which resides in tab that
+-- will be evaluated.
+function M.is_component_win(tab, win)
+    local active_components = lib_state.get_active_components(tab)
+    local state = lib_state.get_state(tab)
+    local is_litee_panel = false
+    for _, active_component in ipairs(active_components) do
+        if win == state[active_component].win then
+            is_litee_panel = true
+        end
+    end
+    return is_litee_panel
 end
 
 return M
