@@ -26,7 +26,8 @@ CONTENTS                                                            *litee-conte
   11    lib/panel......................................|litee-lib-panel|  
   12    lib/state......................................|litee-lib-state|  
   13    lib/tree........................................|litee-lib-tree|  
-  14   lib/util........................................|litee-lib-util|  
+  14    lib/util........................................|litee-lib-util|  
+  15    lib/term........................................|litee-lib-term|  
 
 ====================================================================================
 INTRODUCTION                                                           *litee-intro*
@@ -438,3 +439,48 @@ Lib `util` is a dumping ground for various helper functions and utilities.
 
 As `litee.nvim` matures methods in this library will fall into thier own 
 submodules such as "lib.util.window" and "lib.util.buffer", etc...
+
+====================================================================================
+lib/term                                                            *litee-lib-term*
+
+Lib `term` exports a method for opening a Neovim native terminal that is aware
+of `litee.nvim` environment. 
+
+This terminal can be opened on the top or bottom and is controlled by the "term"
+configuration block in the `lib.config` module.
+
+```
+    term = {
+        -- can be  "top" or "bottom"
+        position = "bottom",
+        -- the initial size of the terminal
+        term_size = 15,
+        -- if true maps arrow keys to window resize
+        -- commands.
+        map_resize_keys = true,
+    },
+````
+
+The terminal creates two "terminal" mode key bindings. 
+
+    vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>v", "<cmd>lua require('configs.terminal').terminal_vsplit()<cr>", opts)
+
+    vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>n", "<C-\\><C-n>", opts)
+
+    vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>h", "<C-\\><C-n> <C-w>h", opts)
+    vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>j", "<C-\\><C-n> <C-w>j", opts)
+    vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>k", "<C-\\><C-n> <C-w>k", opts)
+    vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>l", "<C-\\><C-n> <C-w>l", opts)
+
+The first one will open another terminal in a vsplit relative to the terminal you're issuing
+the command in.
+
+The second is a helper that puts your terminal back into normal mode. 
+
+The final set are short-cuts for jumping out of the terminal into other windows.
+
+Be aware, these mappins will only work when your Vim mode is "terminal" which is when
+input is being forwarded directly to the shell. If you are in normal mode (the shell is just
+a buffer of lines at that point) the mappins will revert back to normal mode mappings.
+
+The term can be triggered open with the "LTTerm" user command.

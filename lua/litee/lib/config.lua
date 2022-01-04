@@ -18,6 +18,11 @@ M.config = {
         panel_size = 30,
     },
     state = {},
+    term = {
+        position = "bottom",
+        term_size = 15,
+        map_resize_keys = true,
+    },
     tree = {
         icon_set = "default",
         indent_guides = true
