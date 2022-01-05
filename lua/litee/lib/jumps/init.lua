@@ -1,5 +1,6 @@
 local config    = require('litee.lib.config').config
 local lib_hi    = require('litee.lib.highlights')
+local lib_panel = require('litee.lib.panel')
 
 local M = {}
 
@@ -58,6 +59,9 @@ function M.jump_tab(location, node)
     M.set_jump_hl(false, nil)
     vim.cmd("tabedit " .. location.uri)
     vim.cmd("set nocursorline")
+    -- if the panel currently has a component "popped-out"
+    -- close it before jumping.
+    lib_panel.close_current_popout()
     vim.lsp.util.jump_to_location(location)
     M.set_jump_hl(true, node)
 end
@@ -76,6 +80,9 @@ function M.jump_split(split, location, node)
     if not move_or_create(config["panel"].orientation) then
         vim.cmd(split)
     end
+    -- if the panel currently has a component "popped-out"
+    -- close it before jumping.
+    lib_panel.close_current_popout()
     vim.lsp.util.jump_to_location(location)
     M.set_jump_hl(true, node)
 end
@@ -93,6 +100,9 @@ end
 function M.jump_neighbor(location, node)
     M.set_jump_hl(false, nil)
     move_or_create(config["panel"].orientation)
+    -- if the panel currently has a component "popped-out"
+    -- close it before jumping.
+    lib_panel.close_current_popout()
     vim.lsp.util.jump_to_location(location)
     M.set_jump_hl(true, node)
 end
@@ -125,6 +135,9 @@ function M.jump_invoking(location, win, node)
         win = vim.api.nvim_get_current_win()
     end
     vim.api.nvim_set_current_win(win)
+    -- if the panel currently has a component "popped-out"
+    -- close it before jumping.
+    lib_panel.close_current_popout()
     vim.lsp.util.jump_to_location(location)
     M.set_jump_hl(true, node)
     return win
@@ -139,7 +152,7 @@ end
 -- @param node (table) An element which is being jumped to,
 -- the node must have a high level ".location" field.
 -- if this element has a high level ".references" field with
--- an array of "Range" objects (specified by LSP), 
+-- an array of "Range" objects (specified by LSP),
 -- they will be highlighted as well.
 function M.set_jump_hl(set, node)
     if not set then

@@ -10,10 +10,11 @@ function M.on_resize()
     if state == nil then
         return
     end
-    lib_panel.toggle_panel(state, false, true)
-    -- restore window
-    vim.api.nvim_set_current_win(cur_win)
-    vim.cmd("redraw!")
+    local is_open = lib_panel.is_panel_open(state)
+    if is_open then
+        lib_panel.toggle_panel(state, false, true)
+        vim.api.nvim_set_current_win(cur_win)
+    end
 end
 
 return M
