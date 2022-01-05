@@ -58,6 +58,7 @@ end
 -- useful when resizing events occur to snap the panel back
 -- into the appropriate size.
 function M.toggle_panel(state, keep_open, cycle)
+    local cur_win = vim.api.nvim_get_current_win()
     -- if state is nil then try to grab it from current tab.
     if state == nil then
         local cur_tab = vim.api.nvim_get_current_tabpage()
@@ -121,6 +122,7 @@ function M.toggle_panel(state, keep_open, cycle)
             end
         end
     end
+    vim.api.nvim_set_current_win(cur_win)
 end
 
 -- Similar to toggle_panel but retrieves state from
