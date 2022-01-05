@@ -45,6 +45,20 @@ function M.register_component(component, pre_window_create, post_window_create)
     }
 end
 
+function M.is_panel_open(state)
+    local component_open = false
+    for component, _ in pairs(components) do
+        if
+            state[component] ~= nil
+            and state[component].win ~= nil
+            and vim.api.nvim_win_is_valid(state[component].win)
+        then
+            component_open = true
+        end
+    end
+    return component_open
+end
+
 -- toggle_panel will toggle the panel open and
 -- close in the common case. Arguments can be
 -- used to alter how the toggle takes place.
@@ -57,7 +71,7 @@ end
 -- @param cycle (bool) Close and open the panel in succession,
 -- useful when resizing events occur to snap the panel back
 -- into the appropriate size.
-function M.toggle_panel(state, keep_open, cycle)
+function M.toggle_panel(state, keep_open, cycle, close)
     local cur_win = vim.api.nvim_get_current_win()
     -- if state is nil then try to grab it from current tab.
     if state == nil then
@@ -84,8 +98,9 @@ function M.toggle_panel(state, keep_open, cycle)
     -- components are open, close them, recording its dimensions
     -- for proper restore.
     if
+        not keep_open or
         cycle or
-        not keep_open
+        close
     then
         if component_open then
             for component, _ in pairs(components) do
@@ -245,6 +260,114 @@ function M.open_to(component, state)
     end
     M.toggle_panel(state, true, false)
     vim.api.nvim_set_current_win(state[component].win)
+end
+
+M.popout_panel_state = nil
+
+function M.close_current_popout()
+    if M.popout_panel_state == nil then
+        return
+    end
+    if vim.api.nvim_win_is_valid(M.popout_panel_state.float_win) then
+        vim.api.nvim_win_close(M.popout_panel_state.float_win, true)
+        -- if panel was closed when popout panel was created, close it again,
+        -- otherwise open it again.
+        if M.popout_panel_state.panel_open then
+            -- issue a cycle here to reset any odd spacing from removing the window
+            -- from the panel.
+            M.toggle_panel(M.popout_panel_state.litee_state, false, true, false)
+        end
+    end
+    M.popout_panel_state = nil
+end
+
+-- popout_to will pop the requested component
+-- out of the panel to a popup on the bottom right
+-- hand of the editor and focus the popup window.
+--
+-- if the panel is open when a call to "popout_to" is made,
+-- when the popup is closed via "close_current_popout()",
+-- or a jump is made with lib/jump functions,
+-- then the window will be popped back into the panel.
+--
+-- if the panel was closed when a call to "popup_to" was made
+-- this is remembered, and the panel will remain closed after
+-- "close_current_popup()" is called or a jump is made with
+-- lib/jump functions.
+--
+-- @param component (string) The registered component name
+-- to create the popout for.
+-- @param state (table) The current global state as defined
+-- in lib/state
+-- @param before_focus A callback ran just before switching
+-- focus to the popout floating win. This callback is ran
+-- in the original win when the call to popout_to was made.
+-- @param after_focus Same as "before_focus" but runs inside
+-- the newly created popout floating win.
+function M.popout_to(component, state, before_focus, after_focus)
+    if
+        state == nil
+        or state[component] == nil
+    then
+        return
+    end
+
+    -- close any popup which maybe open.
+    M.close_current_popout()
+
+    -- reset the popout panel state
+    M.popout_panel_state = {}
+
+    -- check panel open state so we can restore it correctly
+    -- on close_current_popout()
+    M.popout_panel_state.panel_open = M.is_panel_open(state)
+
+    --  we need to initially open the panels since we are converting
+    --  the panel windows to popup ones.
+    M.toggle_panel(state, true, false)
+
+    local popup_conf = {
+        relative = "editor",
+        anchor = "NW",
+        width = math.floor(vim.opt.columns:get()/2),
+        height = math.floor(vim.opt.lines:get()/2),
+        focusable = true,
+        zindex = 99,
+        border = "rounded",
+        row = math.floor(vim.opt.lines:get() - (vim.opt.cmdheight:get() + 1)/2),
+        col = math.floor(vim.opt.columns:get()/2),
+    }
+    vim.api.nvim_win_set_config(state[component].win, popup_conf)
+
+    M.popout_panel_state.float_win = state[component].win
+    M.popout_panel_state.litee_state = state
+
+    -- run callback before focusing the callback window
+    if before_focus ~= nil then
+        before_focus()
+    end
+
+    vim.api.nvim_set_current_win(state[component].win)
+
+    -- run callback after focusing the callback window
+    if after_focus ~= nil then
+        after_focus()
+    end
+
+    -- if the panel was originally closed, we can close any
+    -- other windows which toggled opened.
+    if not M.popout_panel_state.panel_open then
+        for comp, _ in pairs(components) do
+            if
+                state[comp] ~= nil and
+                state[comp].win ~= nil and
+                vim.api.nvim_win_is_valid(state[comp].win) and
+                comp ~= component
+            then
+                vim.api.nvim_win_close(state[comp].win, true)
+            end
+        end
+    end
 end
 
 -- setup_window evaluates the current layout and the desired layout
