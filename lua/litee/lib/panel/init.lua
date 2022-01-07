@@ -308,6 +308,7 @@ function M.popout_to(component, state, before_focus, after_focus)
     if
         state == nil
         or state[component] == nil
+        or components[component] == nil
     then
         return
     end
@@ -322,10 +323,6 @@ function M.popout_to(component, state, before_focus, after_focus)
     -- on close_current_popout()
     M.popout_panel_state.panel_open = M.is_panel_open(state)
 
-    --  we need to initially open the panels since we are converting
-    --  the panel windows to popup ones.
-    M.toggle_panel(state, true, false)
-
     local popup_conf = {
         relative = "editor",
         anchor = "NW",
@@ -337,36 +334,42 @@ function M.popout_to(component, state, before_focus, after_focus)
         row = math.floor(vim.opt.lines:get() - (vim.opt.cmdheight:get() + 1)/2),
         col = math.floor(vim.opt.columns:get()/2),
     }
-    vim.api.nvim_win_set_config(state[component].win, popup_conf)
 
-    M.popout_panel_state.float_win = state[component].win
-    M.popout_panel_state.litee_state = state
+    if M.popout_panel_state.panel_open then
+        -- if panel is open, popout the current panel window
+        vim.api.nvim_win_set_config(state[component].win, popup_conf)
+        M.popout_panel_state.float_win = state[component].win
+        M.popout_panel_state.litee_state = state
+    else
+        -- if the panel is closed, manually create the floating window.
+        components[component].pre(state)
+        M.popout_panel_state.float_win = vim.api.nvim_open_win(state[component].buf, false, popup_conf)
+        state[component].win = M.popout_panel_state.float_win
+        M._set_win_opts(M.popout_panel_state.float_win)
+        M.popout_panel_state.litee_state = state
+        vim.api.nvim_win_set_buf(M.popout_panel_state.float_win, state[component].buf)
+    end
 
     -- run callback before focusing the callback window
     if before_focus ~= nil then
         before_focus()
     end
 
-    vim.api.nvim_set_current_win(state[component].win)
+    -- set focus into float
+    vim.api.nvim_set_current_win(M.popout_panel_state.float_win)
+
+    -- if we created a floating win, we need to run post callbacks
+    -- when inside of it.
+    if
+        not M.popout_panel_state.panel_open
+        and components[component].post ~= nil
+    then
+        components[component].post(state)
+    end
 
     -- run callback after focusing the callback window
     if after_focus ~= nil then
         after_focus()
-    end
-
-    -- if the panel was originally closed, we can close any
-    -- other windows which toggled opened.
-    if not M.popout_panel_state.panel_open then
-        for comp, _ in pairs(components) do
-            if
-                state[comp] ~= nil and
-                state[comp].win ~= nil and
-                vim.api.nvim_win_is_valid(state[comp].win) and
-                comp ~= component
-            then
-                vim.api.nvim_win_close(state[comp].win, true)
-            end
-        end
     end
 end
 
@@ -437,11 +440,7 @@ function M._setup_window(current_layout, desired_layout, state)
         cur_win = vim.api.nvim_get_current_win()
         state[component].win = cur_win
         vim.api.nvim_win_set_buf(state[component].win, buffer_to_set)
-        vim.api.nvim_win_set_option(state[component].win, 'number', false)
-        vim.api.nvim_win_set_option(state[component].win, 'cursorline', true)
-        vim.api.nvim_win_set_option(state[component].win, 'wrap', false)
-        vim.api.nvim_win_set_option(state[component].win, 'winfixwidth', true)
-        vim.api.nvim_win_set_option(state[component].win, 'winfixheight', true)
+        M._set_win_opts(state[component].win)
         if
             dimensions_to_set ~= nil and
             dimensions_to_set.width ~= nil and
@@ -464,6 +463,17 @@ function M._setup_window(current_layout, desired_layout, state)
             components[component].post(state)
         end
     end
+end
+
+-- _set_win_opts sets the manditory window options for a
+-- panel window.
+-- @param win (int) Window ID of panel window
+function M._set_win_opts(win)
+    vim.api.nvim_win_set_option(win, 'number', false)
+    vim.api.nvim_win_set_option(win, 'cursorline', true)
+    vim.api.nvim_win_set_option(win, 'wrap', false)
+    vim.api.nvim_win_set_option(win, 'winfixwidth', true)
+    vim.api.nvim_win_set_option(win, 'winfixheight', true)
 end
 
 return M
