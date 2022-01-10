@@ -335,13 +335,17 @@ function M.popout_to(component, state, before_focus, after_focus)
         col = math.floor(vim.opt.columns:get()/2),
     }
 
-    if M.popout_panel_state.panel_open then
-        -- if panel is open, popout the current panel window
+    if  M.popout_panel_state.panel_open
+        and state[component].win ~= nil
+        and vim.api.nvim_win_is_valid(state[component].win)
+    then
+        -- if panel is open and win is valid make it a float.
         vim.api.nvim_win_set_config(state[component].win, popup_conf)
         M.popout_panel_state.float_win = state[component].win
         M.popout_panel_state.litee_state = state
     else
-        -- if the panel is closed, manually create the floating window.
+        -- if the panel is closed or win is not valid 
+        -- manually create the floating window.
         components[component].pre(state)
         M.popout_panel_state.float_win = vim.api.nvim_open_win(state[component].buf, false, popup_conf)
         state[component].win = M.popout_panel_state.float_win
@@ -360,12 +364,7 @@ function M.popout_to(component, state, before_focus, after_focus)
 
     -- if we created a floating win, we need to run post callbacks
     -- when inside of it.
-    if
-        not M.popout_panel_state.panel_open
-        and components[component].post ~= nil
-    then
-        components[component].post(state)
-    end
+    components[component].post(state)
 
     -- run callback after focusing the callback window
     if after_focus ~= nil then
