@@ -4,6 +4,7 @@ local M = {}
 -- https://github.com/onsails/lspkind-nvim/blob/master/lua/lspkind/init.lua
 M.nerd = {
     Array           = "",
+    Bookmark        = "",
     Boolean         = "",
     Class           = "ﴯ",
     Collapsed       = "",
@@ -46,6 +47,7 @@ M.nerd = {
 
 M.codicons = {
     Array           = "",
+    Bookmark        = "",
     Boolean         = "",
     Class           = "",
     Collapsed       = "",
@@ -87,6 +89,7 @@ M.codicons = {
 }
 
 M.default = {
+    Bookmark        = "🔖",
     Collapsed       = "▶",
     Expanded        = "▼",
     IndentGuide     = "⎸",
