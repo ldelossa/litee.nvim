@@ -156,7 +156,10 @@ end
 -- they will be highlighted as well.
 function M.set_jump_hl(set, node)
     if not set then
-        if M.last_highlighted_buffer ~= nil then
+        if 
+            M.last_highlighted_buffer ~= nil 
+            and vim.api.nvim_buf_is_valid(M.last_highlighted_buffer)
+        then
             vim.api.nvim_buf_clear_namespace(
                 M.last_highlighted_buffer,
                 M.jump_higlight_ns,

@@ -68,28 +68,32 @@ function M.basename(uri)
 end
 
 function M.parent_dir(path)
-    if M.is_dir(path) then
         local base = M.basename(path)
         local diff = vim.fn.strlen(path) - (vim.fn.strlen(base)+1)
         local res = vim.fn.strpart(path, 0, diff)
-        return res
-    elseif M.file_exists(path) then
-        local base = M.basename(path)
-        local diff = vim.fn.strlen(path) - vim.fn.strlen(base)
-        local dir  = vim.fn.strpart(path, 0, diff)
+        return res .. "/"
+end
 
-        base = M.basename(dir)
-        -- +1 to base because it returns the file's parent owning directory
-        -- without a slash
-        diff = vim.fn.strlen(dir) - (vim.fn.strlen(base)+1)
-        return vim.fn.strpart(path, 0, diff)
-    else
-        return nil
+function M.path_prefix_match(prefix, path)
+    local idx = vim.fn.stridx(path, prefix)
+    if idx == -1 then
+        return false
     end
+    return true
+end
+
+function M.swap_path_prefix(path, old_prefix, new_prefix)
+    local new_path = vim.fn.substitute(path, old_prefix, new_prefix, "")
+    return new_path
 end
 
 function M.strip_file_prefix(path)
     return vim.fn.substitute(path, "file://", "", "")
+end
+
+function M.add_file_prefix(path)
+    vim.fn.substitute(path, "file://", "", "")
+    return string.format("%s%s", "file://", path) 
 end
 
 return M
