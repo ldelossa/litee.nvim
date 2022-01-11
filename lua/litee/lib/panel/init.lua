@@ -329,7 +329,7 @@ function M.popout_to(component, state, before_focus, after_focus)
         width = math.floor(vim.opt.columns:get()/2),
         height = math.floor(vim.opt.lines:get()/2),
         focusable = true,
-        zindex = 99,
+        zindex = 98,
         border = "rounded",
         row = math.floor(vim.opt.lines:get() - (vim.opt.cmdheight:get() + 1)/2),
         col = math.floor(vim.opt.columns:get()/2),
