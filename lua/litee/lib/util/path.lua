@@ -96,4 +96,11 @@ function M.add_file_prefix(path)
     return string.format("%s%s", "file://", path) 
 end
 
+function M.strip_trailing_slash(path)
+    if vim.fn.strridx(path, "/") == (vim.fn.strlen(path)-1) then
+        return vim.fn.strpart(path, 0, vim.fn.strlen(path)-1)
+    end
+    return path
+end
+
 return M
