@@ -90,7 +90,7 @@ end
 -- symbol the node represents.
 --
 -- @param clients (table) All active lsp clients
--- @param node (table) A node with a "call_hierarhcy_item" 
+-- @param node (table) A node with a "call_hierarhcy_item"
 -- field we are acquiring workspace symbols for.
 -- @param bufnr (int) An window handle to the buffer
 -- containing the node.
@@ -125,6 +125,41 @@ function M.symbol_from_node(clients, node, bufnr)
         ::continue::
     end
     return nil
+end
+
+-- conv_symbolinfo_to_docsymbol will convert a SymbolInformation
+-- model to a DocumentSymbol mode.
+--
+-- this is handy when working with documentSymbol requests and
+-- users do not want to handle two data models in their code.
+--
+-- @param symbolinfo (table) A SymbolInformation structure as
+-- defined by the LSP specification.
+-- @returns (table) A DocumentSymbol structure as defined by
+-- the LSP specification.
+function M.conv_symbolinfo_to_docsymbol(symbolinfo)
+    local document_symbol = {}
+
+    -- these are mandatory fields per the LSP spec,
+    -- return nil if they arent there.
+    if
+        symbolinfo.name == nil or
+        symbolinfo.kind == nil or
+        symbolinfo.location == nil or
+        symbolinfo.location.range == nil
+    then
+        return nil
+    end
+
+    document_symbol.name    = symbolinfo.name
+    document_symbol.kind    = symbolinfo.kind
+    document_symbol.range   = symbolinfo.location.range
+    document_symbol.children = {}
+    document_symbol.details = ""
+    document_symbol.tags = {}
+    document_symbol.deprecated = false
+    document_symbol.selectionRange = symbolinfo.location.range
+    return document_symbol
 end
 
 return M
