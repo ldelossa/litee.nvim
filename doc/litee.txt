@@ -218,11 +218,13 @@ See `litee-lib-panel` for information on registration.
 ====================================================================================
 lib/notify                                                          *litee-lib-notify*
 
-The `notify` library produces pop-up notifications at the bottom right corner
+The `notify` library produces pop-up notifications at the top right corner
 of the editor.
 
 Methods exist to create both persistent notifications and ones with configurable
 timeouts, along with methods to close all notifications.
+
+Currently, notifications stack on top of each other so only one is visible at a time.
 
 ====================================================================================
 lib/panel                                                          *litee-lib-panel*
@@ -252,6 +254,19 @@ associated with displaying its window, such as setting up autocommands or buffer
 The `post_window_create` method is optional and when called Neovim is inside the 
 newly created window within the panel. The plugin is free to perform any in-window
 manipulations such as setting syntax highlights or window options. 
+
+The panel also supports a feature dubbed "PopOut" panels. 
+
+"PopOut" panels are floating windows which act as if you're "popping out" the 
+panel window to a float, and will "pop" back into the panel when closed. 
+This is convenient for "zooming" into panel windows. 
+
+Additionally, the panel need not be visible for a "PopOut" panel to be displayed.
+Meaning, users of `litee.nvim` do not necessary need to interface with the panel, 
+and can use only "PopOut" panels if they prefer, tho the plugin has to facilitate 
+this by calling the right `lib/panel` api functions.
+
+For more info on "PopOut" panels see the "popout_to" function in `litee.lib.panel`.
 
 The rest of the API footprint exists to display/hide/jump into the panel. 
 See the source code for full details.
@@ -437,8 +452,11 @@ lib/util                                                            *litee-lib-u
 
 Lib `util` is a dumping ground for various helper functions and utilities. 
 
-As `litee.nvim` matures methods in this library will fall into thier own 
-submodules such as "lib.util.window" and "lib.util.buffer", etc...
+Lib `util` exports several helpful sub-libraries. 
+
+`lib.util.window` For helper functions around Neovim windows
+`lib.util.buffer` For helper functions around Neovim buffers
+`lib.util.path`   For helper functions dealing with file system paths (only linux right now.)
 
 ====================================================================================
 lib/term                                                            *litee-lib-term*

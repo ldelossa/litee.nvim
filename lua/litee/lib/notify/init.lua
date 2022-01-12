@@ -65,7 +65,7 @@ function M.notify_popup(text, sev)
         zindex = 99,
         style = "minimal",
         border = "rounded",
-        row = vim.opt.lines:get() - (vim.opt.cmdheight:get() + 1),
+        row = 0,
         col = vim.opt.columns:get(),
     }
     local float_win = vim.api.nvim_open_win(buf, false, popup_conf)
