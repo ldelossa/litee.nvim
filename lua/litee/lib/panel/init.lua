@@ -356,7 +356,7 @@ function M.popout_to(component, state, before_focus, after_focus)
 
     -- run callback before focusing the callback window
     if before_focus ~= nil then
-        before_focus()
+        before_focus(true)
     end
 
     -- set focus into float
