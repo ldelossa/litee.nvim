@@ -330,4 +330,14 @@ function M.marshal_line(linenr, handle)
     return lib_marshal.marshal_line(linenr, handle)
 end
 
+function M.flatten_depth_table(dtp)
+    local nodes = {}
+    for _, depth in pairs(dtp) do
+        for _, node in ipairs(depth) do
+            table.insert(nodes, node)
+        end
+    end
+    return nodes
+end
+
 return M
