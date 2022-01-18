@@ -59,7 +59,7 @@ function M.terminal()
     terminal_win_setup(vim.api.nvim_get_current_win())
 
     local cur_win = vim.api.nvim_get_current_win()
-    vim.api.nvim_win_set_buf(vim.api.nvim_get_current_win, buf)
+    vim.api.nvim_win_set_buf(cur_win, buf)
     vim.fn.termopen(shell)
     lib_panel.toggle_panel_ctx(true, true)
     vim.api.nvim_set_current_win(cur_win)
@@ -77,8 +77,9 @@ function M.terminal_vsplit()
     end
     terminal_buf_setup(buf)
     vim.cmd('vsplit')
-    terminal_win_setup(vim.api.nvim_get_current_win())
-    vim.api.nvim_win_set_buf(vim.api.nvim_get_current_win, buf)
+    local cur_win = vim.api.nvim_get_current_win()
+    terminal_win_setup(cur_win)
+    vim.api.nvim_win_set_buf(cur_win, buf)
     vim.fn.termopen(shell)
 end
 return M
