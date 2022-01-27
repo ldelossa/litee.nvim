@@ -1,4 +1,5 @@
 local lib_panel = require('litee.lib.panel')
+local lib_state = require('litee.lib.state')
 local lib_util_buf = require('litee.lib.util.buffer')
 local config = require('litee.lib.config').config["term"]
 
@@ -59,9 +60,15 @@ function M.terminal()
     terminal_win_setup(vim.api.nvim_get_current_win())
 
     local cur_win = vim.api.nvim_get_current_win()
+    local cur_tab = vim.api.nvim_get_current_tabpage()
+    local state = lib_state.get_state(cur_tab)
     vim.api.nvim_win_set_buf(cur_win, buf)
     vim.fn.termopen(shell)
-    lib_panel.toggle_panel_ctx(true, true)
+    if state ~= nil then
+        if lib_panel.is_panel_open(state) then
+            lib_panel.toggle_panel_ctx(true, true)
+        end
+    end
     vim.api.nvim_set_current_win(cur_win)
 end
 

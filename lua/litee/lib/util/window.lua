@@ -23,6 +23,9 @@ function M.set_tree_highlights()
     end
     -- set configured symbol highlight
     vim.cmd(string.format("syn match %s /%s/", lib_hi.hls.SymbolHL, [[\w]]))
+    vim.cmd(string.format("syn match %s /%s/", lib_hi.hls.SymbolHL, [[\.]]))
+    vim.cmd(string.format("syn match %s /%s/", lib_hi.hls.SymbolHL, [[\-]]))
+    vim.cmd(string.format("syn match %s /%s/", lib_hi.hls.SymbolHL, [[\\_]]))
     -- set configured expanded indicator highlights
     vim.cmd(string.format("syn match %s /%s/", lib_hi.hls.ExpandedGuideHL, icon_set["Expanded"]))
     vim.cmd(string.format("syn match %s /%s/", lib_hi.hls.CollapsedGuideHL, icon_set["Collapsed"]))
