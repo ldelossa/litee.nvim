@@ -344,7 +344,7 @@ function M.popout_to(component, state, before_focus, after_focus)
         M.popout_panel_state.float_win = state[component].win
         M.popout_panel_state.litee_state = state
     else
-        -- if the panel is closed or win is not valid 
+        -- if the panel is closed or win is not valid
         -- manually create the floating window.
         components[component].pre(state)
         M.popout_panel_state.float_win = vim.api.nvim_open_win(state[component].buf, false, popup_conf)
@@ -473,6 +473,7 @@ function M._set_win_opts(win)
     vim.api.nvim_win_set_option(win, 'wrap', false)
     vim.api.nvim_win_set_option(win, 'winfixwidth', true)
     vim.api.nvim_win_set_option(win, 'winfixheight', true)
+    vim.api.nvim_win_set_option(win, 'winhighlight', 'Normal:NormalSB')
 end
 
 return M

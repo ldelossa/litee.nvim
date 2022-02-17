@@ -10,7 +10,8 @@ M.hls = {
     IndentGuideHL       = "LTIndentGuide",
     ExpandedGuideHL     = "LTExpandedGuide",
     CollapsedGuideHL    = "LTCollapsedGuide",
-    SelectFiletreeHL    = "LTSelectFiletree"
+    SelectFiletreeHL    = "LTSelectFiletree",
+    NormalSB            = "LTNormalSB"
 }
 
 -- setup_default_highlights configures a list of default
