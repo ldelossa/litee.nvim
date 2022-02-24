@@ -105,6 +105,14 @@ function M.jump_neighbor(location, node)
     lib_panel.close_current_popout()
     vim.lsp.util.jump_to_location(location)
     M.set_jump_hl(true, node)
+
+    -- cleanup any [No Name] buffers if they exist
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        local name = vim.api.nvim_buf_get_name(buf)
+        if name == "" then
+            vim.api.nvim_buf_delete(buf, {force=true})
+        end
+    end
 end
 
 -- jump_invoking will jump to the symbol using the
@@ -135,11 +143,21 @@ function M.jump_invoking(location, win, node)
         win = vim.api.nvim_get_current_win()
     end
     vim.api.nvim_set_current_win(win)
+
     -- if the panel currently has a component "popped-out"
     -- close it before jumping.
     lib_panel.close_current_popout()
     vim.lsp.util.jump_to_location(location)
     M.set_jump_hl(true, node)
+
+    -- cleanup any [No Name] buffers if they exist
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        local name = vim.api.nvim_buf_get_name(buf)
+        if name == "" then
+            vim.api.nvim_buf_delete(buf, {force=true})
+        end
+    end
+
     return win
 end
 
@@ -156,8 +174,8 @@ end
 -- they will be highlighted as well.
 function M.set_jump_hl(set, node)
     if not set then
-        if 
-            M.last_highlighted_buffer ~= nil 
+        if
+            M.last_highlighted_buffer ~= nil
             and vim.api.nvim_buf_is_valid(M.last_highlighted_buffer)
         then
             vim.api.nvim_buf_clear_namespace(
