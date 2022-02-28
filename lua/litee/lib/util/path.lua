@@ -93,7 +93,7 @@ end
 
 function M.add_file_prefix(path)
     vim.fn.substitute(path, "file://", "", "")
-    return string.format("%s%s", "file://", path) 
+    return string.format("%s%s", "file://", path)
 end
 
 function M.strip_trailing_slash(path)
@@ -101,6 +101,16 @@ function M.strip_trailing_slash(path)
         return vim.fn.strpart(path, 0, vim.fn.strlen(path)-1)
     end
     return path
+end
+
+-- strip the prefix from the path, usually to make a
+-- relative path, and ensure leading '/'
+function M.strip_path_prefix(prefix, path)
+    local new = vim.fn.substitute(path, prefix, "", "")
+    if vim.fn.strridx(new, '/') == -1 then
+        new = '/' .. new
+    end
+    return new
 end
 
 return M
