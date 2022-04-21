@@ -101,6 +101,10 @@ function M.marshal_node(node, marshal_func, no_guide_leaf)
         end
     end
 
+    if icon == nil then
+        icon = " "
+    end
+
     -- ▶ Func1
     str = str .. expand_guide .. icon_set["Space"]
     str = str .. icon .. icon_set["Space"]  .. icon_set["Space"] .. name
