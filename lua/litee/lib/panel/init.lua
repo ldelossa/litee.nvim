@@ -2,6 +2,7 @@ local lib_state = require('litee.lib.state')
 local config = require('litee.lib.config').config
 local lib_notify = require('litee.lib.notify')
 local lib_util = require('litee.lib.util')
+local lib_util_win = require('litee.lib.util.window')
 
 local M = {}
 

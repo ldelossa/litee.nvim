@@ -44,6 +44,26 @@ M.nerd = {
     Unit            = "塞",
     Value           = "",
     Variable        = "",
+
+    Info            = '',
+    Pass            = '',
+    PassFilled      = '',
+    Account         = '',
+    Check           = '',
+    CheckAll        = '',
+    CircleFilled    = '',
+    Circle          = '',
+    CircleClash     = '',
+    GitCompare      = '',
+    GitBranch       = '',
+    GitPullRequest  = '',
+    CircleStop      = '',
+    DiffAdded       = '',
+    CirclePause     = '',
+    GitCommit       = 'ﰖ',
+
+    Comment         = '',
+    MultiComment    = ''
 }
 
 M.codicons = {
@@ -88,6 +108,26 @@ M.codicons = {
     Unit            = "",
     Value           = "",
     Variable        = "",
+
+    Info            = '',
+    Pass            = '',
+    PassFilled      = '',
+    Account         = '',
+    Check           = '',
+    CheckAll        = '',
+    CircleFilled    = '',
+    Circle          = '',
+    CircleClash     = '',
+    GitBranch       = '',
+    GitCompare      = '',
+    GitPullRequest  = '',
+    CircleStop      = '',
+    CirclePause     = '',
+    DiffAdded       = '',
+    GitCommit       = '',
+
+    Comment         = '',
+    MultiComment    = ''
 }
 
 M.default = {

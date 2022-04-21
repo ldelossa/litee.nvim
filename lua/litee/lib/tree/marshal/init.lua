@@ -160,7 +160,7 @@ function M._marshal_tree(buf, lines, node, tree, virtual_text_lines, marshal_fun
 
     -- if the node has a location we can track where it
     -- exists in the source code file.
-    if node.location ~= nil then
+    if node.location ~= nil and not vim.tbl_isempty(node.location) then
         local start_line = node.location["range"]["start"].line
         M.source_line_map[tree][start_line+1] = {
             uri = lib_util.absolute_path_from_uri(node.location.uri),
