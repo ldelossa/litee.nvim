@@ -64,7 +64,8 @@ M.nerd = {
     GitRepo         = '',
 
     Comment         = '',
-    MultiComment    = ''
+    MultiComment    = '',
+    Pencil          = ''
 }
 
 M.codicons = {
@@ -129,7 +130,10 @@ M.codicons = {
     GitRepo         = '',
 
     Comment         = '',
-    MultiComment    = ''
+    MultiComment    = '',
+
+    Calendar        = '',
+    Pencil          = ''
 }
 
 M.default = {
@@ -195,7 +199,10 @@ M.icon_hls = {
     GitCommit       = 'LTGitCommit',
 
     Comment         = 'LTComment',
-    MultiComment    = 'LTMultiComment'
+    MultiComment    = 'LTMultiComment',
+
+    Calendar        = 'LTDefault',
+    Pencil          = 'LTDefault'
 }
 
 return M
