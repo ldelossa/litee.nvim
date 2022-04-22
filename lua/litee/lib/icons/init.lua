@@ -53,7 +53,7 @@ M.nerd = {
     CheckAll        = '',
     CircleFilled    = '',
     Circle          = '',
-    CircleClash     = '',
+    CircleSlash     = '',
     GitCompare      = '',
     GitBranch       = '',
     GitPullRequest  = '',
@@ -61,6 +61,7 @@ M.nerd = {
     DiffAdded       = '',
     CirclePause     = '',
     GitCommit       = 'ﰖ',
+    GitRepo         = '',
 
     Comment         = '',
     MultiComment    = ''
@@ -117,7 +118,7 @@ M.codicons = {
     CheckAll        = '',
     CircleFilled    = '',
     Circle          = '',
-    CircleClash     = '',
+    CircleSlash     = '',
     GitBranch       = '',
     GitCompare      = '',
     GitPullRequest  = '',
@@ -125,6 +126,7 @@ M.codicons = {
     CirclePause     = '',
     DiffAdded       = '',
     GitCommit       = '',
+    GitRepo         = '',
 
     Comment         = '',
     MultiComment    = ''
@@ -173,7 +175,27 @@ M.icon_hls = {
     TypeParameter   = "LTParameter",
     Unit            = "LTType",
     Value           = "LTType",
-    Variable        = "LTConstant"
+    Variable        = "LTConstant",
+
+    Info            = 'LTInfo',
+    Pass            = 'LTSuccess',
+    PassFilled      = 'LTSuccess',
+    Account         = 'LTAccount',
+    Check           = 'LTSuccess',
+    CheckAll        = 'LTSuccess',
+    CircleFilled    = 'LTDefault',
+    Circle          = 'LTDefault',
+    CircleSlash     = 'LTFailure',
+    GitCompare      = 'LTGitCompare',
+    GitBranch       = 'LTGitBranch',
+    GitPullRequest  = 'LTGitPullRequest',
+    CircleStop      = 'LTFailure',
+    DiffAdded       = 'LTDiffAdded',
+    CirclePause     = 'LTWarning',
+    GitCommit       = 'LTGitCommit',
+
+    Comment         = 'LTComment',
+    MultiComment    = 'LTMultiComment'
 }
 
 return M
