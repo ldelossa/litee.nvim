@@ -124,10 +124,14 @@ M.codicons = {
     GitCompare      = '',
     GitPullRequest  = '',
     CircleStop      = '',
-    CirclePause     = '',
+    CirclePause     = '',
     DiffAdded       = '',
     GitCommit       = '',
     GitRepo         = '',
+    History         = '',
+    Sync            = '',
+    CommentExclaim  = '',
+    RequestChanges  = '',
 
     Comment         = '',
     MultiComment    = '',
@@ -202,7 +206,12 @@ M.icon_hls = {
     MultiComment    = 'LTMultiComment',
 
     Calendar        = 'LTDefault',
-    Pencil          = 'LTDefault'
+    Pencil          = 'LTWarning',
+
+    History         = 'LTWarning',
+    Sync            = 'LTWarning',
+    CommentExclaim  = 'LRWarning',
+    RequestChanges  = 'LTFailure',
 }
 
 return M
