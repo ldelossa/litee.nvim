@@ -140,7 +140,7 @@ M.codicons = {
 
 M.default = {
     Account         = "🗣",
-    Array           = "[]",
+    Array           = "\\[\\]",
     Bookmark        = "🏷",
     Boolean         = "∧",
     Calendar        = '🗓',
@@ -167,7 +167,7 @@ M.default = {
     File            = "🗀",
     Folder          = "🗁",
     Function        = "ƒ",
-    GitBranch       = '',
+    GitBranch       = ' ',
     GitCommit       = '⫰',
     GitCompare      = '⤄',
     GitIssue        = '⊙',
