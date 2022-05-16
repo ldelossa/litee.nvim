@@ -7,6 +7,7 @@ M.nerd = {
     Array           = "",
     Bookmark        = "",
     Boolean         = "",
+    Calendar        = '',
     Check           = '',
     CheckAll        = '',
     Circle          = '',
