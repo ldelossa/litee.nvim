@@ -71,7 +71,11 @@ function M.parent_dir(path)
         local base = M.basename(path)
         local diff = vim.fn.strlen(path) - (vim.fn.strlen(base)+1)
         local res = vim.fn.strpart(path, 0, diff)
-        return res .. "/"
+        if vim.fn.strridx(path, "/") == #path-1 then
+            return res
+        else
+            return res .. "/"
+        end
 end
 
 function M.path_prefix_match(prefix, path)
