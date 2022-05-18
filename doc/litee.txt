@@ -114,6 +114,26 @@ in litee/lib/init.lua, for example:
 The above overrides the default configuration options for the icon_set used in the
 tree sub-module and changes the panel sub-module's orientation and size.
 
+Example for custom icons:
+>
+    -- Provide a custom icon_set which will be merged with the default icon_set.
+    require('litee.lib').setup{
+        tree = { icon_set_custom = { Struct = "s" } }
+    }
+
+    -- You can even copy, paste the icon_set in `lib/icons/init.lua`, then
+    -- modify it and pass it to `icon_set_custom`.
+    icon_set_custom = { ... }
+    require('litee.lib').setup{
+        tree = { icon_set_custom = icon_set_custom }
+    }
+
+    -- Provide a custom icon_set which will be merged with the specified icon_set
+    -- from `lib/icons/init.lua` by name.
+    require('litee.lib').setup{
+        tree = { icon_set_custom = { Struct = "s" }, icon_set = "codicons" }
+    }
+<
 ====================================================================================
 lib/details                                                      *litee-lib-details*
 
