@@ -1,7 +1,7 @@
 local lib_util = require('litee.lib.util')
-local lib_icons = require('litee.lib.icons')
 local lib_hi    = require('litee.lib.highlights')
 local lib_tree_config = require('litee.lib.config').config["tree"]
+local icon_set = require('litee.lib').icon_set
 
 local M = {}
 
@@ -59,13 +59,6 @@ M.source_line_map = {}
 -- of the node. This virtual text will be placed EOL
 -- in the buffer line.
 function M.marshal_node(node, marshal_func, no_guide_leaf)
-    local icon_set = nil
-    if lib_tree_config.icon_set == nil then
-        icon_set = lib_icons["default"]
-    else
-        icon_set = lib_icons[lib_tree_config.icon_set]
-    end
-
     local expand_guide = ""
     if node.expanded then
         expand_guide = icon_set["Expanded"]

@@ -25,6 +25,7 @@ M.config = {
     },
     tree = {
         icon_set = "default",
+        icon_set_custom = nil,
         indent_guides = true
     }
 }
