@@ -76,7 +76,7 @@ Each lib will be covered in detail in their respective sections.
 The library itself has a config object which configures each sub-module.
 
 The configuration is structured like so (with defaults).
-
+>
     M.config = {
         icons = {},
         jumps = {},
@@ -95,12 +95,12 @@ The configuration is structured like so (with defaults).
             indent_guides = true
         }
     }
-
+<
 Each key of the configuration corresponds to a library sub-module.
 
 You can apply configuration to litee/lib by way of it's setup method found
 in litee/lib/init.lua, for example:
-
+>
     require('litee.lib').setup({
         tree = {
             icon_set = "codicons"
@@ -110,7 +110,7 @@ in litee/lib/init.lua, for example:
             panel_size  = 15
         }
     })
-
+<
 The above overrides the default configuration options for the icon_set used in the
 tree sub-module and changes the panel sub-module's orientation and size.
 
@@ -123,7 +123,7 @@ Example for custom icons:
 
     -- You can even copy, paste the icon_set in `lib/icons/init.lua`, then
     -- modify it and pass it to `icon_set_custom`.
-    icon_set_custom = { ... }
+    local icon_set_custom = { ... }
     require('litee.lib').setup{
         tree = { icon_set_custom = icon_set_custom }
     }
@@ -160,7 +160,7 @@ methods for setting up the default highlights, and a sub-module for the
 auto-highlights features.
 
 The following highlights are exported and can be defined for theme overriding.
-
+>
     M.hls = {
         SymbolDetailHL      = "LTSymbolDetail",
         SymbolHL            = "LTSymbol",
@@ -171,7 +171,7 @@ The following highlights are exported and can be defined for theme overriding.
         CollapsedGuideHL    = "LTCollapsedGuide",
         SelectFiletreeHL    = "LTSelectFiletree"
     }
-
+<
 The `auto` module provides a facility for highlighting areas of a source file
 given a node and a window. 
 
@@ -310,30 +310,30 @@ A component should only mutate its own state, unless it positively knows what
 its doing. 
 
 The state structure looks as follows:
-
-{
-    "componentA" = {
-        buf = 0,
-        win = 0,
-        tab = 0,
-        tree = 0,
-        win_dimensions = {0, 0},
-        invoking_win = 0,
-        active_lsp_clients = {list of lsp clients},
-        (component specific fields)...
-    },
-    "componentB" = {
-        buf = 0,
-        win = 0,
-        tab = 0,
-        tree = 0,
-        win_dimensions = {0, 0},
-        invoking_win = 0,
-        active_lsp_clients = {list of lsp clients},
-        (component specific fields)...
-    }
-}
-
+>
+  {
+      "componentA" = {
+          buf = 0,
+          win = 0,
+          tab = 0,
+          tree = 0,
+          win_dimensions = {0, 0},
+          invoking_win = 0,
+          active_lsp_clients = {list of lsp clients},
+          (component specific fields)...
+      },
+      "componentB" = {
+          buf = 0,
+          win = 0,
+          tab = 0,
+          tree = 0,
+          win_dimensions = {0, 0},
+          invoking_win = 0,
+          active_lsp_clients = {list of lsp clients},
+          (component specific fields)...
+      }
+  }
+<
 When functions expect the full state the function parameter is typically "state" and when
 functions expect a component's stat (state["componentA"] for example) the parameter
 is typically "component_state". 
@@ -363,22 +363,22 @@ data on.
 
 A node looks as follows and can be instantiated with the "lib.tree.node.new_node()"
 method.
-
-{
-    -- a non-unique display name for the node
-    name = name,
-    -- the depth of the node in the target tree
-    depth = depth,
-    -- a unique key used to identify the node when
-    -- placed into a tree
-    key = key,
-    -- a list of children nodes with recursive definitions.
-    children = {},
-    -- whether this node is expanded in its containing
-    -- tree.
-    expanded = false,
-}
-
+>
+  {
+      -- a non-unique display name for the node
+      name = name,
+      -- the depth of the node in the target tree
+      depth = depth,
+      -- a unique key used to identify the node when
+      -- placed into a tree
+      key = key,
+      -- a list of children nodes with recursive definitions.
+      children = {},
+      -- whether this node is expanded in its containing
+      -- tree.
+      expanded = false,
+  }
+<
 Its the caller's job to define each value ensuring the key for the node is unique within
 the tree being built. 
 
@@ -388,7 +388,7 @@ The handle can be stored on a plugin's state object and stored in `lib/state` an
 passed to `lib/tree` methods to identify which tree is being acted upon.
 
 The data structure which represents a tree looks like this:
-{root = {}, depth_table = {}, kind = "", source_line_map = nil, buf_line_map = nil}
+`{root = {}, depth_table = {}, kind = "", source_line_map = nil, buf_line_map = nil}`
 
 Where root is an empty root node, depth_table is a flattened 2d array containing a list of nodes
 at a particular depth of the tree (useful for quick lookups), kind is the kind of tree defined
@@ -487,7 +487,7 @@ of `litee.nvim` environment.
 This terminal can be opened on the top or bottom and is controlled by the "term"
 configuration block in the `lib.config` module.
 
-```
+>
     term = {
         -- can be  "top" or "bottom"
         position = "bottom",
@@ -497,10 +497,10 @@ configuration block in the `lib.config` module.
         -- commands.
         map_resize_keys = true,
     },
-````
+<
 
 The terminal creates two "terminal" mode key bindings. 
-
+>
     vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>v", "<cmd>lua require('configs.terminal').terminal_vsplit()<cr>", opts)
 
     vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>n", "<C-\\><C-n>", opts)
@@ -509,7 +509,7 @@ The terminal creates two "terminal" mode key bindings.
     vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>j", "<C-\\><C-n> <C-w>j", opts)
     vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>k", "<C-\\><C-n> <C-w>k", opts)
     vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>l", "<C-\\><C-n> <C-w>l", opts)
-
+<
 The first one will open another terminal in a vsplit relative to the terminal you're issuing
 the command in.
 
@@ -522,3 +522,5 @@ input is being forwarded directly to the shell. If you are in normal mode (the s
 a buffer of lines at that point) the mappins will revert back to normal mode mappings.
 
 The term can be triggered open with the "LTTerm" user command.
+
+vim:ft=help
