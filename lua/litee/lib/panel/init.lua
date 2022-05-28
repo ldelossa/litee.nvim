@@ -471,6 +471,8 @@ end
 function M._set_win_opts(win)
     vim.api.nvim_win_set_option(win, 'number', false)
     vim.api.nvim_win_set_option(win, 'cursorline', true)
+    vim.api.nvim_win_set_option(win, 'relativenumber', false)
+    vim.api.nvim_win_set_option(win, 'signcolumn', 'no')
     vim.api.nvim_win_set_option(win, 'wrap', false)
     vim.api.nvim_win_set_option(win, 'winfixwidth', true)
     vim.api.nvim_win_set_option(win, 'winfixheight', true)
