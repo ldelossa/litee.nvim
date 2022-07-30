@@ -109,6 +109,14 @@ function M.list_terminals()
             end
         },
         function (choice)
+            -- first see if there's a window that's opened with this term
+            for _, w in ipairs(vim.api.nvim_list_wins()) do
+                if vim.api.nvim_win_get_buf(w) == choice["buf"] then
+                    vim.api.nvim_set_current_win(w)
+                    return
+                end
+            end
+
             if config.position == "top" then
                 vim.cmd('topleft split')
             else
