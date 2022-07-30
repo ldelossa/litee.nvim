@@ -58,7 +58,6 @@ function M.terminal()
     end
     vim.cmd("resize " .. config.term_size)
     terminal_win_setup(vim.api.nvim_get_current_win())
-
     local cur_win = vim.api.nvim_get_current_win()
     local cur_tab = vim.api.nvim_get_current_tabpage()
     local state = lib_state.get_state(cur_tab)
@@ -82,11 +81,52 @@ function M.terminal_vsplit()
         vim.api.nvim_err_writeln("failed to create terminal buffer")
         return
     end
-    terminal_buf_setup(buf)
     vim.cmd('vsplit')
     local cur_win = vim.api.nvim_get_current_win()
     terminal_win_setup(cur_win)
     vim.api.nvim_win_set_buf(cur_win, buf)
     vim.fn.termopen(shell)
+    terminal_buf_setup(buf)
 end
+
+function M.list_terminals()
+    local terms = {}
+    for _, b in ipairs(vim.api.nvim_list_bufs()) do
+        local buf_name = vim.api.nvim_buf_get_name(b)
+        if vim.fn.match(buf_name, "term://") == 0 then
+            table.insert(terms, {name = buf_name, buf = b})
+        end
+    end
+    if #terms == 0 then
+        return
+    end
+    vim.ui.select(
+        terms,
+        {
+            prompt = "select a terminal to display",
+            format_item = function(item)
+                return item["name"] .. " " .. item["buf"]
+            end
+        },
+        function (choice)
+            if config.position == "top" then
+                vim.cmd('topleft split')
+            else
+                vim.cmd('botright split')
+            end
+            vim.cmd("resize " .. config.term_size)
+            local cur_win = vim.api.nvim_get_current_win()
+            local cur_tab = vim.api.nvim_get_current_tabpage()
+            local state = lib_state.get_state(cur_tab)
+            vim.api.nvim_win_set_buf(cur_win, choice["buf"])
+            if state ~= nil then
+                if lib_panel.is_panel_open(state) then
+                    lib_panel.toggle_panel_ctx(true, true)
+                end
+            end
+            vim.api.nvim_set_current_win(cur_win)
+        end
+    )
+end
+
 return M
