@@ -1,15 +1,22 @@
 -- Testing
--- * run test in the project root, `DESC` is optional:
+-- * Run test in the project root, `DESC` is optional:
 --   * nvim -u NONE --headless -c ":luafile tests/init.lua" +quit
 --   * DESC=1 nvim -u NONE --headless -c ":luafile tests/init.lua" +quit
--- * add test:
+-- * Add test:
 --   1. append the file path to the path table
 --   2. the testing file returns a table containing testing functions
 --   3. testing functions takes an optional `desc` argument which tells the purpose of testing
+-- * Sample testing function:
+-- function M.name(desc)
+--   -- testing code here
+--   if desc then
+--     return "description"
+--   end
+-- end
 
 local function test(path, desc)
   for name, fn in pairs(dofile(path)) do
-    print(path, '::', name, '-- PASS --', fn(desc))
+    print(string.format("%-30s :: %-30s -- PASS -- ", path, name), fn(desc))
   end
 end
 
