@@ -1,5 +1,5 @@
--- local litee = require("../lua/litee/lib/")
-local highlights = dofile("/root/.local/share/nvim/site/pack/packer/start/litee.nvim/lua/litee/lib/highlights/init.lua")
+local litee = "lua/litee/lib/"
+local highlights = dofile(litee .. "highlights/init.lua")
 local hls, dark, light = highlights.hls, highlights.dark, highlights.light
 local M, dark_fields, light_fields = {}, {}, {}
 for key, _ in pairs(dark) do
@@ -9,7 +9,16 @@ for key, _ in pairs(light) do
   light_fields[key] = true
 end
 
-function M.check_dark_light_fields(desc)
+function M.hls_dark(desc)
+  for _, hl in pairs(hls) do
+    assert(dark_fields[hl], "dark_feild lacks " .. hl)
+  end
+  if desc then
+    return "The highlights in hls are all defined."
+  end
+end
+
+function M.dark_light_fields(desc)
   for key, _ in pairs(dark_fields) do
     assert(light_fields[key], "light_feild lacks " .. key)
   end
@@ -18,6 +27,16 @@ function M.check_dark_light_fields(desc)
   end
   if desc then
     return "Fields are the same in light & dark highlights."
+  end
+end
+
+function M.icon_hls(desc)
+  local icons = dofile(litee .. "icons/init.lua")
+  for _, hl in pairs(icons.icon_hls) do
+    assert(dark_fields[hl], hl .. "is not defined.")
+  end
+  if desc then
+    return "All highlights in icon_hls are defined."
   end
 end
 
