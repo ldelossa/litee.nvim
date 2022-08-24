@@ -11,7 +11,7 @@ M.hls = {
     ExpandedGuideHL     = "LTExpandedGuide",
     CollapsedGuideHL    = "LTCollapsedGuide",
     SelectFiletreeHL    = "LTSelectFiletree",
-    NormalSB            = "LTNormalSB"
+    -- NormalSB            = "LTNormalSB"
 }
 M.dark = {
     LTBoolean              = 'hi LTBoolean                guifg=#0087af guibg=None',
