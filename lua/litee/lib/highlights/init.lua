@@ -30,7 +30,7 @@ function M.setup_default_highlights()
         LTParameter            = 'hi LTParameter              guifg=#988ACF guibg=None',
         LTParameterReference   = 'hi LTParameterReference     guifg=#4DC5C6 guibg=None',
         LTString               = 'hi LTString                 guifg=#af5f5f guibg=None',
-        LTSymbol               = 'hi LTSymbol                 guifg=#87afd7 gui=underline',
+        LTSymbol               = 'hi LTSymbol                 guifg=#87afd7 ',
         LTSymbolDetail         = 'hi LTSymbolDetail           ctermfg=024 cterm=italic guifg=#988ACF gui=italic',
         LTSymbolJump           = 'hi LTSymbolJump             ctermfg=015 ctermbg=110 cterm=italic,bold,underline   guifg=#464646 guibg=#87afd7 gui=italic,bold',
         LTSymbolJumpRefs       = 'hi LTSymbolJumpRefs         ctermfg=015 ctermbg=110 cterm=italic,bold,underline   guifg=#464646 guibg=#9b885c gui=italic,bold',
