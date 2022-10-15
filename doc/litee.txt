@@ -185,9 +185,9 @@ lib/icons                                                          *litee-lib-ic
 The `icons` library defines and exports icon sets which plugin authors may use
 for a consistent experience. 
 
-Currently `codicons` and `nerd` and "default" icons are exported.
+Currently `codicons`, `simple`, `nerd` and `default` icons are exported.
 
-The "default" icon set only supplies the stock UTF-8 icons necessary to display
+The `default` icon set only supplies the stock UTF-8 icons necessary to display
 litee's UI such as indent guides and tree symbols.
 
 Users of this library can override the exported icon libraries during runtime to
