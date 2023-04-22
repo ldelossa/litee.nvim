@@ -2,6 +2,8 @@ local config    = require('litee.lib.config').config
 local lib_hi    = require('litee.lib.highlights')
 local lib_panel = require('litee.lib.panel')
 
+local offset_encoding = 'utf-16'
+
 local M = {}
 
 -- the current highlight source, reset on jumps
@@ -62,7 +64,7 @@ function M.jump_tab(location, node)
     -- if the panel currently has a component "popped-out"
     -- close it before jumping.
     lib_panel.close_current_popout()
-    vim.lsp.util.jump_to_location(location)
+    vim.lsp.util.jump_to_location(location, offset_encoding)
     M.set_jump_hl(true, node)
 end
 
@@ -83,7 +85,7 @@ function M.jump_split(split, location, node)
     -- if the panel currently has a component "popped-out"
     -- close it before jumping.
     lib_panel.close_current_popout()
-    vim.lsp.util.jump_to_location(location)
+    vim.lsp.util.jump_to_location(location, offset_encoding)
     M.set_jump_hl(true, node)
 end
 
@@ -103,7 +105,7 @@ function M.jump_neighbor(location, node)
     -- if the panel currently has a component "popped-out"
     -- close it before jumping.
     lib_panel.close_current_popout()
-    vim.lsp.util.jump_to_location(location)
+    vim.lsp.util.jump_to_location(location, offset_encoding)
     M.set_jump_hl(true, node)
 
     -- cleanup any [No Name] buffers if they exist
@@ -147,7 +149,7 @@ function M.jump_invoking(location, win, node)
     -- if the panel currently has a component "popped-out"
     -- close it before jumping.
     lib_panel.close_current_popout()
-    vim.lsp.util.jump_to_location(location)
+    vim.lsp.util.jump_to_location(location, offset_encoding)
     M.set_jump_hl(true, node)
 
     -- cleanup any [No Name] buffers if they exist
