@@ -12,7 +12,7 @@ function M.multi_client_request(clients, method, params, handler, bufnr)
         if not client.supports_method(method) then
             goto continue
         end
-        client.request(method, params, handler, bufnr)
+        client.request(method, params, handler, bufnr or 0)
         ::continue::
     end
 end
@@ -75,8 +75,7 @@ function M.gather_symbols_async(root, children, component_state, callback)
                 "workspace/symbol",
                 params,
                 -- handler will call resume for this co.
-                M.gather_symbols_async_handler(node, co),
-                component_state.invoking_win
+                M.gather_symbols_async_handler(node, co)
             )
             node.symbol = coroutine.yield()
             lib_notify.close_notify_popup()
