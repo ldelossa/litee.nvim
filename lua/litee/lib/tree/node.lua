@@ -47,6 +47,7 @@ function M.new_node(name, key, depth)
         -- whether this node is expanded in its containing
         -- tree.
         expanded = false,
+        offset_encoding = "utf-8"
     }
 end
 

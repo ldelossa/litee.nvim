@@ -9,11 +9,10 @@ local M = {}
 -- but takes a list of clients as the first argument.
 function M.multi_client_request(clients, method, params, handler, bufnr)
     for _, client in ipairs(clients) do
-        if not client.supports_method(method) then
-            goto continue
+        if client.supports_method(method) then
+            client.request(method, params, handler, bufnr or 0)
+            return client
         end
-        client.request(method, params, handler, bufnr or 0)
-        ::continue::
     end
 end
 
@@ -70,13 +69,16 @@ function M.gather_symbols_async(root, children, component_state, callback)
                 query = node.name,
             }
             lib_notify.notify_popup("gathering symbols [" .. i .. "/" .. #all_nodes .. "]", "warning")
-            M.multi_client_request(
+            local client = M.multi_client_request(
                 component_state.active_lsp_clients,
                 "workspace/symbol",
                 params,
                 -- handler will call resume for this co.
                 M.gather_symbols_async_handler(node, co)
             )
+            if client.offset_encoding ~= nil then
+                node.offset_encoding = client.offset_encoding
+            end
             node.symbol = coroutine.yield()
             lib_notify.close_notify_popup()
         end

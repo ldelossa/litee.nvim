@@ -55,14 +55,14 @@ end
 -- @param node (table) An element which is being jumped to,
 -- if this element has a high level "references" field with
 -- more "Location" objects, they will be highlighted as well.
-function M.jump_tab(location, node)
+function M.jump_tab(location, node, offset_encoding)
     M.set_jump_hl(false, nil)
     vim.cmd("tabedit " .. location.uri)
     vim.cmd("set nocursorline")
     -- if the panel currently has a component "popped-out"
     -- close it before jumping.
     lib_panel.close_current_popout()
-    vim.lsp.util.jump_to_location(location)
+    vim.lsp.util.jump_to_location(location, offset_encoding or "utf-8")
     M.set_jump_hl(true, node)
 end
 
@@ -75,7 +75,7 @@ end
 -- @param node (table) An element which is being jumped to,
 -- if this element has a high level "references" field with
 -- more "Location" objects, they will be highlighted as well.
-function M.jump_split(split, location, node)
+function M.jump_split(split, location, node, offset_encoding)
     M.set_jump_hl(false, nil)
     if not move_or_create(config["panel"].orientation) then
         vim.cmd(split)
@@ -83,7 +83,7 @@ function M.jump_split(split, location, node)
     -- if the panel currently has a component "popped-out"
     -- close it before jumping.
     lib_panel.close_current_popout()
-    vim.lsp.util.jump_to_location(location)
+    vim.lsp.util.jump_to_location(location, offset_encoding or "utf-8")
     M.set_jump_hl(true, node)
 end
 
@@ -97,13 +97,13 @@ end
 -- @param node (table) An element which is being jumped to,
 -- if this element has a high level "references" field with
 -- more "Location" objects, they will be highlighted as well.
-function M.jump_neighbor(location, node)
+function M.jump_neighbor(location, node, offset_encoding)
     M.set_jump_hl(false, nil)
     move_or_create(config["panel"].orientation)
     -- if the panel currently has a component "popped-out"
     -- close it before jumping.
     lib_panel.close_current_popout()
-    vim.lsp.util.jump_to_location(location)
+    vim.lsp.util.jump_to_location(location, offset_encoding or "utf-8")
     M.set_jump_hl(true, node)
 
     -- cleanup any [No Name] buffers if they exist
@@ -128,7 +128,7 @@ end
 -- @param node (table) An element which is being jumped to,
 -- if this element has a high level "references" field with
 -- more "Location" objects, they will be highlighted as well.
-function M.jump_invoking(location, win, node)
+function M.jump_invoking(location, win, node, offset_encoding)
     M.set_jump_hl(false, nil)
     if not vim.api.nvim_win_is_valid(win) then
         if config["panel"].orientation == "left" then
@@ -147,7 +147,7 @@ function M.jump_invoking(location, win, node)
     -- if the panel currently has a component "popped-out"
     -- close it before jumping.
     lib_panel.close_current_popout()
-    vim.lsp.util.jump_to_location(location)
+    vim.lsp.util.jump_to_location(location, offset_encoding or "utf-8")
     M.set_jump_hl(true, node)
 
     -- cleanup any [No Name] buffers if they exist
